@@ -31,7 +31,7 @@ public sealed class ApiRequestException : CliUserError
     public static (string Message, ProblemDetails? Problem) ParseBody(string body)
     {
         if (string.IsNullOrWhiteSpace(body))
-            return ("Unknown error", null);
+            return ("Server returned an error with an empty response body.", null);
 
         try
         {

@@ -21,7 +21,7 @@
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>connapse</ToolCommandName>
     <PackageId>Connapse.CLI</PackageId>
-    <Version>0.4.2</Version>
+    <Version>0.4.3</Version>
     <Authors>Connapse Contributors</Authors>
     <Description>CLI for Connapse — the AI knowledge management platform.</Description>
     <PackageProjectUrl>https://github.com/Destrayon/connapse-cli</PackageProjectUrl>

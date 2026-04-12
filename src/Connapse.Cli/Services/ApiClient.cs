@@ -90,9 +90,11 @@ public sealed class ApiClient
         if (!response.IsSuccessStatusCode)
         {
             var body = await response.Content.ReadAsStringAsync(ct);
+            var status = response.StatusCode;
             response.Dispose();
             var (message, problem) = ApiRequestException.ParseBody(body);
-            throw new ApiRequestException(response.StatusCode, message, body, problem);
+            var fullMessage = $"{(int)status} {status}: {message}";
+            throw new ApiRequestException(status, fullMessage, body, problem);
         }
 
         return response;

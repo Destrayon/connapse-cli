@@ -44,43 +44,45 @@ public static class FilesListCommand
 
             var root = result.RootElement;
 
-            var hasFolders = root.TryGetProperty("folders", out var folders)
-                && folders.ValueKind == JsonValueKind.Array
-                && folders.GetArrayLength() > 0;
-            var hasFiles = root.TryGetProperty("files", out var files)
-                && files.ValueKind == JsonValueKind.Array
-                && files.GetArrayLength() > 0;
+            if (!root.TryGetProperty("items", out var items) || items.ValueKind != JsonValueKind.Array || items.GetArrayLength() == 0)
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("No files or folders found at this path.");
+                Console.ResetColor();
+                return CliExitCodes.Success;
+            }
 
-            if (hasFolders)
+            var folderEntries = new List<JsonElement>();
+            var fileEntries = new List<JsonElement>();
+            foreach (var item in items.EnumerateArray())
+            {
+                var isFolder = item.TryGetProperty("isFolder", out var f) && f.ValueKind == JsonValueKind.True;
+                (isFolder ? folderEntries : fileEntries).Add(item);
+            }
+
+            if (folderEntries.Count > 0)
             {
                 Console.ForegroundColor = ConsoleColor.Cyan;
                 Console.WriteLine("Folders:");
                 Console.ResetColor();
-                foreach (var folder in folders.EnumerateArray())
+                foreach (var folder in folderEntries)
                 {
                     var name = folder.TryGetProperty("name", out var n) ? n.GetString() : "?";
-                    var count = folder.TryGetProperty("documentCount", out var dc)
-                        ? dc.GetInt32().ToString()
-                        : (folder.TryGetProperty("fileCount", out var fc) ? fc.GetInt32().ToString() : "?");
-
                     Console.ForegroundColor = ConsoleColor.Yellow;
-                    Console.Write($"  {name}/");
-                    Console.ResetColor();
-                    Console.ForegroundColor = ConsoleColor.DarkGray;
-                    Console.WriteLine($"  ({count} files)");
+                    Console.WriteLine($"  {name}/");
                     Console.ResetColor();
                 }
                 Console.WriteLine();
             }
 
-            if (hasFiles)
+            if (fileEntries.Count > 0)
             {
                 Console.ForegroundColor = ConsoleColor.Cyan;
                 Console.WriteLine("Files:");
                 Console.ResetColor();
-                foreach (var file in files.EnumerateArray())
+                foreach (var file in fileEntries)
                 {
-                    var name = file.TryGetProperty("fileName", out var fn) ? fn.GetString() : "?";
+                    var name = file.TryGetProperty("name", out var fn) ? fn.GetString() : "?";
                     var id = file.TryGetProperty("id", out var fid) ? fid.GetString() : "?";
                     var status = file.TryGetProperty("status", out var s) ? s.GetString() : "?";
 
@@ -103,13 +105,6 @@ public static class FilesListCommand
                     Console.WriteLine(status);
                     Console.ResetColor();
                 }
-            }
-
-            if (!hasFolders && !hasFiles)
-            {
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine("No files or folders found at this path.");
-                Console.ResetColor();
             }
 
             return CliExitCodes.Success;

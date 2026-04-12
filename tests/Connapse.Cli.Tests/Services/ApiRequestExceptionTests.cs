@@ -69,10 +69,10 @@ public sealed class ApiRequestExceptionTests
     }
 
     [Fact]
-    public void ParseBody_returns_unknown_for_empty_body()
+    public void ParseBody_returns_explanatory_message_for_empty_body()
     {
         var (message, _) = ApiRequestException.ParseBody("");
-        Assert.Equal("Unknown error", message);
+        Assert.Equal("Server returned an error with an empty response body.", message);
     }
 
     [Fact]

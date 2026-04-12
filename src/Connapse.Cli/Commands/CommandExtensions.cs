@@ -14,12 +14,8 @@ public static class CommandExtensions
 {
     /// <summary>
     /// Wraps a command handler so that <see cref="IOrgContextProvider.CurrentOrgSlug"/>
-    /// is populated from the parsed <c>--org</c> option (or the
-    /// <c>CONNAPSE_ORG</c> environment variable) before the inner handler
-    /// runs. Reads the <see cref="OrgResolver"/> precedence: flag → env.
-    /// The <see cref="ConfigStore"/> default is NOT read here — that's a
-    /// per-command decision handled by <see cref="OrgResolver.Resolve"/>
-    /// when the command actually needs the slug.
+    /// is populated using the full <see cref="OrgResolver"/> precedence
+    /// (flag → env → config default → null) before the inner handler runs.
     /// </summary>
     public static Func<ParseResult, CancellationToken, Task<int>> WithOrgContext(
         this IServiceProvider services,
@@ -31,16 +27,18 @@ public static class CommandExtensions
             var flagValue = parseResult.GetValue(orgOption);
             var envValue = Environment.GetEnvironmentVariable("CONNAPSE_ORG");
 
-            var context = services.GetRequiredService<OrgContextProvider>();
+            var configStore = services.GetRequiredService<ConfigStore>();
+            var resolver = services.GetRequiredService<OrgResolver>();
+            var config = configStore.Load();
 
-            // Priority: flag > env. Config default is applied later by OrgResolver
-            // inside ApiClient when edition is known to be Cloud.
-            if (!string.IsNullOrWhiteSpace(flagValue))
-                context.CurrentOrgSlug = flagValue;
-            else if (!string.IsNullOrWhiteSpace(envValue))
-                context.CurrentOrgSlug = envValue;
-            else
-                context.CurrentOrgSlug = null;
+            var resolved = resolver.Resolve(new OrgResolutionContext(
+                FlagValue: flagValue,
+                EnvironmentVariable: envValue,
+                ConfigDefault: config.DefaultOrgSlug,
+                Edition: config.Edition ?? Models.ServerEdition.Unknown));
+
+            var context = services.GetRequiredService<OrgContextProvider>();
+            context.CurrentOrgSlug = resolved;
 
             return await handler(parseResult, ct);
         };
