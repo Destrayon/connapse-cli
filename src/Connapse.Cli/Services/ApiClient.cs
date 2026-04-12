@@ -91,7 +91,8 @@ public sealed class ApiClient
         {
             var body = await response.Content.ReadAsStringAsync(ct);
             response.Dispose();
-            throw new ApiRequestException(response.StatusCode, ParseError(body), body);
+            var (message, problem) = ApiRequestException.ParseBody(body);
+            throw new ApiRequestException(response.StatusCode, message, body, problem);
         }
 
         return response;
@@ -163,21 +164,4 @@ public sealed class ApiClient
         }
     }
 
-    private static string ParseError(string body)
-    {
-        try
-        {
-            using var doc = JsonDocument.Parse(body);
-            if (doc.RootElement.TryGetProperty("error", out var errorProp) &&
-                errorProp.ValueKind == JsonValueKind.String)
-            {
-                return errorProp.GetString() ?? body;
-            }
-        }
-        catch (JsonException)
-        {
-            // fall through
-        }
-        return string.IsNullOrWhiteSpace(body) ? "Unknown error" : body;
-    }
 }

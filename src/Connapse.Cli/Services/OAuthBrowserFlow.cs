@@ -271,7 +271,7 @@ public sealed class OAuthBrowserFlow
 /// <summary>
 /// Raised when the OAuth browser flow cannot complete successfully.
 /// </summary>
-public sealed class OAuthFlowException : Exception
+public sealed class OAuthFlowException : CliUserError
 {
     public OAuthFlowException(string message) : base(message) { }
     public OAuthFlowException(string message, Exception inner) : base(message, inner) { }
