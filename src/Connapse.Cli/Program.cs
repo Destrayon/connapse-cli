@@ -1,3 +1,4 @@
+using System.CommandLine;
 using System.Net.Http;
 using Connapse.Cli.Services;
 using Microsoft.Extensions.DependencyInjection;
@@ -6,36 +7,60 @@ namespace Connapse.Cli;
 
 internal static class Program
 {
-    public static int Main(string[] args)
+    // Global options — declared at module scope so command builders can
+    // reference them when reading parsed values in their SetAction handlers.
+    internal static readonly Option<string?> OrgOption = new("--org")
     {
-        var services = BuildServiceProvider();
+        Description = "Organization slug to target for this command. " +
+                      "Overrides CONNAPSE_ORG and the default org in config.json. " +
+                      "Ignored when the server is self-hosted.",
+        Recursive = true,
+    };
 
-        // Temporary: prove the wiring works by resolving each service.
-        // This entire Main method will be replaced in Phase 5 with the real
-        // command tree.
-        var credentialStore = services.GetRequiredService<CredentialStore>();
-        var configStore = services.GetRequiredService<ConfigStore>();
-        var orgResolver = services.GetRequiredService<OrgResolver>();
-        var editionDetector = services.GetRequiredService<EditionDetector>();
-        var apiClient = services.GetRequiredService<ApiClient>();
-        var oauthFlow = services.GetRequiredService<OAuthBrowserFlow>();
-        var orgSelector = services.GetRequiredService<PostLoginOrgSelector>();
-        var updateChecker = services.GetRequiredService<UpdateChecker>();
+    internal static readonly Option<bool> VerboseOption = new("--verbose")
+    {
+        Description = "Print full stack traces for unexpected errors.",
+        Recursive = true,
+    };
 
-        Console.WriteLine("connapse CLI — Phase 4 services wired");
-        Console.WriteLine($"  CredentialStore:      {credentialStore.GetType().Name}");
-        Console.WriteLine($"  ConfigStore:          {configStore.GetType().Name}");
-        Console.WriteLine($"  OrgResolver:          {orgResolver.GetType().Name}");
-        Console.WriteLine($"  EditionDetector:      {editionDetector.GetType().Name}");
-        Console.WriteLine($"  ApiClient:            {apiClient.GetType().Name}");
-        Console.WriteLine($"  OAuthBrowserFlow:     {oauthFlow.GetType().Name}");
-        Console.WriteLine($"  PostLoginOrgSelector: {orgSelector.GetType().Name}");
-        Console.WriteLine($"  UpdateChecker:        {updateChecker.GetType().Name}");
-        Console.WriteLine($"  Current version:     v{UpdateChecker.GetCurrentVersion()}");
-        return 0;
+    public static async Task<int> Main(string[] args)
+    {
+        await using var services = BuildServiceProvider();
+
+        var root = new RootCommand("Connapse CLI — knowledge management from the terminal.");
+        root.Options.Add(OrgOption);
+        root.Options.Add(VerboseOption);
+
+        // Placeholder: until Phase 5 wires leaf commands, running `connapse`
+        // with no args prints a construction message. Phase 5.1 replaces
+        // this with the real command tree via RootCommandBuilder.
+        root.SetAction((_, _) =>
+        {
+            Console.Out.WriteLine(
+                "Connapse CLI — command tree under construction (Phase 5).");
+            return Task.FromResult(CliExitCodes.Success);
+        });
+
+        var parseResult = root.Parse(args);
+
+        var config = new InvocationConfiguration
+        {
+            EnableDefaultExceptionHandler = false,
+        };
+
+        var verbose = parseResult.GetValue(VerboseOption);
+
+        try
+        {
+            return await parseResult.InvokeAsync(config);
+        }
+        catch (Exception ex)
+        {
+            return CliRuntime.HandleException(ex, verbose);
+        }
     }
 
-    private static IServiceProvider BuildServiceProvider()
+    private static ServiceProvider BuildServiceProvider()
     {
         var services = new ServiceCollection();
         var homeDirectory = HomeDirectoryResolver.GetHomeDirectory();
