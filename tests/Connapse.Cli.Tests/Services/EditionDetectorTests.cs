@@ -7,10 +7,12 @@ namespace Connapse.Cli.Tests.Services;
 
 public sealed class EditionDetectorTests : IDisposable
 {
+    private static readonly Uri BaseUri = new("https://server.example");
+
     private readonly string _tempDir;
     private readonly ConfigStore _config;
     private readonly MockHttpMessageHandler _handler;
-    private readonly HttpClient _httpClient;
+    private readonly MockHttpClientFactory _httpClientFactory;
     private readonly FakeClock _clock;
 
     public EditionDetectorTests()
@@ -18,18 +20,18 @@ public sealed class EditionDetectorTests : IDisposable
         _tempDir = Path.Combine(Path.GetTempPath(), "connapse-cli-tests-" + Guid.NewGuid());
         _config = new ConfigStore(_tempDir);
         _handler = new MockHttpMessageHandler();
-        _httpClient = new HttpClient(_handler) { BaseAddress = new Uri("https://server.example") };
+        _httpClientFactory = new MockHttpClientFactory(_handler, BaseUri);
         _clock = new FakeClock(new DateTime(2026, 4, 12, 12, 0, 0, DateTimeKind.Utc));
     }
 
     public void Dispose()
     {
-        _httpClient.Dispose();
+        _handler.Dispose();
         if (Directory.Exists(_tempDir))
             Directory.Delete(_tempDir, recursive: true);
     }
 
-    private EditionDetector CreateDetector() => new(new MockHttpClientFactory(_httpClient), _config, _clock);
+    private EditionDetector CreateDetector() => new(_httpClientFactory, _config, _clock);
 
     [Fact]
     public async Task Fetches_edition_from_api_v1_info_on_first_call()

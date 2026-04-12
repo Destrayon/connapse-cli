@@ -8,11 +8,13 @@ namespace Connapse.Cli.Tests.Services;
 
 public sealed class ApiClientTests : IDisposable
 {
+    private static readonly Uri BaseUri = new("https://server.example");
+
     private readonly string _tempDir;
     private readonly CredentialStore _credStore;
     private readonly ConfigStore _configStore;
     private readonly MockHttpMessageHandler _handler;
-    private readonly HttpClient _httpClient;
+    private readonly MockHttpClientFactory _httpClientFactory;
     private readonly OrgContextProvider _orgContext;
     private readonly FakeEditionProvider _editionProvider;
 
@@ -22,7 +24,7 @@ public sealed class ApiClientTests : IDisposable
         _credStore = new CredentialStore(_tempDir);
         _configStore = new ConfigStore(_tempDir);
         _handler = new MockHttpMessageHandler();
-        _httpClient = new HttpClient(_handler) { BaseAddress = new Uri("https://server.example") };
+        _httpClientFactory = new MockHttpClientFactory(_handler, BaseUri);
         _orgContext = new OrgContextProvider();
         _editionProvider = new FakeEditionProvider(ServerEdition.Cloud);
 
@@ -36,13 +38,13 @@ public sealed class ApiClientTests : IDisposable
 
     public void Dispose()
     {
-        _httpClient.Dispose();
+        _handler.Dispose();
         if (Directory.Exists(_tempDir))
             Directory.Delete(_tempDir, recursive: true);
     }
 
     private ApiClient CreateClient() => new(
-        new MockHttpClientFactory(_httpClient),
+        _httpClientFactory,
         _credStore,
         _orgContext,
         _editionProvider);
