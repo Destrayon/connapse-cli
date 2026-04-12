@@ -29,7 +29,7 @@ public sealed class EditionDetectorTests : IDisposable
             Directory.Delete(_tempDir, recursive: true);
     }
 
-    private EditionDetector CreateDetector() => new(_httpClient, _config, _clock);
+    private EditionDetector CreateDetector() => new(new MockHttpClientFactory(_httpClient), _config, _clock);
 
     [Fact]
     public async Task Fetches_edition_from_api_v1_info_on_first_call()

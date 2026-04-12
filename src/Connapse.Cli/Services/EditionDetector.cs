@@ -25,13 +25,13 @@ public sealed class EditionDetector : IEditionProvider
 {
     private static readonly TimeSpan CacheLifetime = TimeSpan.FromDays(7);
 
-    private readonly HttpClient _httpClient;
+    private readonly IHttpClientFactory _httpClientFactory;
     private readonly ConfigStore _configStore;
     private readonly IClock _clock;
 
-    public EditionDetector(HttpClient httpClient, ConfigStore configStore, IClock clock)
+    public EditionDetector(IHttpClientFactory httpClientFactory, ConfigStore configStore, IClock clock)
     {
-        _httpClient = httpClient;
+        _httpClientFactory = httpClientFactory;
         _configStore = configStore;
         _clock = clock;
     }
@@ -52,7 +52,8 @@ public sealed class EditionDetector : IEditionProvider
         ServerEdition edition;
         try
         {
-            using var response = await _httpClient.GetAsync("/api/v1/info", ct);
+            using var client = _httpClientFactory.CreateClient(HttpClientNames.ConnapseServer);
+            using var response = await client.GetAsync("/api/v1/info", ct);
 
             if (response.StatusCode == HttpStatusCode.NotFound)
             {

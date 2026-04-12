@@ -48,22 +48,24 @@ internal static class Program
         services.AddSingleton<OrgContextProvider>(sp =>
             (OrgContextProvider)sp.GetRequiredService<IOrgContextProvider>());
 
-        services.AddSingleton(sp =>
+        services.AddHttpClient(HttpClientNames.ConnapseServer, (sp, client) =>
+        {
+            var credStore = sp.GetRequiredService<CredentialStore>();
+            var baseUrl = credStore.Load()?.ApiBaseUrl ?? "https://localhost:5001";
+            client.BaseAddress = new Uri(baseUrl);
+            client.Timeout = TimeSpan.FromMinutes(10);
+        })
+        .ConfigurePrimaryHttpMessageHandler(sp =>
         {
             var credStore = sp.GetRequiredService<CredentialStore>();
             var baseUrl = credStore.Load()?.ApiBaseUrl ?? "https://localhost:5001";
             var serverUri = new Uri(baseUrl);
             var isLocalhost = serverUri.Host is "localhost" or "127.0.0.1" or "::1";
-            var handler = new HttpClientHandler
+            return new HttpClientHandler
             {
                 ServerCertificateCustomValidationCallback = isLocalhost
                     ? (_, _, _, _) => true
                     : null,
-            };
-            return new HttpClient(handler)
-            {
-                BaseAddress = serverUri,
-                Timeout = TimeSpan.FromMinutes(10),
             };
         });
 

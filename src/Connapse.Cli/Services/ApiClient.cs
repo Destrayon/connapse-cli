@@ -24,18 +24,18 @@ public sealed class ApiClient
         PropertyNameCaseInsensitive = true,
     };
 
-    private readonly HttpClient _httpClient;
+    private readonly IHttpClientFactory _httpClientFactory;
     private readonly CredentialStore _credStore;
     private readonly IOrgContextProvider _orgContext;
     private readonly IEditionProvider _editionProvider;
 
     public ApiClient(
-        HttpClient httpClient,
+        IHttpClientFactory httpClientFactory,
         CredentialStore credStore,
         IOrgContextProvider orgContext,
         IEditionProvider editionProvider)
     {
-        _httpClient = httpClient;
+        _httpClientFactory = httpClientFactory;
         _credStore = credStore;
         _orgContext = orgContext;
         _editionProvider = editionProvider;
@@ -119,7 +119,8 @@ public sealed class ApiClient
                 request.Headers.Add("X-Connapse-Org", orgSlug);
         }
 
-        return await _httpClient.SendAsync(request, ct);
+        using var client = _httpClientFactory.CreateClient(HttpClientNames.ConnapseServer);
+        return await client.SendAsync(request, ct);
     }
 
     private async Task<bool> TryRefreshAsync(CancellationToken ct)
@@ -138,7 +139,8 @@ public sealed class ApiClient
 
         try
         {
-            using var response = await _httpClient.PostAsync("/oauth/token", form, ct);
+            using var client = _httpClientFactory.CreateClient(HttpClientNames.ConnapseServer);
+            using var response = await client.PostAsync("/oauth/token", form, ct);
             if (!response.IsSuccessStatusCode)
                 return false;
 

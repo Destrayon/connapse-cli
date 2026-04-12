@@ -42,7 +42,7 @@ public sealed class ApiClientTests : IDisposable
     }
 
     private ApiClient CreateClient() => new(
-        _httpClient,
+        new MockHttpClientFactory(_httpClient),
         _credStore,
         _orgContext,
         _editionProvider);
