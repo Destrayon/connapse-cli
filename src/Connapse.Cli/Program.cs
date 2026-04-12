@@ -18,13 +18,20 @@ internal static class Program
         var orgResolver = services.GetRequiredService<OrgResolver>();
         var editionDetector = services.GetRequiredService<EditionDetector>();
         var apiClient = services.GetRequiredService<ApiClient>();
+        var oauthFlow = services.GetRequiredService<OAuthBrowserFlow>();
+        var orgSelector = services.GetRequiredService<PostLoginOrgSelector>();
+        var updateChecker = services.GetRequiredService<UpdateChecker>();
 
-        Console.WriteLine("connapse CLI — Phase 3 services wired");
-        Console.WriteLine($"  CredentialStore: {credentialStore.GetType().Name}");
-        Console.WriteLine($"  ConfigStore:     {configStore.GetType().Name}");
-        Console.WriteLine($"  OrgResolver:     {orgResolver.GetType().Name}");
-        Console.WriteLine($"  EditionDetector: {editionDetector.GetType().Name}");
-        Console.WriteLine($"  ApiClient:       {apiClient.GetType().Name}");
+        Console.WriteLine("connapse CLI — Phase 4 services wired");
+        Console.WriteLine($"  CredentialStore:      {credentialStore.GetType().Name}");
+        Console.WriteLine($"  ConfigStore:          {configStore.GetType().Name}");
+        Console.WriteLine($"  OrgResolver:          {orgResolver.GetType().Name}");
+        Console.WriteLine($"  EditionDetector:      {editionDetector.GetType().Name}");
+        Console.WriteLine($"  ApiClient:            {apiClient.GetType().Name}");
+        Console.WriteLine($"  OAuthBrowserFlow:     {oauthFlow.GetType().Name}");
+        Console.WriteLine($"  PostLoginOrgSelector: {orgSelector.GetType().Name}");
+        Console.WriteLine($"  UpdateChecker:        {updateChecker.GetType().Name}");
+        Console.WriteLine($"  Current version:     v{UpdateChecker.GetCurrentVersion()}");
         return 0;
     }
 
@@ -63,6 +70,10 @@ internal static class Program
         services.AddSingleton<EditionDetector>();
         services.AddSingleton<IEditionProvider>(sp => sp.GetRequiredService<EditionDetector>());
         services.AddSingleton<ApiClient>();
+        services.AddSingleton<OAuthBrowserFlow>();
+        services.AddSingleton<IConsolePrompt, ConsolePrompt>();
+        services.AddSingleton<PostLoginOrgSelector>();
+        services.AddSingleton<UpdateChecker>();
 
         return services.BuildServiceProvider();
     }
