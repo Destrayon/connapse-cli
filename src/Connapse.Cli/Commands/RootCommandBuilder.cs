@@ -35,10 +35,7 @@ public static class RootCommandBuilder
         root.Subcommands.Add(UploadCommand.Create(services, orgOption));
         root.Subcommands.Add(SearchCommand.Create(services, orgOption));
         root.Subcommands.Add(ReindexCommand.Create(services, orgOption));
-
-        // Phase 5 tasks add subcommands here:
-        // root.Subcommands.Add(VersionCommand.Create(services));
-        // root.Subcommands.Add(UpdateCommand.Create(services));
+        root.Subcommands.Add(VersionCommand.Create(services));
 
         return root;
     }
