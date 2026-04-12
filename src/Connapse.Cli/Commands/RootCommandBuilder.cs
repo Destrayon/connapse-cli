@@ -1,4 +1,5 @@
 using System.CommandLine;
+using Connapse.Cli.Commands.Auth;
 
 namespace Connapse.Cli.Commands;
 
@@ -27,8 +28,9 @@ public static class RootCommandBuilder
             return Task.FromResult(0);
         });
 
+        root.Subcommands.Add(AuthCommand.Create(services, orgOption));
+
         // Phase 5 tasks add subcommands here:
-        // root.Subcommands.Add(AuthCommand.Create(services, orgOption));
         // root.Subcommands.Add(OrgCommand.Create(services, orgOption));
         // root.Subcommands.Add(ContainerCommand.Create(services, orgOption));
         // root.Subcommands.Add(FilesCommand.Create(services, orgOption));
