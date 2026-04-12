@@ -32,7 +32,7 @@ public sealed class CredentialStoreTests : IDisposable
     {
         var creds = new CliCredentials(
             ApiKey: "test-token-abc",
-            ApiBaseUrl: "https://cloud.connapse.io",
+            ApiBaseUrl: "https://www.connapse.com",
             UserEmail: "alice@example.com",
             RefreshToken: "refresh-xyz",
             ExpiresAt: new DateTime(2026, 4, 12, 13, 0, 0, DateTimeKind.Utc));
@@ -42,7 +42,7 @@ public sealed class CredentialStoreTests : IDisposable
 
         Assert.NotNull(loaded);
         Assert.Equal("test-token-abc", loaded!.ApiKey);
-        Assert.Equal("https://cloud.connapse.io", loaded.ApiBaseUrl);
+        Assert.Equal("https://www.connapse.com", loaded.ApiBaseUrl);
         Assert.Equal("alice@example.com", loaded.UserEmail);
         Assert.Equal("refresh-xyz", loaded.RefreshToken);
         Assert.Equal(new DateTime(2026, 4, 12, 13, 0, 0, DateTimeKind.Utc), loaded.ExpiresAt);

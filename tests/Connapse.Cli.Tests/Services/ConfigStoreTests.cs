@@ -37,7 +37,7 @@ public sealed class ConfigStoreTests : IDisposable
         var now = new DateTime(2026, 4, 12, 12, 0, 0, DateTimeKind.Utc);
         var config = new CliConfig
         {
-            ApiBaseUrl = "https://cloud.connapse.io",
+            ApiBaseUrl = "https://www.connapse.com",
             DefaultOrgSlug = "khastra",
             Edition = ServerEdition.Cloud,
             EditionCheckedAt = now,
@@ -46,7 +46,7 @@ public sealed class ConfigStoreTests : IDisposable
         _store.Save(config);
         var loaded = _store.Load();
 
-        Assert.Equal("https://cloud.connapse.io", loaded.ApiBaseUrl);
+        Assert.Equal("https://www.connapse.com", loaded.ApiBaseUrl);
         Assert.Equal("khastra", loaded.DefaultOrgSlug);
         Assert.Equal(ServerEdition.Cloud, loaded.Edition);
         Assert.Equal(now, loaded.EditionCheckedAt);
@@ -69,7 +69,7 @@ public sealed class ConfigStoreTests : IDisposable
     {
         _store.Save(new CliConfig
         {
-            ApiBaseUrl = "https://cloud.connapse.io",
+            ApiBaseUrl = "https://www.connapse.com",
             Edition = ServerEdition.Cloud,
         });
 
@@ -77,7 +77,7 @@ public sealed class ConfigStoreTests : IDisposable
 
         var loaded = _store.Load();
         Assert.Equal("khastra", loaded.DefaultOrgSlug);
-        Assert.Equal("https://cloud.connapse.io", loaded.ApiBaseUrl);
+        Assert.Equal("https://www.connapse.com", loaded.ApiBaseUrl);
         Assert.Equal(ServerEdition.Cloud, loaded.Edition);
     }
 
