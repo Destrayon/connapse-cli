@@ -21,7 +21,7 @@
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>connapse</ToolCommandName>
     <PackageId>Connapse.CLI</PackageId>
-    <Version>0.4.0</Version>
+    <Version>0.4.1</Version>
     <Authors>Connapse Contributors</Authors>
     <Description>CLI for Connapse — the AI knowledge management platform.</Description>
     <PackageProjectUrl>https://github.com/Destrayon/connapse-cli</PackageProjectUrl>
@@ -30,18 +30,22 @@
 
     <AssemblyName>connapse</AssemblyName>
 
-    <!-- Self-contained single-file publish (used by release.yml) -->
+    <!-- Self-contained single-file publish (used by release.yml).
+         Trimming is disabled because System.Text.Json reflection-based
+         deserialization of our DTO records (positional records with
+         trim-invisible constructors) breaks under trim. The cost is
+         ~3x larger binaries; the benefit is reliable JSON round-trips
+         without having to annotate every model type. -->
     <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>true</SelfContained>
-    <PublishTrimmed>true</PublishTrimmed>
-    <TrimmerRootDescriptor>trimmer-roots.xml</TrimmerRootDescriptor>
+    <PublishTrimmed>false</PublishTrimmed>
     <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
     <JsonSerializerIsReflectionEnabledByDefault>true</JsonSerializerIsReflectionEnabledByDefault>
-    <NoWarn>$(NoWarn);IL2026;IL2072</NoWarn>
   </PropertyGroup>
 
-  <ItemGroup>
-    <None Include="trimmer-roots.xml" />
-  </ItemGroup>
+  <!--
+    (Trimming disabled in 0.4.1 — see comment on PublishTrimmed above.
+    The former trimmer-roots.xml descriptor is gone.)
+  -->
 
 </Project>
