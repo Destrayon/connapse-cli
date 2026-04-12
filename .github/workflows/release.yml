@@ -50,12 +50,15 @@ jobs:
       - name: Publish CLI (${{ matrix.rid }})
         shell: bash
         run: |
+          # Trimming is intentionally disabled — see csproj comment.
+          # Reflection-based JSON deserialization of positional records
+          # breaks under trim, and v0.4.0/v0.4.1 shipped with this bug.
+          # Do NOT add -p:PublishTrimmed=true here.
           dotnet publish src/Connapse.Cli/Connapse.Cli.csproj \
             --configuration Release \
             --runtime ${{ matrix.rid }} \
             --self-contained true \
             -p:PublishSingleFile=true \
-            -p:PublishTrimmed=true \
             -p:EnableCompressionInSingleFile=true \
             -p:Version=${{ steps.version.outputs.VERSION }} \
             --output publish/${{ matrix.rid }}
