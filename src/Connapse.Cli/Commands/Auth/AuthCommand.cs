@@ -15,11 +15,12 @@ public static class AuthCommand
         auth.Subcommands.Add(AuthLoginCommand.Create(services, orgOption));
         auth.Subcommands.Add(AuthLogoutCommand.Create(services));
         auth.Subcommands.Add(AuthWhoamiCommand.Create(services, orgOption));
+        auth.Subcommands.Add(AuthPatCommand.Create(services, orgOption));
 
         auth.SetAction((_, _) =>
         {
             Console.Out.WriteLine(
-                "Usage: connapse auth <login|logout|whoami> [options]");
+                "Usage: connapse auth <login|logout|whoami|pat> [options]");
             return Task.FromResult(0);
         });
 
