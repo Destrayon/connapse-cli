@@ -5,6 +5,15 @@ using Connapse.Cli.Models;
 namespace Connapse.Cli.Services;
 
 /// <summary>
+/// Abstraction over edition detection so consumers (e.g. ApiClient) don't
+/// depend on the concrete detector and its HTTP cache logic.
+/// </summary>
+public interface IEditionProvider
+{
+    Task<ServerEdition> GetEditionAsync(bool forceRefresh = false, CancellationToken ct = default);
+}
+
+/// <summary>
 /// Detects whether the server is Cloud or self-hosted by calling
 /// GET /api/v1/info. Caches the result in config.json and re-checks
 /// after 7 days.
@@ -12,7 +21,7 @@ namespace Connapse.Cli.Services;
 /// Uses its own HttpClient (not ApiClient) to break the circular dependency
 /// between ApiClient and EditionDetector.
 /// </summary>
-public sealed class EditionDetector
+public sealed class EditionDetector : IEditionProvider
 {
     private static readonly TimeSpan CacheLifetime = TimeSpan.FromDays(7);
 
