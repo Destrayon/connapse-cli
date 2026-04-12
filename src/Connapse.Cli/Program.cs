@@ -1,5 +1,6 @@
 using System.CommandLine;
 using System.Net.Http;
+using Connapse.Cli.Commands;
 using Connapse.Cli.Services;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -27,20 +28,7 @@ internal static class Program
     {
         await using var services = BuildServiceProvider();
 
-        var root = new RootCommand("Connapse CLI — knowledge management from the terminal.");
-        root.Options.Add(OrgOption);
-        root.Options.Add(VerboseOption);
-
-        // Placeholder: until Phase 5 wires leaf commands, running `connapse`
-        // with no args prints a construction message. Phase 5.1 replaces
-        // this with the real command tree via RootCommandBuilder.
-        root.SetAction((_, _) =>
-        {
-            Console.Out.WriteLine(
-                "Connapse CLI — command tree under construction (Phase 5).");
-            return Task.FromResult(CliExitCodes.Success);
-        });
-
+        var root = RootCommandBuilder.Build(services, OrgOption, VerboseOption);
         var parseResult = root.Parse(args);
 
         var config = new InvocationConfiguration
