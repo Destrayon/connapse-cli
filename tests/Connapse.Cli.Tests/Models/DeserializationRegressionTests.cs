@@ -68,27 +68,6 @@ public sealed class DeserializationRegressionTests
     }
 
     [Fact]
-    public void MeResponse_deserializes_from_auth_me_body()
-    {
-        var json = """
-            {
-              "id": "11111111-2222-3333-4444-555555555555",
-              "email": "alice@example.com",
-              "displayName": "Alice",
-              "roles": ["Owner", "Admin"],
-              "createdAt": "2026-01-01T00:00:00Z"
-            }
-            """;
-
-        var me = JsonSerializer.Deserialize<MeResponse>(json, Options);
-
-        Assert.NotNull(me);
-        Assert.Equal("alice@example.com", me!.Email);
-        Assert.Equal("Alice", me.DisplayName);
-        Assert.Contains("Owner", me.Roles);
-    }
-
-    [Fact]
     public void ServerInfo_deserializes_from_api_v1_info_body()
     {
         var json = """

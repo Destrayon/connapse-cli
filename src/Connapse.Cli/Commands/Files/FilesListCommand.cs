@@ -1,7 +1,8 @@
 using System.CommandLine;
-using System.Text.Json;
 using Connapse.Cli.Commands.Container;
 using Connapse.Cli.Services;
+using Connapse.Client;
+using Connapse.Client.Models;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Connapse.Cli.Commands.Files;
@@ -31,20 +32,17 @@ public static class FilesListCommand
             var containerName = parseResult.GetRequiredValue(containerOption);
             var path = parseResult.GetValue(pathOption) ?? "/";
 
-            var apiClient = services.GetRequiredService<ApiClient>();
+            var client = services.GetRequiredService<ConnapseApiClient>();
 
-            var containerId = await ContainerHelpers.ResolveIdAsync(apiClient, containerName, ct);
+            var containerId = await ContainerHelpers.ResolveIdAsync(client, containerName, ct);
             if (containerId is null)
                 throw new CliValidationError($"Container '{containerName}' not found.");
 
-            var url = $"/api/containers/{containerId}/files?path={Uri.EscapeDataString(path)}";
-            var result = await apiClient.GetAsync<JsonDocument>(url, ct);
+            var result = await client.Api.Containers[containerId.Value].Files.GetAsync(r => r.QueryParameters.Path = path, ct);
             if (result is null)
                 throw new CliServerError("Unexpected response from server.");
 
-            var root = result.RootElement;
-
-            if (!root.TryGetProperty("items", out var items) || items.ValueKind != JsonValueKind.Array || items.GetArrayLength() == 0)
+            if (result.Items is not { Count: > 0 } items)
             {
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine("No files or folders found at this path.");
@@ -52,13 +50,8 @@ public static class FilesListCommand
                 return CliExitCodes.Success;
             }
 
-            var folderEntries = new List<JsonElement>();
-            var fileEntries = new List<JsonElement>();
-            foreach (var item in items.EnumerateArray())
-            {
-                var isFolder = item.TryGetProperty("isFolder", out var f) && f.ValueKind == JsonValueKind.True;
-                (isFolder ? folderEntries : fileEntries).Add(item);
-            }
+            var folderEntries = items.Where(i => i.IsFolder == true).ToList();
+            var fileEntries = items.Where(i => i.IsFolder != true).ToList();
 
             if (folderEntries.Count > 0)
             {
@@ -67,7 +60,7 @@ public static class FilesListCommand
                 Console.ResetColor();
                 foreach (var folder in folderEntries)
                 {
-                    var name = folder.TryGetProperty("name", out var n) ? n.GetString() : "?";
+                    var name = folder.Name ?? "?";
                     Console.ForegroundColor = ConsoleColor.Yellow;
                     Console.WriteLine($"  {name}/");
                     Console.ResetColor();
@@ -82,9 +75,9 @@ public static class FilesListCommand
                 Console.ResetColor();
                 foreach (var file in fileEntries)
                 {
-                    var name = file.TryGetProperty("name", out var fn) ? fn.GetString() : "?";
-                    var id = file.TryGetProperty("id", out var fid) ? fid.GetString() : "?";
-                    var status = file.TryGetProperty("status", out var s) ? s.GetString() : "?";
+                    var name = file.Name ?? "?";
+                    var id = file.Id ?? "?";
+                    var status = file.Status ?? "?";
 
                     var statusColor = status switch
                     {

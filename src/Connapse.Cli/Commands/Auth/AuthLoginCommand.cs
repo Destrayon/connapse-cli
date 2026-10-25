@@ -1,6 +1,8 @@
 using System.CommandLine;
 using Connapse.Cli.Models;
 using Connapse.Cli.Services;
+using Connapse.Client;
+using Connapse.Client.Models;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Connapse.Cli.Commands.Auth;
@@ -119,13 +121,13 @@ public static class AuthLoginCommand
     private static async Task FetchAndStoreIdentityAsync(
         IServiceProvider services, CancellationToken ct)
     {
-        var apiClient = services.GetRequiredService<ApiClient>();
+        var client = services.GetRequiredService<ConnapseApiClient>();
         var credStore = services.GetRequiredService<CredentialStore>();
 
         MeResponse? me;
         try
         {
-            me = await apiClient.GetAsync<MeResponse>("/api/v1/auth/me", ct);
+            me = await client.Api.V1.Auth.Me.GetAsync(cancellationToken: ct);
         }
         catch (ApiRequestException ex)
         {
@@ -135,7 +137,7 @@ public static class AuthLoginCommand
             return;
         }
 
-        if (me is null) return;
+        if (me?.Email is null) return;
 
         var current = credStore.Load();
         if (current is null) return;

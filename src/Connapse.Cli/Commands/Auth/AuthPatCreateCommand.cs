@@ -1,7 +1,8 @@
 using System.CommandLine;
 using System.Globalization;
-using Connapse.Cli.Models;
 using Connapse.Cli.Services;
+using Connapse.Client;
+using Connapse.Client.Models;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Connapse.Cli.Commands.Auth;
@@ -46,13 +47,13 @@ public static class AuthPatCreateCommand
                 expiresAt = parsed;
             }
 
-            var apiClient = services.GetRequiredService<ApiClient>();
+            var client = services.GetRequiredService<ConnapseApiClient>();
 
             Console.Write($"Creating PAT '{name}'... ");
 
-            var request = new PatCreateRequest(name, Scopes: null, ExpiresAt: expiresAt);
-            var response = await apiClient.PostAsync<PatCreateRequest, PatCreateResponse>(
-                "/api/v1/auth/pats", request, ct);
+            var response = await client.Api.V1.Auth.Pats.PostAsync(
+                new PatCreateRequest { Name = name, ExpiresAt = expiresAt },
+                cancellationToken: ct);
 
             if (response is null)
                 throw new CliServerError("Unexpected response from server.");

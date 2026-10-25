@@ -1,6 +1,7 @@
 using System.CommandLine;
 using System.Net;
 using Connapse.Cli.Services;
+using Connapse.Client;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Connapse.Cli.Commands.Auth;
@@ -21,16 +22,16 @@ public static class AuthPatRevokeCommand
         {
             var idStr = parseResult.GetRequiredValue(idArg);
 
-            if (!Guid.TryParse(idStr, out _))
+            if (!Guid.TryParse(idStr, out var id))
                 throw new CliValidationError($"'{idStr}' is not a valid PAT ID (expected GUID format).");
 
-            var apiClient = services.GetRequiredService<ApiClient>();
+            var client = services.GetRequiredService<ConnapseApiClient>();
 
             Console.Write($"Revoking PAT {idStr}... ");
 
             try
             {
-                await apiClient.DeleteAsync($"/api/v1/auth/pats/{idStr}", ct);
+                await client.Api.V1.Auth.Pats[id].DeleteAsync(cancellationToken: ct);
             }
             catch (ApiRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
             {

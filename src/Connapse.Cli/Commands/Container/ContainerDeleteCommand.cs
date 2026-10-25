@@ -1,5 +1,6 @@
 using System.CommandLine;
 using Connapse.Cli.Services;
+using Connapse.Client;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Connapse.Cli.Commands.Container;
@@ -19,15 +20,15 @@ public static class ContainerDeleteCommand
         cmd.SetAction(services.WithOrgContext(orgOption, async (parseResult, ct) =>
         {
             var name = parseResult.GetRequiredValue(nameArg);
-            var apiClient = services.GetRequiredService<ApiClient>();
+            var client = services.GetRequiredService<ConnapseApiClient>();
 
-            var containerId = await ContainerHelpers.ResolveIdAsync(apiClient, name, ct);
+            var containerId = await ContainerHelpers.ResolveIdAsync(client, name, ct);
             if (containerId is null)
                 throw new CliValidationError($"Container '{name}' not found.");
 
             Console.Write($"Deleting container '{name}'... ");
 
-            await apiClient.DeleteAsync($"/api/containers/{containerId}", ct);
+            await client.Api.Containers[containerId.Value].DeleteAsync(cancellationToken: ct);
 
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Deleted");

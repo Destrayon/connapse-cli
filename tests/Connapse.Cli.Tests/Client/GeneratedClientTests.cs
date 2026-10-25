@@ -40,6 +40,22 @@ public class GeneratedClientTests
     }
 
     [Fact]
+    public async Task Me_ReadsTheSignedInIdentity()
+    {
+        _handler.Responder = _ => MockHttpMessageHandler.Json(HttpStatusCode.OK, """
+            {"id":"11111111-2222-3333-4444-555555555555","email":"alice@example.com","displayName":"Alice",
+            "roles":["Owner","Admin"],"createdAt":"2026-01-01T00:00:00Z"}
+            """);
+
+        var me = await Client().Api.V1.Auth.Me.GetAsync();
+
+        Assert.Equal("https://connapse.test/api/v1/auth/me", _handler.Requests.Single().RequestUri!.ToString());
+        Assert.Equal("alice@example.com", me!.Email);
+        Assert.Equal("Alice", me.DisplayName);
+        Assert.Contains("Owner", me.Roles!);
+    }
+
+    [Fact]
     public async Task GetContainer_Missing_RaisesTheServersProblem()
     {
         _handler.Responder = _ => new HttpResponseMessage(HttpStatusCode.NotFound)

@@ -1,6 +1,6 @@
 using System.Net;
-using Connapse.Cli.Models;
 using Connapse.Cli.Services;
+using Connapse.Client;
 
 namespace Connapse.Cli.Commands.Container;
 
@@ -16,20 +16,18 @@ internal static class ContainerHelpers
     /// parses as a GUID, it's returned unchanged (caller may pass either).
     /// Returns null on 404 so the caller can produce a friendly message.
     /// </summary>
-    public static async Task<string?> ResolveIdAsync(
-        ApiClient apiClient,
+    public static async Task<Guid?> ResolveIdAsync(
+        ConnapseApiClient client,
         string nameOrId,
         CancellationToken ct)
     {
-        if (Guid.TryParse(nameOrId, out _))
-            return nameOrId;
+        if (Guid.TryParse(nameOrId, out var id))
+            return id;
 
         try
         {
-            var info = await apiClient.GetAsync<ContainerInfo>(
-                $"/api/containers/by-name/{Uri.EscapeDataString(nameOrId.ToLowerInvariant())}",
-                ct);
-            return info?.Id;
+            var info = await client.Api.Containers.ByName[nameOrId.ToLowerInvariant()].GetAsync(cancellationToken: ct);
+            return Guid.TryParse(info?.Id, out var found) ? found : null;
         }
         catch (ApiRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
         {

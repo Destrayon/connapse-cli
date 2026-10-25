@@ -1,6 +1,7 @@
 using System.CommandLine;
-using Connapse.Cli.Models;
 using Connapse.Cli.Services;
+using Connapse.Client;
+using Connapse.Client.Models;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Connapse.Cli.Commands.Auth;
@@ -13,8 +14,8 @@ public static class AuthPatListCommand
 
         cmd.SetAction(services.WithOrgContext(orgOption, async (_, ct) =>
         {
-            var apiClient = services.GetRequiredService<ApiClient>();
-            var pats = await apiClient.GetAsync<List<PatListItem>>("/api/v1/auth/pats", ct);
+            var client = services.GetRequiredService<ConnapseApiClient>();
+            var pats = await client.Api.V1.Auth.Pats.GetAsync(cancellationToken: ct);
 
             if (pats is null || pats.Count == 0)
             {
@@ -47,7 +48,7 @@ public static class AuthPatListCommand
                 Console.ResetColor();
 
                 Console.ForegroundColor = ConsoleColor.DarkGray;
-                Console.Write($"    Prefix: {pat.TokenPrefix}...  Created: {pat.CreatedAt.ToLocalTime():yyyy-MM-dd}");
+                Console.Write($"    Prefix: {pat.TokenPrefix}...  Created: {pat.CreatedAt?.ToLocalTime():yyyy-MM-dd}");
                 if (pat.ExpiresAt.HasValue)
                     Console.Write($"  Expires: {pat.ExpiresAt.Value.ToLocalTime():yyyy-MM-dd}");
                 if (pat.LastUsedAt.HasValue)
@@ -64,7 +65,7 @@ public static class AuthPatListCommand
 
     private static (string Status, ConsoleColor Color) DescribeStatus(PatListItem pat)
     {
-        if (pat.IsRevoked)
+        if (pat.IsRevoked == true)
             return ("REVOKED", ConsoleColor.Red);
 
         if (pat.ExpiresAt.HasValue && pat.ExpiresAt < DateTime.UtcNow)

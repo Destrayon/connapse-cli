@@ -1,14 +1,13 @@
 using System.CommandLine;
-using Connapse.Cli.Models;
 using Connapse.Cli.Services;
+using Connapse.Client;
+using Connapse.Client.Models;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Connapse.Cli.Commands.Container;
 
 public static class ContainerCreateCommand
 {
-    private sealed record CreateRequest(string Name, string? Description);
-
     public static Command Create(IServiceProvider services, Option<string?> orgOption)
     {
         var nameArg = new Argument<string>("name")
@@ -30,14 +29,13 @@ public static class ContainerCreateCommand
             var name = parseResult.GetRequiredValue(nameArg);
             var description = parseResult.GetValue(descriptionOption);
 
-            var apiClient = services.GetRequiredService<ApiClient>();
+            var client = services.GetRequiredService<ConnapseApiClient>();
 
             Console.Write($"Creating container '{name}'... ");
 
-            var result = await apiClient.PostAsync<CreateRequest, ContainerInfo>(
-                "/api/containers",
-                new CreateRequest(name, description),
-                ct);
+            var result = await client.Api.Containers.PostAsync(
+                new CreateContainerApiRequest { Name = name, Description = description },
+                cancellationToken: ct);
 
             if (result is null)
                 throw new CliServerError("Unexpected response from server.");

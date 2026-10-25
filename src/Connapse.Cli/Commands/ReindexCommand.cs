@@ -1,7 +1,8 @@
 using System.CommandLine;
 using Connapse.Cli.Commands.Container;
-using Connapse.Cli.Models;
 using Connapse.Cli.Services;
+using Connapse.Client;
+using Connapse.Client.Models;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Connapse.Cli.Commands;
@@ -37,9 +38,9 @@ public static class ReindexCommand
             var force = parseResult.GetValue(forceOption);
             var detectChanges = !parseResult.GetValue(noDetectChangesOption);
 
-            var apiClient = services.GetRequiredService<ApiClient>();
+            var client = services.GetRequiredService<ConnapseApiClient>();
 
-            var containerId = await ContainerHelpers.ResolveIdAsync(apiClient, containerName, ct);
+            var containerId = await ContainerHelpers.ResolveIdAsync(client, containerName, ct);
             if (containerId is null)
                 throw new CliValidationError($"Container '{containerName}' not found.");
 
@@ -50,9 +51,9 @@ public static class ReindexCommand
                 Console.WriteLine("Settings change detection: disabled");
             Console.WriteLine();
 
-            var request = new ReindexRequest(force, detectChanges);
-            var result = await apiClient.PostAsync<ReindexRequest, ReindexResult>(
-                $"/api/containers/{containerId}/reindex", request, ct);
+            var result = await client.Api.Containers[containerId.Value].Reindex.PostAsync(
+                new ContainerReindexRequest { Force = force, DetectSettingsChanges = detectChanges },
+                cancellationToken: ct);
 
             if (result is null)
                 throw new CliServerError("Unexpected response from server.");
@@ -65,10 +66,10 @@ public static class ReindexCommand
             Console.WriteLine($"  Skipped:         {result.SkippedCount}");
             Console.WriteLine($"  Failed:          {result.FailedCount}");
 
-            if (result.ReasonCounts is { Count: > 0 })
+            if (result.ReasonCounts?.AdditionalData is { Count: > 0 } reasons)
             {
                 Console.WriteLine("  Reasons:");
-                foreach (var kvp in result.ReasonCounts)
+                foreach (var kvp in reasons)
                     Console.WriteLine($"    {kvp.Key}: {kvp.Value}");
             }
 

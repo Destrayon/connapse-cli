@@ -2,6 +2,7 @@ using System.CommandLine;
 using System.Net.Http.Headers;
 using Connapse.Cli.Commands.Container;
 using Connapse.Cli.Services;
+using Connapse.Client;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Connapse.Cli.Commands;
@@ -50,8 +51,9 @@ public static class UploadCommand
                 throw new CliValidationError($"Path '{sourcePath}' does not exist.");
 
             var apiClient = services.GetRequiredService<ApiClient>();
+            var client = services.GetRequiredService<ConnapseApiClient>();
 
-            var containerId = await ContainerHelpers.ResolveIdAsync(apiClient, containerName, ct);
+            var containerId = await ContainerHelpers.ResolveIdAsync(client, containerName, ct);
             if (containerId is null)
                 throw new CliValidationError($"Container '{containerName}' not found.");
 
@@ -82,6 +84,9 @@ public static class UploadCommand
 
                 try
                 {
+                    // Sent by hand, not through the generated client: the spec describes the upload as a model
+                    // of byte arrays, which Kiota's multipart writer refuses (it takes only its MultipartBody),
+                    // and which would hold each file in memory and drop its name.
                     using var content = new MultipartFormDataContent();
                     await using var fileStream = File.OpenRead(file);
                     using var streamContent = new StreamContent(fileStream);
