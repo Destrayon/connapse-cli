@@ -11,4 +11,20 @@ scripts/generate-client.sh
 
 The nightly **Spec sync** workflow fetches the server's latest spec. If it changed, the workflow repins it, regenerates this client, and opens a pull request. CI regenerates the client on every build and fails if the checked-in code differs.
 
-Source scopes are flattened: the server declares `SourceScope` as an `anyOf` over the per-provider scope types, and Kiota reads `anyOf` as a merge of all of them. So `SourceScope` carries every provider's fields, and you pick one with `Type`. Settings are a composed type with one typed property per settings shape.
+## Known limitation: source scopes
+
+The server's spec declares `SourceScope` as an `anyOf` over the eight per-provider scope types. Kiota
+merges an `anyOf` into one class:
+- `SourceScope` carries every provider's fields together, and there is no class per provider.
+- Its `Type` enum keeps only the first variant's value, `s3`.
+
+So this client can describe an S3 scope with the typed model. For any other provider, fill in that
+provider's fields and set the type yourself, for example `scope.AdditionalData["type"] = "github"`
+(a test covers this). Or send the scope as `scopeJson`.
+
+The fix belongs on the server and is tracked as CON-77: emit each scope type as a discriminated subtype,
+`allOf` of `SourceScope` and its own fields. Once that spec lands, the nightly sync regenerates this
+client with one typed class per provider.
+
+Settings aren't affected: `GET /api/settings/{category}` is a composed type with one typed property per
+settings shape.

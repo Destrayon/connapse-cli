@@ -3,11 +3,10 @@ name: Spec sync
 # Nightly: when the server's OpenAPI spec has changed since the commit in spec/pin.json, repin it,
 # regenerate src/Connapse.Client and open (or update) one pull request with the result.
 #
-# Two things this needs from the repository:
-# - Settings > Actions > General: "Allow GitHub Actions to create and approve pull requests".
-# - Optionally a SPEC_SYNC_TOKEN secret (a fine-grained token with contents and pull-requests write).
-#   A pull request opened with the default GITHUB_TOKEN doesn't trigger CI, so without it, close and
-#   reopen the sync PR to run CI on it.
+# It needs one repository setting: Settings > Actions > General, "Allow GitHub Actions to create and
+# approve pull requests". A SPEC_SYNC_TOKEN secret (a fine-grained token with contents, pull-requests
+# and actions write) is used instead of GITHUB_TOKEN when present; either way the job starts CI on the
+# sync branch itself.
 
 on:
   schedule:
@@ -15,6 +14,7 @@ on:
   workflow_dispatch:
 
 permissions:
+  actions: write
   contents: write
   pull-requests: write
 
@@ -44,9 +44,18 @@ jobs:
           pinned=$(jq -r .commit spec/pin.json)
           latest=$(gh api "repos/$repo/commits/$ref" --jq .sha)
           gh api "repos/$repo/contents/$path?ref=$latest" -H "Accept: application/vnd.github.raw" > "$RUNNER_TEMP/openapi.json"
-          # A new commit that leaves the spec as it was isn't worth a pull request.
+          # A new commit that leaves the spec as it was isn't worth a pull request. A sync PR still open
+          # from an earlier run is now out of date (the server went back to the pinned spec), so it closes.
           if cmp -s "$RUNNER_TEMP/openapi.json" spec/openapi.json; then
             echo "Spec unchanged at $latest (pinned $pinned)."
+            open=$(gh api "repos/$GITHUB_REPOSITORY/pulls?head=$GITHUB_REPOSITORY_OWNER:$BRANCH&state=open" --jq '.[0].number // empty')
+            if [ -n "$open" ]; then
+              gh api -X POST "repos/$GITHUB_REPOSITORY/issues/$open/comments" \
+                -f body="The server's spec at \`${latest:0:8}\` matches the pinned one again, so this sync is no longer needed." > /dev/null
+              gh api -X PATCH "repos/$GITHUB_REPOSITORY/pulls/$open" -f state=closed > /dev/null
+              gh api -X DELETE "repos/$GITHUB_REPOSITORY/git/refs/heads/$BRANCH" > /dev/null || true
+              echo "Closed sync PR #$open."
+            fi
             echo "changed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
@@ -110,3 +119,14 @@ jobs:
           else
             gh pr create --head "$BRANCH" --base main --title "chore: sync the API spec and regenerate the client" --body "$body"
           fi
+
+          # A push with the default token starts no workflows, so CI is started on the branch by hand;
+          # workflow_dispatch is the one event that token may trigger. Its checks attach to the PR's commit.
+          gh workflow run ci.yml --ref "$BRANCH"
+
+      # Last, so the PR exists either way: a client that doesn't build fails this run, not only the PR text.
+      - name: Fail when the regenerated client doesn't build
+        if: steps.fetch.outputs.changed == 'true' && steps.build.outcome != 'success'
+        run: |
+          echo "::error::The client regenerated from the new spec doesn't build. See the sync pull request."
+          exit 1
