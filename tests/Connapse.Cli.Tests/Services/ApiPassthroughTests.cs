@@ -1,4 +1,5 @@
 using System.Net;
+using System.Text;
 using System.Text.Json;
 using Connapse.Cli.Models;
 using Connapse.Cli.Services;
@@ -14,7 +15,8 @@ public sealed class ApiPassthroughTests : IDisposable
     private readonly CredentialStore _credStore;
     private readonly MockHttpMessageHandler _handler = new();
     private readonly List<(string Method, string PathAndQuery, string? Body, string? ContentType)> _sent = new();
-    private readonly StringWriter _stdout = new();
+    private readonly MemoryStream _stdout = new();
+    private readonly List<string> _clientNames = new();
     private readonly StringWriter _stderr = new();
 
     public ApiPassthroughTests()
@@ -44,10 +46,12 @@ public sealed class ApiPassthroughTests : IDisposable
             return responder(req);
         };
 
+    private string Out => Encoding.UTF8.GetString(_stdout.ToArray());
+
     private Task<int> Run(ApiPassthroughRequest request, string stdin = "")
     {
-        var api = new ApiClient(new MockHttpClientFactory(_handler, BaseUri), _credStore, new OrgContextProvider(), new FakeEditionProvider(ServerEdition.SelfHosted));
-        return new ApiPassthrough(api).RunAsync(request, new StringReader(stdin), _stdout, _stderr);
+        var api = new ApiClient(new NamingFactory(new MockHttpClientFactory(_handler, BaseUri), _clientNames), _credStore, new OrgContextProvider(), new FakeEditionProvider(ServerEdition.SelfHosted));
+        return new ApiPassthrough(api).RunAsync(request, new MemoryStream(Encoding.UTF8.GetBytes(stdin)), _stdout, _stderr);
     }
 
     [Fact]
@@ -61,7 +65,7 @@ public sealed class ApiPassthroughTests : IDisposable
         var sent = Assert.Single(_sent);
         Assert.Equal(("POST", "/api/containers", """{"name":"docs"}"""), (sent.Method, sent.PathAndQuery, sent.Body));
         Assert.Equal("application/json", sent.ContentType);
-        Assert.Equal("""{"id":"c1"}""", _stdout.ToString().TrimEnd());
+        Assert.Equal("""{"id":"c1"}""", Out.TrimEnd());
     }
 
     [Fact]
@@ -129,7 +133,7 @@ public sealed class ApiPassthroughTests : IDisposable
         int exit = await Run(new ApiPassthroughRequest("GET", "/api/containers/nope"));
 
         Assert.Equal(CliExitCodes.UserError, exit);
-        Assert.Contains("Container not found", _stdout.ToString());
+        Assert.Contains("Container not found", Out);
         Assert.Contains("HTTP 404", _stderr.ToString());
     }
 
@@ -169,7 +173,7 @@ public sealed class ApiPassthroughTests : IDisposable
 
         Assert.Equal(CliExitCodes.Success, exit);
         Assert.Equal(3, _sent.Count);
-        var items = JsonDocument.Parse(_stdout.ToString()).RootElement.EnumerateArray().Select(e => e.GetProperty("n").GetInt32());
+        var items = JsonDocument.Parse(Out).RootElement.EnumerateArray().Select(e => e.GetProperty("n").GetInt32());
         Assert.Equal([1, 2, 3, 4, 5], items);
     }
 
@@ -181,7 +185,7 @@ public sealed class ApiPassthroughTests : IDisposable
         await Run(new ApiPassthroughRequest("GET", "/api/sources", Paginate: true));
 
         Assert.Equal($"/api/sources?take={ApiPassthrough.DefaultTake}&skip=0", Assert.Single(_sent).PathAndQuery);
-        Assert.Equal("[]", _stdout.ToString().Trim());
+        Assert.Equal("[]", Out.Trim());
     }
 
     [Fact]
@@ -192,7 +196,7 @@ public sealed class ApiPassthroughTests : IDisposable
         int exit = await Run(new ApiPassthroughRequest("GET", "/api/info", Paginate: true));
 
         Assert.Equal(CliExitCodes.Success, exit);
-        Assert.Equal("""{"version":"1.0"}""", _stdout.ToString().TrimEnd());
+        Assert.Equal("""{"version":"1.0"}""", Out.TrimEnd());
     }
 
     [Fact]
@@ -205,7 +209,7 @@ public sealed class ApiPassthroughTests : IDisposable
         int exit = await Run(new ApiPassthroughRequest("GET", "/api/containers?take=1", Paginate: true));
 
         Assert.Equal(CliExitCodes.UserError, exit);
-        Assert.Contains("boom", _stdout.ToString());
+        Assert.Contains("boom", Out);
     }
 
     [Theory]
@@ -217,6 +221,57 @@ public sealed class ApiPassthroughTests : IDisposable
         await Assert.ThrowsAsync<CliValidationError>(() => Run(new ApiPassthroughRequest(method, "/api/containers", data, Paginate: paginate)));
 
         Assert.Empty(_handler.Requests);
+    }
+
+    [Fact]
+    public async Task A_binary_response_reaches_stdout_byte_for_byte()
+    {
+        byte[] pdf = [0x25, 0x50, 0x44, 0x46, 0x00, 0xFF, 0xFE, 0x80];
+        Respond(_ => new HttpResponseMessage(HttpStatusCode.OK) { Content = new ByteArrayContent(pdf) });
+
+        await Run(new ApiPassthroughRequest("GET", "/api/containers/1/files/2/content"));
+
+        Assert.Equal(pdf, _stdout.ToArray());
+    }
+
+    [Fact]
+    public async Task A_redirect_is_reported_not_followed()
+    {
+        Respond(_ =>
+        {
+            var r = new HttpResponseMessage(HttpStatusCode.TemporaryRedirect);
+            r.Headers.Location = new Uri("https://elsewhere.example/api/containers");
+            return r;
+        });
+
+        int exit = await Run(new ApiPassthroughRequest("POST", "/api/containers", Data: "{}"));
+
+        Assert.Equal(CliExitCodes.UserError, exit);
+        Assert.Single(_handler.Requests);
+        Assert.Contains("redirected to https://elsewhere.example/api/containers", _stderr.ToString());
+        Assert.All(_clientNames, n => Assert.Equal(HttpClientNames.ConnapseServerNoRedirect, n));
+    }
+
+    [Fact]
+    public async Task Paginate_refuses_an_empty_page_that_says_more_follow()
+    {
+        Respond(req => req.RequestUri!.Query.Contains("skip=0")
+            ? MockHttpMessageHandler.Json(HttpStatusCode.OK, """{"items":[{"n":1}],"hasMore":true}""")
+            : MockHttpMessageHandler.Json(HttpStatusCode.OK, """{"items":[],"hasMore":true}"""));
+
+        await Assert.ThrowsAsync<CliServerError>(() => Run(new ApiPassthroughRequest("GET", "/api/containers?take=1", Paginate: true)));
+
+        Assert.Empty(_stdout.ToArray());
+    }
+
+    /// <summary>Records which named client each request used.</summary>
+    private sealed class NamingFactory(IHttpClientFactory inner, List<string> names) : IHttpClientFactory
+    {
+        public HttpClient CreateClient(string name)
+        {
+            names.Add(name);
+            return inner.CreateClient(name);
+        }
     }
 
     private sealed class FakeEditionProvider(ServerEdition edition) : IEditionProvider

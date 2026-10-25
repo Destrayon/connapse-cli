@@ -53,8 +53,10 @@ public static class ApiCommand
                 parseResult.GetValue(dataOption),
                 parseResult.GetValue(contentTypeOption) ?? "application/json",
                 parseResult.GetValue(paginateOption));
-            var passthrough = new ApiPassthrough(services.GetRequiredService<ApiClient>());
-            return await passthrough.RunAsync(request, Console.In, Console.Out, Console.Error, ct);
+            var passthrough = new ApiPassthrough(services.GetRequiredService<ApiClient>(), stdoutIsTerminal: !Console.IsOutputRedirected);
+            await using var stdin = Console.OpenStandardInput();
+            await using var stdout = Console.OpenStandardOutput();
+            return await passthrough.RunAsync(request, stdin, stdout, Console.Error, ct);
         }));
 
         return cmd;

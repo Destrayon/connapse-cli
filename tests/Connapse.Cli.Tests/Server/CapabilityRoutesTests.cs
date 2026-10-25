@@ -51,11 +51,9 @@ public sealed class CapabilityRoutesTests
 
         const string probePath = "/api/cli-route-test-no-such-route";
         var probes = new Dictionary<string, Reply>();
-        var missed = new List<string>();
-        foreach (var (id, route) in routes)
+
+        async Task<(bool Reached, Reply Reply)> Reach(string method, string path)
         {
-            string method = route[..route.IndexOf(' ')];
-            string path = Fill(route[(route.IndexOf(' ') + 1)..]);
             if (!probes.TryGetValue(method, out var probe))
                 probes[method] = probe = await Send(cli, home, method, probePath);
 
@@ -68,7 +66,20 @@ public sealed class CapabilityRoutesTests
             if (unrouted && !reply.Status.StartsWith("HTTP 405", StringComparison.Ordinal))
                 unrouted = !(await Send(cli, home, "OPTIONS", path)).Status.StartsWith("HTTP 405", StringComparison.Ordinal);
             // A 401 means the sign-in, not the route, failed, and a CLI that didn't run reached nothing.
-            if (unrouted || reply.Status.StartsWith("HTTP 401", StringComparison.Ordinal) || reply.Status.StartsWith("cli failed", StringComparison.Ordinal))
+            bool failed = reply.Status.StartsWith("HTTP 401", StringComparison.Ordinal) || reply.Status.StartsWith("cli failed", StringComparison.Ordinal);
+            return (!unrouted && !failed, reply);
+        }
+
+        // Canaries the rule must reject on every run: a made-up path, and a real path (/health is GET
+        // only) asked with a method it doesn't map. If either counts as reached, the rule proves nothing.
+        foreach (var (method, path) in new[] { ("GET", probePath + "/" + Guid.NewGuid()), ("PATCH", "/health") })
+            Assert.False((await Reach(method, path)).Reached, $"the canary {method} {path} counted as reached");
+
+        var missed = new List<string>();
+        foreach (var (id, route) in routes)
+        {
+            var (reached, reply) = await Reach(route[..route.IndexOf(' ')], Fill(route[(route.IndexOf(' ') + 1)..]));
+            if (!reached)
                 missed.Add($"{id}: {route} -> {reply.Status}");
         }
         Assert.True(probes.Values.All(p => p.Status.StartsWith("HTTP 4", StringComparison.Ordinal)),

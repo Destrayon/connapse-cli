@@ -75,11 +75,12 @@ public sealed class ApiClient
     public async Task<HttpResponseMessage> SendPassthroughAsync(
         HttpMethod method, string path, Func<HttpContent?> body, CancellationToken ct = default)
     {
-        var response = await SendOnceAsync(method, path, body(), ct);
+        // Redirects aren't followed: one could name another host and take the body and org header there.
+        var response = await SendOnceAsync(method, path, body(), ct, HttpClientNames.ConnapseServerNoRedirect);
         if (response.StatusCode == HttpStatusCode.Unauthorized && await TryRefreshAsync(ct))
         {
             response.Dispose();
-            response = await SendOnceAsync(method, path, body(), ct);
+            response = await SendOnceAsync(method, path, body(), ct, HttpClientNames.ConnapseServerNoRedirect);
         }
         return response;
     }
@@ -124,7 +125,8 @@ public sealed class ApiClient
         HttpMethod method,
         string path,
         HttpContent? content,
-        CancellationToken ct)
+        CancellationToken ct,
+        string clientName = HttpClientNames.ConnapseServer)
     {
         var request = new HttpRequestMessage(method, path);
         if (content is not null)
@@ -142,7 +144,7 @@ public sealed class ApiClient
                 request.Headers.Add("X-Connapse-Org", orgSlug);
         }
 
-        using var client = _httpClientFactory.CreateClient(HttpClientNames.ConnapseServer);
+        using var client = _httpClientFactory.CreateClient(clientName);
         return await client.SendAsync(request, ct);
     }
 

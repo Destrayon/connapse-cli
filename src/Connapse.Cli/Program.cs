@@ -61,26 +61,30 @@ internal static class Program
         services.AddSingleton<OrgContextProvider>(sp =>
             (OrgContextProvider)sp.GetRequiredService<IOrgContextProvider>());
 
-        services.AddHttpClient(HttpClientNames.ConnapseServer, (sp, client) =>
+        foreach (var (name, followRedirects) in new[] { (HttpClientNames.ConnapseServer, true), (HttpClientNames.ConnapseServerNoRedirect, false) })
         {
-            var credStore = sp.GetRequiredService<CredentialStore>();
-            var baseUrl = credStore.Load()?.ApiBaseUrl ?? "https://localhost:5001";
-            client.BaseAddress = new Uri(baseUrl);
-            client.Timeout = TimeSpan.FromMinutes(10);
-        })
-        .ConfigurePrimaryHttpMessageHandler(sp =>
-        {
-            var credStore = sp.GetRequiredService<CredentialStore>();
-            var baseUrl = credStore.Load()?.ApiBaseUrl ?? "https://localhost:5001";
-            var serverUri = new Uri(baseUrl);
-            var isLocalhost = serverUri.Host is "localhost" or "127.0.0.1" or "::1";
-            return new HttpClientHandler
+            services.AddHttpClient(name, (sp, client) =>
             {
-                ServerCertificateCustomValidationCallback = isLocalhost
-                    ? (_, _, _, _) => true
-                    : null,
-            };
-        });
+                var credStore = sp.GetRequiredService<CredentialStore>();
+                var baseUrl = credStore.Load()?.ApiBaseUrl ?? "https://localhost:5001";
+                client.BaseAddress = new Uri(baseUrl);
+                client.Timeout = TimeSpan.FromMinutes(10);
+            })
+            .ConfigurePrimaryHttpMessageHandler(sp =>
+            {
+                var credStore = sp.GetRequiredService<CredentialStore>();
+                var baseUrl = credStore.Load()?.ApiBaseUrl ?? "https://localhost:5001";
+                var serverUri = new Uri(baseUrl);
+                var isLocalhost = serverUri.Host is "localhost" or "127.0.0.1" or "::1";
+                return new HttpClientHandler
+                {
+                    AllowAutoRedirect = followRedirects,
+                    ServerCertificateCustomValidationCallback = isLocalhost
+                        ? (_, _, _, _) => true
+                        : null,
+                };
+            });
+        }
 
         services.AddSingleton<EditionDetector>();
         services.AddSingleton<IEditionProvider>(sp => sp.GetRequiredService<EditionDetector>());

@@ -122,7 +122,7 @@ Organization commands are no-ops on self-hosted servers and exit 0 with a friend
 
 | Command | Description |
 |---|---|
-| `connapse api <method> <path> [--data <json\|@file\|->] [--content-type <type>] [--paginate]` | Call any route on the signed-in server, for routes the CLI has no command for yet. It prints the response body as sent, and exits 1 on a non-2xx status. `--paginate` follows `skip`/`take` pages of a GET and prints all items as one array. |
+| `connapse api <method> <path> [--data <json\|@file\|->] [--content-type <type>] [--paginate]` | Call any route on the signed-in server, for routes the CLI has no command for yet. It prints the response body byte for byte as sent, and exits 1 on a non-2xx status. Redirects are reported, not followed. `--paginate` follows `skip`/`take` pages of a GET and prints all items as one array. |
 
 For example, `connapse api GET "/api/sources?take=50" --paginate`, or `connapse api POST /api/containers --data '{"name":"docs"}'`. In Git Bash, set `MSYS_NO_PATHCONV=1`: otherwise Git Bash rewrites `/api/...` into a Windows path.
 
