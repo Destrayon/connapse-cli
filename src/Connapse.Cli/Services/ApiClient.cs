@@ -41,6 +41,9 @@ public sealed class ApiClient
         _editionProvider = editionProvider;
     }
 
+    /// <summary>Whether a sign-in is saved; without one, requests go to the default server unauthenticated.</summary>
+    public bool IsSignedIn => _credStore.Load() is not null;
+
     public async Task<T?> GetAsync<T>(string path, CancellationToken ct = default)
     {
         using var response = await SendWithAuthAsync(HttpMethod.Get, path, content: null, ct);

@@ -1,0 +1,49 @@
+name: Server routes
+
+# Every route in the server's capability list, called through `connapse api` against a real server
+# built from the commit in tests/server/pin.json (CON-21). It takes about 10 minutes, so it runs only
+# when the api command, the pin or the test changes, and on demand; ordinary PRs keep ci.yml alone.
+# The pin is an epic/783 commit until that epic ships, then a release tag.
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'src/Connapse.Cli/Commands/ApiCommand.cs'
+      - 'src/Connapse.Cli/Services/ApiPassthrough.cs'
+      - 'src/Connapse.Cli/Services/ApiClient.cs'
+      - 'tests/server/**'
+      - 'tests/Connapse.Cli.Tests/Server/**'
+      - '.github/workflows/server-routes.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  routes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - name: Checkout CLI
+        uses: actions/checkout@v4
+
+      - name: Read the pin
+        id: pin
+        run: |
+          echo "repository=$(jq -r .repository tests/server/pin.json)" >> "$GITHUB_OUTPUT"
+          echo "commit=$(jq -r .commit tests/server/pin.json)" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout the pinned server
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ steps.pin.outputs.repository }}
+          ref: ${{ steps.pin.outputs.commit }}
+          path: connapse-server
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Route test
+        run: tests/server/run-route-test.sh connapse-server

@@ -32,6 +32,9 @@ public sealed class ApiPassthrough(ApiClient api)
 
     public async Task<int> RunAsync(ApiPassthroughRequest request, TextReader stdin, TextWriter stdout, TextWriter stderr, CancellationToken ct = default)
     {
+        // Without a saved sign-in the CLI would talk to its default server, which may be another one.
+        if (!api.IsSignedIn)
+            throw new CliAuthError("Not signed in, so there is no server to send this to.");
         if (!Methods.Contains(request.Method))
             throw new CliValidationError($"'{request.Method}' is not an HTTP method. Use GET, POST, PUT, PATCH, DELETE, HEAD or OPTIONS.");
         var method = new HttpMethod(request.Method.ToUpperInvariant());
@@ -65,6 +68,9 @@ public sealed class ApiPassthrough(ApiClient api)
             throw new CliValidationError("Give a path, like /api/containers.");
         if (p.Contains('\\') || p.StartsWith("//", StringComparison.Ordinal) || (!p.StartsWith('/') && p.Contains("://", StringComparison.Ordinal)))
             throw new CliValidationError($"'{path}' isn't a path on the signed-in server. Give one like /api/containers, not a URL.");
+        // Git Bash rewrites an argument like /api/containers into C:/Program Files/Git/api/containers.
+        if (p.Length > 2 && char.IsAsciiLetter(p[0]) && p[1] == ':' && p[2] == '/')
+            throw new CliValidationError($"'{path}' is a Windows path. Git Bash rewrites /api/... arguments; run with MSYS_NO_PATHCONV=1 set.");
         return p.StartsWith('/') ? p : "/" + p;
     }
 

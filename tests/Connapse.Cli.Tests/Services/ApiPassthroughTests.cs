@@ -91,11 +91,22 @@ public sealed class ApiPassthroughTests : IDisposable
     [InlineData("https://evil.example/api/containers")]
     [InlineData("//evil.example/api/containers")]
     [InlineData("\\\\evil.example\\api")]
+    [InlineData("C:/Program Files/Git/api/containers")]
     public async Task A_url_or_another_host_is_refused_before_any_request(string path)
     {
         Respond(_ => new HttpResponseMessage(HttpStatusCode.OK));
 
         await Assert.ThrowsAsync<CliValidationError>(() => Run(new ApiPassthroughRequest("GET", path)));
+
+        Assert.Empty(_handler.Requests);
+    }
+
+    [Fact]
+    public async Task Not_signed_in_is_refused_before_any_request()
+    {
+        _credStore.Delete();
+
+        await Assert.ThrowsAsync<CliAuthError>(() => Run(new ApiPassthroughRequest("GET", "/api/containers")));
 
         Assert.Empty(_handler.Requests);
     }
