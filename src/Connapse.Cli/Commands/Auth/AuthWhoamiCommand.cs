@@ -1,6 +1,7 @@
 using System.CommandLine;
 using Connapse.Cli.Models;
 using Connapse.Cli.Services;
+using Connapse.Client;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Connapse.Cli.Commands.Auth;
@@ -15,7 +16,7 @@ public static class AuthWhoamiCommand
         {
             var credStore = services.GetRequiredService<CredentialStore>();
             var configStore = services.GetRequiredService<ConfigStore>();
-            var apiClient = services.GetRequiredService<ApiClient>();
+            var client = services.GetRequiredService<ConnapseApiClient>();
             var editionDetector = services.GetRequiredService<EditionDetector>();
 
             var creds = credStore.Load();
@@ -24,7 +25,7 @@ public static class AuthWhoamiCommand
 
             var edition = await editionDetector.GetEditionAsync(forceRefresh: true, ct);
 
-            var me = await apiClient.GetAsync<MeResponse>("/api/v1/auth/me", ct);
+            var me = await client.Api.V1.Auth.Me.GetAsync(cancellationToken: ct);
 
             var config = configStore.Load();
 
@@ -39,7 +40,7 @@ public static class AuthWhoamiCommand
 
             if (me is not null)
             {
-                PrintRow("Email", me.Email);
+                PrintRow("Email", me.Email ?? "");
                 if (!string.IsNullOrWhiteSpace(me.DisplayName))
                     PrintRow("Name", me.DisplayName);
                 if (me.Roles is { Count: > 0 })

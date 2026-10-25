@@ -1,8 +1,8 @@
 using System.CommandLine;
 using System.Globalization;
 using Connapse.Cli.Commands.Container;
-using Connapse.Cli.Models;
 using Connapse.Cli.Services;
+using Connapse.Client;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Connapse.Cli.Commands;
@@ -67,9 +67,9 @@ public static class SearchCommand
             if (minScore.HasValue && (minScore.Value < 0.0 || minScore.Value > 1.0))
                 throw new CliValidationError("--min-score must be between 0.0 and 1.0.");
 
-            var apiClient = services.GetRequiredService<ApiClient>();
+            var client = services.GetRequiredService<ConnapseApiClient>();
 
-            var containerId = await ContainerHelpers.ResolveIdAsync(apiClient, containerName, ct);
+            var containerId = await ContainerHelpers.ResolveIdAsync(client, containerName, ct);
             if (containerId is null)
                 throw new CliValidationError($"Container '{containerName}' not found.");
 
@@ -81,18 +81,18 @@ public static class SearchCommand
                 Console.WriteLine($"Min score: {minScore.Value.ToString("0.###", CultureInfo.InvariantCulture)}");
             Console.WriteLine();
 
-            var url = $"/api/containers/{containerId}/search" +
-                      $"?q={Uri.EscapeDataString(query)}" +
-                      $"&mode={Uri.EscapeDataString(mode)}" +
-                      $"&topK={topK}";
-            if (!string.IsNullOrWhiteSpace(folderPath))
-                url += $"&path={Uri.EscapeDataString(folderPath)}";
-            if (minScore.HasValue)
-                url += $"&minScore={minScore.Value.ToString("0.###", CultureInfo.InvariantCulture)}";
+            var result = await client.Api.Containers[containerId.Value].Search.GetAsync(r =>
+            {
+                r.QueryParameters.Q = query;
+                r.QueryParameters.Mode = mode;
+                r.QueryParameters.TopK = topK;
+                if (!string.IsNullOrWhiteSpace(folderPath))
+                    r.QueryParameters.Path = folderPath;
+                if (minScore.HasValue)
+                    r.QueryParameters.MinScore = (float)minScore.Value;
+            }, ct);
 
-            var result = await apiClient.GetAsync<SearchResult>(url, ct);
-
-            if (result is null || result.Hits.Count == 0)
+            if (result?.Hits is not { Count: > 0 } hits)
             {
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine("No results found.");
@@ -101,26 +101,29 @@ public static class SearchCommand
             }
 
             Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine($"Found {result.TotalMatches} results in {result.Duration.TotalMilliseconds:F0}ms");
+            // The server sends the duration as a TimeSpan's text, such as 00:00:00.1234567.
+            var took = TimeSpan.TryParse(result.Duration, CultureInfo.InvariantCulture, out var duration) ? $" in {duration.TotalMilliseconds:F0}ms" : "";
+            Console.WriteLine($"Found {result.TotalMatches} results{took}");
             Console.ResetColor();
             Console.WriteLine();
 
-            for (int i = 0; i < result.Hits.Count; i++)
+            for (int i = 0; i < hits.Count; i++)
             {
-                var hit = result.Hits[i];
+                var hit = hits[i];
 
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.Write($"[{i + 1}] Score: {hit.Score:F3}");
                 Console.ResetColor();
 
-                if (hit.Metadata.TryGetValue("FileName", out var fileName))
+                var metadata = hit.Metadata?.AdditionalData ?? new Dictionary<string, object>();
+                if (metadata.TryGetValue("FileName", out var fileName))
                 {
                     Console.ForegroundColor = ConsoleColor.DarkGray;
                     Console.Write($"  | {fileName}");
                     Console.ResetColor();
                 }
 
-                if (hit.Metadata.TryGetValue("ChunkIndex", out var chunkIdx))
+                if (metadata.TryGetValue("ChunkIndex", out var chunkIdx))
                 {
                     Console.ForegroundColor = ConsoleColor.DarkGray;
                     Console.Write($" (chunk {chunkIdx})");
@@ -128,7 +131,7 @@ public static class SearchCommand
                 }
                 Console.WriteLine();
 
-                var content = hit.Content;
+                var content = hit.Content ?? "";
                 if (content.Length > 300)
                     content = content[..297] + "...";
                 Console.WriteLine($"    {content}");

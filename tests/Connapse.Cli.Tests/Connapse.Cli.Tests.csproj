@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Connapse.Cli\Connapse.Cli.csproj" />
+    <ProjectReference Include="..\..\src\Connapse.Client\Connapse.Client.csproj" />
   </ItemGroup>
 
 </Project>

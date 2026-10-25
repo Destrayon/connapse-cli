@@ -2,6 +2,7 @@ using System.CommandLine;
 using System.Net;
 using Connapse.Cli.Commands.Container;
 using Connapse.Cli.Services;
+using Connapse.Client;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Connapse.Cli.Commands.Files;
@@ -34,9 +35,9 @@ public static class FilesDeleteCommand
             if (!Guid.TryParse(fileId, out _))
                 throw new CliValidationError($"'{fileId}' is not a valid file ID (expected GUID format).");
 
-            var apiClient = services.GetRequiredService<ApiClient>();
+            var client = services.GetRequiredService<ConnapseApiClient>();
 
-            var containerId = await ContainerHelpers.ResolveIdAsync(apiClient, containerName, ct);
+            var containerId = await ContainerHelpers.ResolveIdAsync(client, containerName, ct);
             if (containerId is null)
                 throw new CliValidationError($"Container '{containerName}' not found.");
 
@@ -44,7 +45,7 @@ public static class FilesDeleteCommand
 
             try
             {
-                await apiClient.DeleteAsync($"/api/containers/{containerId}/files/{fileId}", ct);
+                await client.Api.Containers[containerId.Value].Files[fileId].DeleteAsync(cancellationToken: ct);
             }
             catch (ApiRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
             {

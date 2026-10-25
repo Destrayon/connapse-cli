@@ -1,6 +1,6 @@
 using System.CommandLine;
-using Connapse.Cli.Models;
 using Connapse.Cli.Services;
+using Connapse.Client;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Connapse.Cli.Commands.Container;
@@ -13,10 +13,13 @@ public static class ContainerListCommand
 
         cmd.SetAction(services.WithOrgContext(orgOption, async (_, ct) =>
         {
-            var apiClient = services.GetRequiredService<ApiClient>();
+            var client = services.GetRequiredService<ConnapseApiClient>();
 
-            var paged = await apiClient.GetAsync<PagedContainerResponse>(
-                "/api/containers?skip=0&take=100", ct);
+            var paged = await client.Api.Containers.GetAsync(r =>
+            {
+                r.QueryParameters.Skip = 0;
+                r.QueryParameters.Take = 100;
+            }, ct);
 
             var containers = paged?.Items;
 
@@ -29,7 +32,7 @@ public static class ContainerListCommand
             }
 
             Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine(paged!.HasMore
+            Console.WriteLine(paged!.HasMore == true
                 ? $"Showing {containers.Count} of {paged.TotalCount} container(s)"
                 : $"Found {containers.Count} container(s)");
             Console.ResetColor();

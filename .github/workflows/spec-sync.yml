@@ -1,0 +1,140 @@
+name: Spec sync
+
+# Nightly: when the server's OpenAPI spec has changed since the commit in spec/pin.json, repin it,
+# regenerate src/Connapse.Client and open (or update) one pull request with the result.
+#
+# It needs one repository setting: Settings > Actions > General, "Allow GitHub Actions to create and
+# approve pull requests". A SPEC_SYNC_TOKEN secret (a fine-grained token with contents, pull-requests
+# and actions write) is used instead of GITHUB_TOKEN when present; either way the job starts CI on the
+# sync branch itself.
+
+on:
+  schedule:
+    - cron: '23 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: spec-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.SPEC_SYNC_TOKEN || secrets.GITHUB_TOKEN }}
+      BRANCH: spec-sync/openapi
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.SPEC_SYNC_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: Fetch the server's latest spec
+        id: fetch
+        run: |
+          repo=$(jq -r .repository spec/pin.json)
+          ref=$(jq -r .ref spec/pin.json)
+          path=$(jq -r .path spec/pin.json)
+          pinned=$(jq -r .commit spec/pin.json)
+          latest=$(gh api "repos/$repo/commits/$ref" --jq .sha)
+          gh api "repos/$repo/contents/$path?ref=$latest" -H "Accept: application/vnd.github.raw" > "$RUNNER_TEMP/openapi.json"
+          # A new commit that leaves the spec as it was isn't worth a pull request. A sync PR still open
+          # from an earlier run is now out of date (the server went back to the pinned spec), so it closes.
+          if cmp -s "$RUNNER_TEMP/openapi.json" spec/openapi.json; then
+            echo "Spec unchanged at $latest (pinned $pinned)."
+            open=$(gh api "repos/$GITHUB_REPOSITORY/pulls?head=$GITHUB_REPOSITORY_OWNER:$BRANCH&state=open" --jq '.[0].number // empty')
+            if [ -n "$open" ]; then
+              gh api -X POST "repos/$GITHUB_REPOSITORY/issues/$open/comments" \
+                -f body="The server's spec at \`${latest:0:8}\` matches the pinned one again, so this sync is no longer needed." > /dev/null
+              gh api -X PATCH "repos/$GITHUB_REPOSITORY/pulls/$open" -f state=closed > /dev/null
+              gh api -X DELETE "repos/$GITHUB_REPOSITORY/git/refs/heads/$BRANCH" > /dev/null || true
+              echo "Closed sync PR #$open."
+            fi
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          cp "$RUNNER_TEMP/openapi.json" spec/openapi.json
+          jq --arg c "$latest" '.commit = $c' spec/pin.json > "$RUNNER_TEMP/pin.json" && mv "$RUNNER_TEMP/pin.json" spec/pin.json
+          {
+            echo "changed=true"
+            echo "repo=$repo"
+            echo "ref=$ref"
+            echo "pinned=$pinned"
+            echo "latest=$latest"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Setup .NET
+        if: steps.fetch.outputs.changed == 'true'
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Regenerate the client
+        if: steps.fetch.outputs.changed == 'true'
+        run: scripts/generate-client.sh
+
+      # A spec the generated client can't compile against is reported in the PR, not hidden: the build
+      # result goes in its description, and CI on the PR fails the same way.
+      - name: Build
+        id: build
+        if: steps.fetch.outputs.changed == 'true'
+        continue-on-error: true
+        run: dotnet build Connapse.Cli.slnx --configuration Release
+
+      - name: Open or update the pull request
+        if: steps.fetch.outputs.changed == 'true'
+        env:
+          REPO: ${{ steps.fetch.outputs.repo }}
+          REF: ${{ steps.fetch.outputs.ref }}
+          PINNED: ${{ steps.fetch.outputs.pinned }}
+          LATEST: ${{ steps.fetch.outputs.latest }}
+          BUILD: ${{ steps.build.outcome }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -B "$BRANCH"
+          git add spec/openapi.json spec/pin.json src/Connapse.Client/Generated
+
+          # REST, not gh pr edit: that one reads the PR's classic project cards, which GitHub retired.
+          open=$(gh api "repos/$GITHUB_REPOSITORY/pulls?head=$GITHUB_REPOSITORY_OWNER:$BRANCH&state=open" --jq '.[0].number // empty')
+
+          # While a sync PR is open, a night with nothing new would otherwise force-push the same tree and rerun CI.
+          if [ -n "$open" ] && git fetch --quiet origin "$BRANCH" && [ "$(git write-tree)" = "$(git rev-parse 'FETCH_HEAD^{tree}')" ]; then
+            echo "The open sync PR #$open already has this spec and client; nothing to push."
+            exit 0
+          fi
+
+          git commit -m "chore: sync the API spec to $REPO@${LATEST:0:8} and regenerate the client"
+          git push --force origin "$BRANCH"
+
+          body=$(cat <<EOF
+          The server's OpenAPI spec changed on \`$REF\`, so this repins it and regenerates \`src/Connapse.Client\`.
+
+          - Spec: [\`${PINNED:0:8}\`...\`${LATEST:0:8}\`](https://github.com/$REPO/compare/$PINNED...$LATEST)
+          - Build with the regenerated client: **$BUILD**
+
+          Opened by the nightly Spec sync workflow. A later change to the spec updates this same pull request.
+          EOF
+          )
+          if [ -n "$open" ]; then
+            gh api -X PATCH "repos/$GITHUB_REPOSITORY/pulls/$open" -f body="$body" > /dev/null
+          else
+            gh pr create --head "$BRANCH" --base main --title "chore: sync the API spec and regenerate the client" --body "$body"
+          fi
+
+          # A push with the default token starts no workflows, so CI is started on the branch by hand;
+          # workflow_dispatch is the one event that token may trigger. Its checks attach to the PR's commit.
+          gh workflow run ci.yml --ref "$BRANCH"
+
+      # Last, so the PR exists either way: a client that doesn't build fails this run, not only the PR text.
+      - name: Fail when the regenerated client doesn't build
+        if: steps.fetch.outputs.changed == 'true' && steps.build.outcome != 'success'
+        run: |
+          echo "::error::The client regenerated from the new spec doesn't build. See the sync pull request."
+          exit 1

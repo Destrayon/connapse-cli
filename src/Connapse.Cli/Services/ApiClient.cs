@@ -76,22 +76,30 @@ public sealed class ApiClient
         HttpMethod method, string path, Func<HttpContent?> body, CancellationToken ct = default)
     {
         // Redirects aren't followed: one could name another host and take the body and org header there.
-        var response = await SendOnceAsync(method, path, body(), ct, HttpClientNames.ConnapseServerNoRedirect);
+        var response = await SendOnceAsync(method, path, body(), ct, clientName: HttpClientNames.ConnapseServerNoRedirect);
         if (response.StatusCode == HttpStatusCode.Unauthorized && await TryRefreshAsync(ct))
         {
             response.Dispose();
-            response = await SendOnceAsync(method, path, body(), ct, HttpClientNames.ConnapseServerNoRedirect);
+            response = await SendOnceAsync(method, path, body(), ct, clientName: HttpClientNames.ConnapseServerNoRedirect);
         }
         return response;
     }
+
+    /// <summary>
+    /// Sends a request the generated client built, by its path and query, with the same token, org
+    /// header, refresh and errors as every other call. Its own headers, such as Accept, go with it.
+    /// </summary>
+    public Task<HttpResponseMessage> ForwardAsync(HttpRequestMessage request, CancellationToken ct = default) =>
+        SendWithAuthAsync(request.Method, request.RequestUri!.PathAndQuery, request.Content, ct, request.Headers);
 
     private async Task<HttpResponseMessage> SendWithAuthAsync(
         HttpMethod method,
         string path,
         HttpContent? content,
-        CancellationToken ct)
+        CancellationToken ct,
+        HttpRequestHeaders? headers = null)
     {
-        var response = await SendOnceAsync(method, path, content, ct);
+        var response = await SendOnceAsync(method, path, content, ct, headers);
 
         if (response.StatusCode == HttpStatusCode.Unauthorized)
         {
@@ -100,7 +108,7 @@ public sealed class ApiClient
             if (!refreshed)
                 throw new ApiUnauthorizedException("Token expired or invalid. Run 'connapse auth login' to re-authenticate.");
 
-            response = await SendOnceAsync(method, path, content, ct);
+            response = await SendOnceAsync(method, path, content, ct, headers);
             if (response.StatusCode == HttpStatusCode.Unauthorized)
             {
                 response.Dispose();
@@ -126,11 +134,14 @@ public sealed class ApiClient
         string path,
         HttpContent? content,
         CancellationToken ct,
+        HttpRequestHeaders? headers = null,
         string clientName = HttpClientNames.ConnapseServer)
     {
         var request = new HttpRequestMessage(method, path);
         if (content is not null)
             request.Content = content;
+        foreach (var header in headers ?? Enumerable.Empty<KeyValuePair<string, IEnumerable<string>>>())
+            request.Headers.TryAddWithoutValidation(header.Key, header.Value);
 
         var creds = _credStore.Load();
         if (creds is not null)

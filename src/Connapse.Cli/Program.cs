@@ -89,6 +89,8 @@ internal static class Program
         services.AddSingleton<EditionDetector>();
         services.AddSingleton<IEditionProvider>(sp => sp.GetRequiredService<EditionDetector>());
         services.AddSingleton<ApiClient>();
+        // The generated client, sent through ApiClient so it shares its token, org header and errors.
+        services.AddSingleton(sp => ApiClientHandler.CreateClient(sp.GetRequiredService<ApiClient>()));
         services.AddSingleton<OAuthBrowserFlow>();
         services.AddSingleton<IConsolePrompt, ConsolePrompt>();
         services.AddSingleton<PostLoginOrgSelector>();

@@ -1,6 +1,6 @@
 using System.CommandLine;
-using System.Text.Json;
 using Connapse.Cli.Services;
+using Connapse.Client;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Connapse.Cli.Commands.Container;
@@ -20,16 +20,15 @@ public static class ContainerStatsCommand
         cmd.SetAction(services.WithOrgContext(orgOption, async (parseResult, ct) =>
         {
             var name = parseResult.GetRequiredValue(nameArg);
-            var apiClient = services.GetRequiredService<ApiClient>();
+            var client = services.GetRequiredService<ConnapseApiClient>();
 
-            var containerId = await ContainerHelpers.ResolveIdAsync(apiClient, name, ct);
+            var containerId = await ContainerHelpers.ResolveIdAsync(client, name, ct);
             if (containerId is null)
                 throw new CliValidationError($"Container '{name}' not found.");
 
             Console.Write($"Fetching stats for '{name}'... ");
 
-            var stats = await apiClient.GetAsync<JsonDocument>(
-                $"/api/containers/{containerId}/stats", ct);
+            var stats = await client.Api.Containers[containerId.Value].Stats.GetAsync(cancellationToken: ct);
             if (stats is null)
                 throw new CliServerError("Unexpected response from server.");
 
@@ -38,60 +37,50 @@ public static class ContainerStatsCommand
             Console.ResetColor();
             Console.WriteLine();
 
-            var root = stats.RootElement;
-
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.WriteLine("Documents:");
             Console.ResetColor();
-            if (root.TryGetProperty("documents", out var docs))
+            if (stats.Documents is { } docs)
             {
-                if (docs.TryGetProperty("total", out var total))
-                    Console.WriteLine($"  Total:      {total.GetInt32()}");
-                if (docs.TryGetProperty("ready", out var ready))
-                    Console.WriteLine($"  Ready:      {ready.GetInt32()}");
-                if (docs.TryGetProperty("processing", out var processing))
-                    Console.WriteLine($"  Processing: {processing.GetInt32()}");
-                if (docs.TryGetProperty("failed", out var failed))
-                    Console.WriteLine($"  Failed:     {failed.GetInt32()}");
+                Console.WriteLine($"  Total:      {docs.Total}");
+                Console.WriteLine($"  Ready:      {docs.Ready}");
+                Console.WriteLine($"  Processing: {docs.Processing}");
+                Console.WriteLine($"  Failed:     {docs.Failed}");
             }
             Console.WriteLine();
 
-            if (root.TryGetProperty("totalChunks", out var chunks))
+            if (stats.TotalChunks is { } chunks)
             {
                 Console.ForegroundColor = ConsoleColor.Cyan;
                 Console.Write("Total Chunks: ");
                 Console.ResetColor();
-                Console.WriteLine(chunks.GetInt32());
+                Console.WriteLine(chunks);
             }
 
-            if (root.TryGetProperty("totalSizeBytes", out var sizeBytes))
+            if (stats.TotalSizeBytes is { } sizeBytes)
             {
                 Console.ForegroundColor = ConsoleColor.Cyan;
                 Console.Write("Storage Size: ");
                 Console.ResetColor();
-                Console.WriteLine(ContainerHelpers.FormatBytes(sizeBytes.GetInt64()));
+                Console.WriteLine(ContainerHelpers.FormatBytes(sizeBytes));
             }
 
-            if (root.TryGetProperty("embedding", out var embedding))
+            // One line per embedding model the container's vectors use; a container mid re-embed has two.
+            if (stats.EmbeddingModels is { Count: > 0 } models)
             {
                 Console.ForegroundColor = ConsoleColor.Cyan;
                 Console.WriteLine("Embedding:");
                 Console.ResetColor();
-                if (embedding.TryGetProperty("modelId", out var modelId) && modelId.ValueKind != JsonValueKind.Null)
-                    Console.WriteLine($"  Model:      {modelId.GetString()}");
-                if (embedding.TryGetProperty("dimensions", out var dims) && dims.ValueKind != JsonValueKind.Null)
-                    Console.WriteLine($"  Dimensions: {dims.GetInt32()}");
+                foreach (var model in models)
+                    Console.WriteLine($"  Model:      {model.ModelId} ({model.Dimensions} dimensions, {model.VectorCount} vectors)");
             }
 
-            if (root.TryGetProperty("lastIndexedAt", out var lastIndexed) && lastIndexed.ValueKind != JsonValueKind.Null)
+            if (stats.LastIndexedAt is { } lastIndexed)
             {
                 Console.ForegroundColor = ConsoleColor.Cyan;
                 Console.Write("Last Indexed: ");
                 Console.ResetColor();
-                if (DateTime.TryParse(lastIndexed.GetString(), out var dt))
-                    Console.WriteLine(dt.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss"));
-                else
-                    Console.WriteLine(lastIndexed.GetString());
+                Console.WriteLine(lastIndexed.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss"));
             }
 
             return CliExitCodes.Success;
