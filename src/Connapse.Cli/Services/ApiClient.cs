@@ -64,6 +64,23 @@ public sealed class ApiClient
         return await SendWithAuthAsync(method, path, content, ct);
     }
 
+    /// <summary>
+    /// For <c>connapse api</c>: returns the response whatever its status, so the caller can show the
+    /// server's own error. Only a 401 is handled, by refreshing the token and retrying once. The body
+    /// is built afresh for the retry, because a sent <see cref="HttpContent"/> can't be sent again.
+    /// </summary>
+    public async Task<HttpResponseMessage> SendPassthroughAsync(
+        HttpMethod method, string path, Func<HttpContent?> body, CancellationToken ct = default)
+    {
+        var response = await SendOnceAsync(method, path, body(), ct);
+        if (response.StatusCode == HttpStatusCode.Unauthorized && await TryRefreshAsync(ct))
+        {
+            response.Dispose();
+            response = await SendOnceAsync(method, path, body(), ct);
+        }
+        return response;
+    }
+
     private async Task<HttpResponseMessage> SendWithAuthAsync(
         HttpMethod method,
         string path,
