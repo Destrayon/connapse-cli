@@ -4,8 +4,6 @@ using Connapse.Cli.Services;
 using Connapse.Cli.Tests.Testing;
 using Connapse.Client;
 using Connapse.Client.Models;
-using Microsoft.Kiota.Abstractions.Authentication;
-using Microsoft.Kiota.Http.HttpClientLibrary;
 
 namespace Connapse.Cli.Tests.Services;
 
@@ -41,14 +39,17 @@ public sealed class ApiClientHandlerTests : IDisposable
             Directory.Delete(_tempDir, recursive: true);
     }
 
-    private ConnapseApiClient Client()
+    private ApiClient Api() => new(new MockHttpClientFactory(_handler, BaseUri), _credStore, _orgContext, new CloudEdition());
+
+    private ConnapseApiClient Client() => ApiClientHandler.CreateClient(Api());
+
+    [Fact]
+    public void Transport_LeavesTheTimeoutToTheServerClient()
     {
-        var api = new ApiClient(new MockHttpClientFactory(_handler, BaseUri), _credStore, _orgContext, new CloudEdition());
-        return new ConnapseApiClient(new HttpClientRequestAdapter(new AnonymousAuthenticationProvider(),
-            httpClient: new HttpClient(new ApiClientHandler(api)))
-        {
-            BaseUrl = ApiClientHandler.BaseUrl,
-        });
+        // The configured server client allows 10 minutes; HttpClient's own default of 100 seconds would win.
+        using var http = ApiClientHandler.CreateHttpClient(Api());
+
+        Assert.Equal(Timeout.InfiniteTimeSpan, http.Timeout);
     }
 
     [Fact]

@@ -90,13 +90,7 @@ internal static class Program
         services.AddSingleton<IEditionProvider>(sp => sp.GetRequiredService<EditionDetector>());
         services.AddSingleton<ApiClient>();
         // The generated client, sent through ApiClient so it shares its token, org header and errors.
-        services.AddSingleton(sp => new Connapse.Client.ConnapseApiClient(
-            new Microsoft.Kiota.Http.HttpClientLibrary.HttpClientRequestAdapter(
-                new Microsoft.Kiota.Abstractions.Authentication.AnonymousAuthenticationProvider(),
-                httpClient: new HttpClient(new ApiClientHandler(sp.GetRequiredService<ApiClient>())))
-            {
-                BaseUrl = ApiClientHandler.BaseUrl,
-            }));
+        services.AddSingleton(sp => ApiClientHandler.CreateClient(sp.GetRequiredService<ApiClient>()));
         services.AddSingleton<OAuthBrowserFlow>();
         services.AddSingleton<IConsolePrompt, ConsolePrompt>();
         services.AddSingleton<PostLoginOrgSelector>();
