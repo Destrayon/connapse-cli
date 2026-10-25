@@ -1,0 +1,57 @@
+# The Connapse server the route test runs against (CON-21): Postgres, MinIO and the web app built from
+# the commit in pin.json. No embedding model or reranker: the test checks that every route is
+# reached, not what search returns. Each container is capped, as in Connapse's own compose file.
+name: connapse-route-test
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg17
+    environment:
+      POSTGRES_DB: connapse
+      POSTGRES_USER: connapse
+      POSTGRES_PASSWORD: route_test
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U connapse -d connapse"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    deploy:
+      resources:
+        limits: { memory: 512M, cpus: "1.0" }
+
+  minio:
+    image: cgr.dev/chainguard/minio
+    user: "0"
+    command: server /data
+    environment:
+      MINIO_ROOT_USER: route_test
+      MINIO_ROOT_PASSWORD: route_test_secret
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    deploy:
+      resources:
+        limits: { memory: 256M, cpus: "0.5" }
+
+  web:
+    image: connapse-route-test:pinned
+    ports:
+      - "127.0.0.1:5111:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__DefaultConnection: "Host=postgres;Database=connapse;Username=connapse;Password=route_test"
+      Knowledge__Storage__MinIO__Endpoint: "minio:9000"
+      Knowledge__Storage__MinIO__AccessKey: route_test
+      Knowledge__Storage__MinIO__SecretKey: route_test_secret
+      Knowledge__Storage__MinIO__UseSSL: "false"
+      CONNAPSE_ADMIN_EMAIL: route-test@example.com
+      CONNAPSE_ADMIN_PASSWORD: "Route-Test-Passw0rd!"
+      Identity__Jwt__Secret: "route-test-jwt-secret-that-is-long-enough-0123456789"
+    depends_on:
+      postgres: { condition: service_healthy }
+      minio: { condition: service_healthy }
+    deploy:
+      resources:
+        limits: { memory: 2G, cpus: "2.0" }

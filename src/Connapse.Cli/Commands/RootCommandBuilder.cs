@@ -35,6 +35,7 @@ public static class RootCommandBuilder
         root.Subcommands.Add(UploadCommand.Create(services, orgOption));
         root.Subcommands.Add(SearchCommand.Create(services, orgOption));
         root.Subcommands.Add(ReindexCommand.Create(services, orgOption));
+        root.Subcommands.Add(ApiCommand.Create(services, orgOption));
         root.Subcommands.Add(VersionCommand.Create(services));
         root.Subcommands.Add(UpdateCommand.Create(services));
 

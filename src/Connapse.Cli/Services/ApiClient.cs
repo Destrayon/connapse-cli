@@ -41,6 +41,9 @@ public sealed class ApiClient
         _editionProvider = editionProvider;
     }
 
+    /// <summary>Whether a sign-in is saved; without one, requests go to the default server unauthenticated.</summary>
+    public bool IsSignedIn => _credStore.Load() is not null;
+
     public async Task<T?> GetAsync<T>(string path, CancellationToken ct = default)
     {
         using var response = await SendWithAuthAsync(HttpMethod.Get, path, content: null, ct);
@@ -62,6 +65,24 @@ public sealed class ApiClient
     public async Task<HttpResponseMessage> SendRawAsync(HttpMethod method, string path, HttpContent? content, CancellationToken ct = default)
     {
         return await SendWithAuthAsync(method, path, content, ct);
+    }
+
+    /// <summary>
+    /// For <c>connapse api</c>: returns the response whatever its status, so the caller can show the
+    /// server's own error. Only a 401 is handled, by refreshing the token and retrying once. The body
+    /// is built afresh for the retry, because a sent <see cref="HttpContent"/> can't be sent again.
+    /// </summary>
+    public async Task<HttpResponseMessage> SendPassthroughAsync(
+        HttpMethod method, string path, Func<HttpContent?> body, CancellationToken ct = default)
+    {
+        // Redirects aren't followed: one could name another host and take the body and org header there.
+        var response = await SendOnceAsync(method, path, body(), ct, HttpClientNames.ConnapseServerNoRedirect);
+        if (response.StatusCode == HttpStatusCode.Unauthorized && await TryRefreshAsync(ct))
+        {
+            response.Dispose();
+            response = await SendOnceAsync(method, path, body(), ct, HttpClientNames.ConnapseServerNoRedirect);
+        }
+        return response;
     }
 
     private async Task<HttpResponseMessage> SendWithAuthAsync(
@@ -104,7 +125,8 @@ public sealed class ApiClient
         HttpMethod method,
         string path,
         HttpContent? content,
-        CancellationToken ct)
+        CancellationToken ct,
+        string clientName = HttpClientNames.ConnapseServer)
     {
         var request = new HttpRequestMessage(method, path);
         if (content is not null)
@@ -122,7 +144,7 @@ public sealed class ApiClient
                 request.Headers.Add("X-Connapse-Org", orgSlug);
         }
 
-        using var client = _httpClientFactory.CreateClient(HttpClientNames.ConnapseServer);
+        using var client = _httpClientFactory.CreateClient(clientName);
         return await client.SendAsync(request, ct);
     }
 

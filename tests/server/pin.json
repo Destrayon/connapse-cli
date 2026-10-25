@@ -1,0 +1,5 @@
+{
+  "repository": "Destrayon/Connapse",
+  "commit": "2f4581fc888c0285de1e318486dc8e453e38d529",
+  "note": "epic/783-endpoint-consistency, which has the capability list; move to a release tag once the epic ships"
+}

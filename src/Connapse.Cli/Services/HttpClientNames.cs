@@ -13,4 +13,10 @@ public static class HttpClientNames
     /// on every CreateClient() call from the current CredentialStore state.
     /// </summary>
     public const string ConnapseServer = "connapse-server";
+
+    /// <summary>
+    /// The same server client with redirects not followed, for <c>connapse api</c>: a redirect could
+    /// name another host and take the request body and org header with it.
+    /// </summary>
+    public const string ConnapseServerNoRedirect = "connapse-server-no-redirect";
 }
