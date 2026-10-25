@@ -23,6 +23,17 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
+      # The checked-in client must be exactly what the pinned spec generates, so a hand edit or a stale
+      # regeneration fails here instead of drifting from the server.
+      - name: Generated client matches the pinned spec
+        run: |
+          scripts/generate-client.sh
+          if [ -n "$(git status --porcelain -- src/Connapse.Client/Generated)" ]; then
+            git status --short -- src/Connapse.Client/Generated
+            echo "::error::src/Connapse.Client/Generated differs from what spec/openapi.json generates. Run scripts/generate-client.sh and commit the result."
+            exit 1
+          fi
+
       - name: Restore dependencies
         run: dotnet restore Connapse.Cli.slnx
 

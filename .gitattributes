@@ -1,2 +1,8 @@
 # Shell scripts run in CI on Linux and in Git Bash on Windows; a CRLF checkout breaks them.
 *.sh text eol=lf
+# Kiota output: collapsed in diffs and left out of language statistics.
+src/Connapse.Client/Generated/** linguist-generated=true
+spec/openapi.json linguist-generated=true
+# Byte for byte, so Kiota's lock-file hash of the spec is the same on every machine.
+spec/openapi.json -text
+src/Connapse.Client/Generated/** text eol=lf

@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/Connapse.Cli/Connapse.Cli.csproj" />
+    <Project Path="src/Connapse.Client/Connapse.Client.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Connapse.Cli.Tests/Connapse.Cli.Tests.csproj" />
