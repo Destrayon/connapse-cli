@@ -100,6 +100,16 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -B "$BRANCH"
           git add spec/openapi.json spec/pin.json src/Connapse.Client/Generated
+
+          # REST, not gh pr edit: that one reads the PR's classic project cards, which GitHub retired.
+          open=$(gh api "repos/$GITHUB_REPOSITORY/pulls?head=$GITHUB_REPOSITORY_OWNER:$BRANCH&state=open" --jq '.[0].number // empty')
+
+          # While a sync PR is open, a night with nothing new would otherwise force-push the same tree and rerun CI.
+          if [ -n "$open" ] && git fetch --quiet origin "$BRANCH" && [ "$(git write-tree)" = "$(git rev-parse 'FETCH_HEAD^{tree}')" ]; then
+            echo "The open sync PR #$open already has this spec and client; nothing to push."
+            exit 0
+          fi
+
           git commit -m "chore: sync the API spec to $REPO@${LATEST:0:8} and regenerate the client"
           git push --force origin "$BRANCH"
 
@@ -112,8 +122,6 @@ jobs:
           Opened by the nightly Spec sync workflow. A later change to the spec updates this same pull request.
           EOF
           )
-          # REST, not gh pr edit: that one reads the PR's classic project cards, which GitHub retired.
-          open=$(gh api "repos/$GITHUB_REPOSITORY/pulls?head=$GITHUB_REPOSITORY_OWNER:$BRANCH&state=open" --jq '.[0].number // empty')
           if [ -n "$open" ]; then
             gh api -X PATCH "repos/$GITHUB_REPOSITORY/pulls/$open" -f body="$body" > /dev/null
           else
