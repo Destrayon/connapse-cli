@@ -202,16 +202,16 @@ internal sealed class JsonObjectOptions
     }
 
     /// <summary>The object given, or null when neither option was.</summary>
-    public UntypedNode? Read(ParseResult parseResult)
+    public UntypedNode? Read(ParseResult parseResult) =>
+        ReadText(parseResult) is { } json ? AdminHelpers.ParseJsonObject(json, Inline.Name) : null;
+
+    /// <summary>The JSON text given, unparsed, or null when neither option was.</summary>
+    public string? ReadText(ParseResult parseResult)
     {
         var inline = parseResult.GetValue(Inline);
         var path = parseResult.GetValue(File);
         if (inline is not null && path is not null)
             throw new CliValidationError($"Pass {Inline.Name} or {File.Name}, not both.");
-        if (inline is not null)
-            return AdminHelpers.ParseJsonObject(inline, Inline.Name);
-        if (path is not null)
-            return AdminHelpers.ParseJsonObject(AdminHelpers.ReadFile(path, File.Name), File.Name);
-        return null;
+        return inline ?? (path is null ? null : AdminHelpers.ReadFile(path, File.Name));
     }
 }
