@@ -10,32 +10,40 @@ namespace Connapse.Cli.Services;
 /// GET /api/v1/info; older ones don't have that route. A feature the server lacks is found when a
 /// request reaches no route, which <see cref="IsMissingRouteAsync"/> tells apart from a missing record.
 /// </summary>
-public sealed partial class ServerFeatures(IHttpClientFactory httpClientFactory)
+public sealed partial class ServerFeatures(IHttpClientFactory httpClientFactory, TimeSpan? lookupTimeout = null)
 {
+    // These lookups only add detail, so a stalled server mustn't hold a command for the client's ten minutes.
+    private readonly TimeSpan _lookupTimeout = lookupTimeout ?? TimeSpan.FromSeconds(10);
     private Task<ServerInfo?>? _info;
 
     /// <summary>
     /// The server's /api/v1/info, read once per run. Null when the server doesn't have the route,
     /// because it predates it. Throws <see cref="HttpRequestException"/> when the server can't be
-    /// reached or answers with anything else.
+    /// reached, doesn't answer in time, or answers with anything else.
     /// </summary>
     public Task<ServerInfo?> GetInfoAsync(CancellationToken ct = default) => _info ??= ReadInfoAsync(ct);
 
     private async Task<ServerInfo?> ReadInfoAsync(CancellationToken ct)
     {
-        using var client = httpClientFactory.CreateClient(HttpClientNames.ConnapseServer);
-        using var response = await client.GetAsync("/api/v1/info", ct);
-        if (response.StatusCode == HttpStatusCode.NotFound)
-            return null;
-        response.EnsureSuccessStatusCode();
+        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        timeout.CancelAfter(_lookupTimeout);
         try
         {
-            return await response.Content.ReadFromJsonAsync<ServerInfo>(cancellationToken: ct)
+            using var client = httpClientFactory.CreateClient(HttpClientNames.ConnapseServer);
+            using var response = await client.GetAsync("/api/v1/info", timeout.Token);
+            if (response.StatusCode == HttpStatusCode.NotFound)
+                return null;
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<ServerInfo>(cancellationToken: timeout.Token)
                 ?? throw new HttpRequestException("The server's /api/v1/info was empty.");
         }
         catch (Exception ex) when (ex is System.Text.Json.JsonException or NotSupportedException)
         {
             throw new HttpRequestException("The server's /api/v1/info isn't the JSON the CLI expects.", ex);
+        }
+        catch (OperationCanceledException ex) when (!ct.IsCancellationRequested)
+        {
+            throw new HttpRequestException("The server's /api/v1/info didn't answer in time.", ex);
         }
     }
 
@@ -43,7 +51,7 @@ public sealed partial class ServerFeatures(IHttpClientFactory httpClientFactory)
     /// Whether a reply means the server has no such route. A 405 always does: routing knows the path
     /// but not the method. A 404 with an empty body may also be an endpoint's own "not found", so the
     /// path is asked for with OPTIONS: routing answers a path it knows with 405, and one it doesn't
-    /// with 404.
+    /// with 404. A probe that fails or doesn't answer in time leaves the reply as it was.
     /// </summary>
     public async Task<bool> IsMissingRouteAsync(
         HttpStatusCode status, string body, Func<CancellationToken, Task<HttpResponseMessage>> askOptions, CancellationToken ct)
@@ -53,12 +61,18 @@ public sealed partial class ServerFeatures(IHttpClientFactory httpClientFactory)
         if (status != HttpStatusCode.NotFound || !string.IsNullOrWhiteSpace(body))
             return false;
 
+        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        timeout.CancelAfter(_lookupTimeout);
         try
         {
-            using var probe = await askOptions(ct);
+            using var probe = await askOptions(timeout.Token);
             return probe.StatusCode == HttpStatusCode.NotFound;
         }
         catch (HttpRequestException)
+        {
+            return false;
+        }
+        catch (OperationCanceledException) when (!ct.IsCancellationRequested)
         {
             return false;
         }

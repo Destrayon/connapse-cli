@@ -137,6 +137,54 @@ public sealed class ServerFeaturesTests : IDisposable
         Assert.Single(_handler.Requests, r => r.RequestUri!.AbsolutePath == "/api/v1/info");
     }
 
+    [Fact]
+    public async Task Server_info_that_never_answers_fails_fast_as_unreachable()
+    {
+        using var handler = new StallingHandler(r => r.RequestUri!.AbsolutePath == "/api/v1/info", NoRoute);
+        var features = new ServerFeatures(new MockHttpClientFactory(handler, new Uri("https://server.example")), TimeSpan.FromMilliseconds(100));
+
+        await Assert.ThrowsAsync<HttpRequestException>(() => features.GetInfoAsync());
+    }
+
+    [Fact]
+    public async Task Missing_route_when_info_never_answers_still_names_the_feature()
+    {
+        using var handler = new StallingHandler(r => r.RequestUri!.AbsolutePath == "/api/v1/info", NoRoute);
+
+        var ex = await Assert.ThrowsAsync<ServerFeatureMissingException>(() => CreateClient(handler).GetAsync<object>("/api/v1/agents"));
+
+        Assert.Equal("This server doesn't support agents (it has no GET /api/v1/agents). Upgrade the server to use this command.", ex.Message);
+    }
+
+    [Fact]
+    public async Task Probe_that_never_answers_keeps_the_original_404()
+    {
+        using var handler = new StallingHandler(r => r.Method == HttpMethod.Options, NoRoute);
+
+        var ex = await Assert.ThrowsAsync<ApiRequestException>(() => CreateClient(handler).GetAsync<object>($"/api/sources/{SourceId}"));
+
+        Assert.Equal(HttpStatusCode.NotFound, ex.StatusCode);
+    }
+
+    private ApiClient CreateClient(HttpMessageHandler handler)
+    {
+        var factory = new MockHttpClientFactory(handler, new Uri("https://server.example"));
+        return new ApiClient(factory, new CredentialStore(_tempDir), new OrgContextProvider(), new SelfHosted(),
+            new ServerFeatures(factory, TimeSpan.FromMilliseconds(100)));
+    }
+
+    /// <summary>A server that accepts the requests <paramref name="stalls"/> picks and never answers them.</summary>
+    private sealed class StallingHandler(Func<HttpRequestMessage, bool> stalls, Func<HttpRequestMessage, HttpResponseMessage> otherwise)
+        : HttpMessageHandler
+    {
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct)
+        {
+            if (stalls(request))
+                await Task.Delay(Timeout.Infinite, ct);
+            return otherwise(request);
+        }
+    }
+
     [Theory]
     [InlineData("/api/sources", "sources")]
     [InlineData("/api/v1/sources/scope-schema/github", "sources")]
