@@ -70,7 +70,7 @@ public static class AgentKeyCommands
             AllowMultipleArgumentsPerToken = true,
         };
         var expiresOption = new Option<int?>("--expires-in-days") { Description = "Days until the key stops working. Without it, it never expires." };
-        var approvalOption = new Option<bool>("--requires-approval") { Description = "Hold the key's writes for an admin's approval." };
+        var approvalOption = new Option<bool?>("--requires-approval") { Description = "Hold the key's writes for an admin's approval (true or false). Without it, the server's default applies." };
 
         var cmd = new Command("create", "Create an API key for an agent. The token is shown once.");
         cmd.Arguments.Add(agentArg);
@@ -96,7 +96,7 @@ public static class AgentKeyCommands
                     Name = parseResult.GetRequiredValue(nameOption),
                     Scopes = [.. scopes],
                     ExpiresAt = parseResult.GetValue(expiresOption) is { } days ? DateTimeOffset.UtcNow.AddDays(days) : null,
-                    RequiresApproval = parseResult.GetValue(approvalOption) ? true : null,
+                    RequiresApproval = parseResult.GetValue(approvalOption),
                 }, cancellationToken: ct))
                 ?? throw new CliServerError("The server returned no key.");
 

@@ -19,6 +19,10 @@ internal static class AgentHelpers
             a => a.Name,
             a => a.Id));
 
+    /// <summary>A key counts as active only while it is neither revoked nor past its expiry.</summary>
+    public static bool IsLive(AgentKeyListItem k) =>
+        k.IsRevoked != true && !(k.ExpiresAt < DateTimeOffset.UtcNow);
+
     public static void Print(AgentDto a)
     {
         Console.WriteLine($"{a.Name}  ({a.Id})");
@@ -27,6 +31,6 @@ internal static class AgentHelpers
         Console.WriteLine($"  Active:   {(a.IsActive == false ? "no" : "yes")}");
         Console.WriteLine($"  Created:  {AdminHelpers.Date(a.CreatedAt)}");
         var keys = a.Keys ?? [];
-        Console.WriteLine($"  Keys:     {keys.Count(k => k.IsRevoked != true)} active, {keys.Count(k => k.IsRevoked == true)} revoked");
+        Console.WriteLine($"  Keys:     {keys.Count(IsLive)} active, {keys.Count(k => k.IsRevoked == true)} revoked");
     }
 }

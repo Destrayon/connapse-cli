@@ -20,7 +20,7 @@ public static class SourceDeleteCommand
             var client = services.GetRequiredService<ConnapseApiClient>();
             var id = await SourceHelpers.ResolveIdAsync(client, parseResult.GetRequiredValue(sourceArg), ct);
 
-            // The server deletes only when told the name, so a mistyped ID can't remove the wrong one.
+            // The server deletes only when told the name, so the CLI reads it back and sends it as ConfirmName; there is no --yes flag.
             var source = await client.Api.Sources[id].GetAsync(cancellationToken: ct)
                 ?? throw new CliServerError("The server returned no source.");
 

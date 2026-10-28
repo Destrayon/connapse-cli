@@ -129,7 +129,8 @@ These need the Owner or Admin role. A personal access token also needs the match
 | `connapse connection create <name> --provider <provider> --config <json> [--token\|--token-stdin\|--private-key-file]` | Create a connection. |
 | `connapse connection update <connection> [--name ...] [--config <json>]` | Rename a connection or change its settings. |
 | `connapse connection delete <connection>` | Delete a connection no source uses. |
-| `connapse connection pause\|resume <connection> [--source <id>...]` | Pause or resume syncing for its sources. |
+| `connapse connection pause <connection>` | Pause syncing for its sources. |
+| `connapse connection resume <connection> [--source <id>...]` | Resume syncing, for all its sources or only those given. |
 | `connapse connection test <connection> [--config <json>]` | Test a connection; exits 1 if it fails. |
 | `connapse connection discover <connection> [--include-personal] [--json]` | List the buckets, containers, repositories or spaces it reaches. |
 | `connapse connection replace-secret <connection> [--token-stdin\|--private-key-file]` | Replace an SFTP key or custom source server token. Owner only. |
@@ -149,9 +150,11 @@ These need the Owner or Admin role. A personal access token also needs the match
 | `connapse settings reindex [--force] [--container <name>]` and `settings reindex-status` | Re-embed documents in the background and follow progress. |
 | `connapse settings embedding-models` | List the embedding models with vectors stored. |
 | `connapse settings clear-summaries` | Clear container and document summaries so they are written again. |
-| `connapse agent list\|get\|create\|enable\|disable <agent>` | Manage agents: non-human callers that use API keys. |
+| `connapse agent list` | List agents: non-human callers that use API keys. |
+| `connapse agent get\|create\|enable\|disable <agent>` | Show, create, enable or disable an agent. |
 | `connapse agent delete <agent> --yes` | Delete an agent and revoke its keys. |
-| `connapse agent key list\|revoke <agent> [key-id]` | List or revoke an agent's keys. |
+| `connapse agent key list <agent>` | List an agent's keys. |
+| `connapse agent key revoke <agent> <key-id>` | Revoke one of an agent's keys. |
 | `connapse agent key create <agent> --name <name> --scope knowledge:read [--expires-in-days 30]` | Create a key. The token is printed once. |
 
 ### Any API route

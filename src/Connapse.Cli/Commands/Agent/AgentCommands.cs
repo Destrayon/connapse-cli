@@ -28,7 +28,7 @@ public static class AgentCommands
 
             Console.WriteLine($"{"NAME",-30} {"ACTIVE",-7} {"KEYS",5} ID");
             foreach (var a in agents)
-                Console.WriteLine($"{a.Name,-30} {(a.IsActive == false ? "no" : "yes"),-7} {a.Keys?.Count(k => k.IsRevoked != true) ?? 0,5} {a.Id}");
+                Console.WriteLine($"{a.Name,-30} {(a.IsActive == false ? "no" : "yes"),-7} {a.Keys?.Count(AgentHelpers.IsLive) ?? 0,5} {a.Id}");
             return CliExitCodes.Success;
         }));
 

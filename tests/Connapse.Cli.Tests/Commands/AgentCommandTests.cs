@@ -62,6 +62,33 @@ public sealed class AgentCommandTests : IDisposable
     }
 
     [Fact]
+    public async Task Get_CountsExpiredKeysAsInactive()
+    {
+        var expired = Key.Replace("\"name\":\"ci\"", "\"name\":\"old\",\"expiresAt\":\"2020-01-01T00:00:00Z\"");
+        var agent = Agent.Replace($"[{Key}]", $"[{Key},{expired}]");
+        _host.Routes(($"GET /api/v1/agents", CommandHost.Json($"[{agent}]")), ($"GET /api/v1/agents/{Id}", CommandHost.Json(agent)));
+
+        var result = await _host.RunAsync("agent", "get", Id);
+
+        Assert.Equal(0, result.ExitCode);
+        Assert.Contains("Keys:     1 active, 0 revoked", result.Output);
+    }
+
+    [Fact]
+    public async Task KeyCreate_AnExplicitFalseApproval_IsSent()
+    {
+        _host.Routes(($"POST /api/v1/agents/{Id}/keys", CommandHost.Json($$"""
+            {"token":"t","keyId":"{{KeyId}}","agentId":"{{Id}}","scopes":["knowledge:read"]}
+            """, HttpStatusCode.Created)));
+
+        var result = await _host.RunAsync("agent", "key", "create", Id, "--name", "ci",
+            "--scope", "knowledge:read", "--requires-approval", "false");
+
+        Assert.Equal(0, result.ExitCode);
+        Assert.Contains("\"requiresApproval\":false", _host.Bodies.Single());
+    }
+
+    [Fact]
     public async Task Get_AnUnknownName_SaysSo()
     {
         _host.Routes(("GET /api/v1/agents", CommandHost.Json("[]")));
