@@ -146,7 +146,46 @@ public sealed class ContainerAndFilesCommandTests : IDisposable
         var result = await _host.RunAsync("files", "get", "--container", "docs", "--file", "a/readme.md");
 
         Assert.Equal(1, result.ExitCode);
-        Assert.Contains("More than one file matches 'a/readme.md'", result.Error);
+        Assert.Contains("More than one entry matches 'a/readme.md'", result.Error);
+    }
+
+    [Fact]
+    public async Task FilesGet_DotSegmentsAndDoubledSlashes_CollapseAsTheServerDoes()
+    {
+        ServeFiles(new() { ["/guides/"] = [File("/guides/install.md")] });
+
+        var result = await _host.RunAsync("files", "get", "--container", "docs", "--file", "guides/./old/..//install.md");
+
+        Assert.Equal(0, result.ExitCode);
+        Assert.Contains("hello from the file", result.Output);
+    }
+
+    [Fact]
+    public async Task FilesGet_FolderCaseDiffers_WalksTheFoldersToFindIt()
+    {
+        // The server matches the folder case-sensitively: '/guides/setup/' lists nothing here.
+        ServeFiles(new()
+        {
+            ["/"] = [Folder("/Guides/")],
+            ["/Guides/"] = [Folder("/Guides/Setup/")],
+            ["/Guides/Setup/"] = [File("/Guides/Setup/Install.md")],
+        });
+
+        var result = await _host.RunAsync("files", "get", "--container", "docs", "--file", "guides/setup/install.md");
+
+        Assert.Equal(0, result.ExitCode);
+        Assert.Contains("hello from the file", result.Output);
+    }
+
+    [Fact]
+    public async Task FilesGet_FolderMissing_IsNotFound()
+    {
+        ServeFiles(new() { ["/"] = [Folder("/guides/")] });
+
+        var result = await _host.RunAsync("files", "get", "--container", "docs", "--file", "other/install.md");
+
+        Assert.Equal(1, result.ExitCode);
+        Assert.Contains("File 'other/install.md' not found in container 'docs'.", result.Error);
     }
 
     [Fact]

@@ -65,8 +65,10 @@ public static class FilesGetCommand
 
     /// <summary>
     /// Finds a file by its path in the container. The server lists only what sits directly in one
-    /// folder, so this lists the file's own folder, every page of it, and matches the full path.
-    /// An exact match wins; otherwise a single match ignoring case is used, and several are an error.
+    /// folder, so this lists the file's own folder, every page of it, and matches the name. The
+    /// server matches folders case-sensitively, so when that folder holds no match, the folders are
+    /// walked from the root, each name matched ignoring case. At every step an exact name wins;
+    /// otherwise a single match ignoring case is used, and several are an error.
     /// </summary>
     private static async Task<string?> ResolveFileIdByPathAsync(
         ConnapseApiClient client,
@@ -74,10 +76,73 @@ public static class FilesGetCommand
         string path,
         CancellationToken ct)
     {
-        var normalized = "/" + path.Replace('\\', '/').Trim().TrimStart('/');
-        var folder = normalized[..(normalized.LastIndexOf('/') + 1)];
+        var segments = Segments(path);
+        if (segments.Count == 0)
+            return null;
 
-        var entries = await Paging.ReadAllAsync<BrowseEntry>(async (skip, take) =>
+        var fileName = segments[^1];
+        var folderNames = segments[..^1];
+        var folder = "/" + string.Concat(folderNames.Select(s => s + "/"));
+
+        var file = Pick(Files(await ListFolderAsync(client, containerId, folder, ct)), fileName, path);
+        if (file is not null)
+            return file.Id;
+
+        var walked = "/";
+        foreach (var name in folderNames)
+        {
+            var subfolder = Pick((await ListFolderAsync(client, containerId, walked, ct)).Where(e => e.IsFolder == true), name, path);
+            if (subfolder?.Path is null)
+                return null;
+            walked = subfolder.Path.EndsWith('/') ? subfolder.Path : subfolder.Path + "/";
+        }
+
+        if (string.Equals(walked, folder, StringComparison.Ordinal))
+            return null;
+
+        return Pick(Files(await ListFolderAsync(client, containerId, walked, ct)), fileName, path)?.Id;
+    }
+
+    /// <summary>A path's segments, normalized as the server does: '\' is '/', and empty, '.' and '..' segments collapse.</summary>
+    private static List<string> Segments(string path)
+    {
+        var stack = new List<string>();
+        foreach (var segment in path.Replace('\\', '/').Trim().Split('/', StringSplitOptions.RemoveEmptyEntries))
+        {
+            if (segment == ".")
+                continue;
+            if (segment == "..")
+            {
+                if (stack.Count > 0)
+                    stack.RemoveAt(stack.Count - 1);
+                continue;
+            }
+            stack.Add(segment);
+        }
+        return stack;
+    }
+
+    private static IEnumerable<BrowseEntry> Files(List<BrowseEntry> entries) =>
+        entries.Where(e => e.IsFolder != true && e.Id is not null);
+
+    private static BrowseEntry? Pick(IEnumerable<BrowseEntry> entries, string name, string path)
+    {
+        var candidates = entries.ToList();
+        var exact = candidates.FirstOrDefault(e => string.Equals(e.Name, name, StringComparison.Ordinal));
+        if (exact is not null)
+            return exact;
+
+        var caseless = candidates.Where(e => string.Equals(e.Name, name, StringComparison.OrdinalIgnoreCase)).ToList();
+        return caseless.Count switch
+        {
+            0 => null,
+            1 => caseless[0],
+            _ => throw new CliValidationError($"More than one entry matches '{path}' when case is ignored; give its exact path or ID."),
+        };
+    }
+
+    private static Task<List<BrowseEntry>> ListFolderAsync(ConnapseApiClient client, Guid containerId, string folder, CancellationToken ct) =>
+        Paging.ReadAllAsync<BrowseEntry>(async (skip, take) =>
         {
             var page = await client.Api.Containers[containerId].Files.GetAsync(r =>
             {
@@ -87,19 +152,4 @@ public static class FilesGetCommand
             }, ct);
             return (page?.Items ?? [], page?.HasMore ?? false);
         });
-
-        var files = entries.Where(e => e.IsFolder != true && e.Id is not null).ToList();
-
-        var exact = files.FirstOrDefault(e => string.Equals(e.Path, normalized, StringComparison.Ordinal));
-        if (exact is not null)
-            return exact.Id;
-
-        var caseless = files.Where(e => string.Equals(e.Path, normalized, StringComparison.OrdinalIgnoreCase)).ToList();
-        return caseless.Count switch
-        {
-            0 => null,
-            1 => caseless[0].Id,
-            _ => throw new CliValidationError($"More than one file matches '{path}' when case is ignored; give its exact path or ID."),
-        };
-    }
 }
