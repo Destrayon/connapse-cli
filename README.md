@@ -118,6 +118,42 @@ Organization commands are no-ops on self-hosted servers and exit 0 with a friend
 | `connapse search "<query>" --container <name> [--mode Hybrid] [--top 10] [--path /x] [--min-score 0.5]` | Search inside a container. |
 | `connapse reindex --container <name> [--force] [--no-detect-changes]` | Re-process all documents. |
 
+### Administration
+
+These need the Owner or Admin role. A personal access token also needs the matching scope: `admin:sources` for connections and source changes, `admin:settings` for settings, and `admin:users` for agents. Reading sources needs only `knowledge:read`. Wherever a command takes a connection, source or agent, it accepts a name or an ID. JSON options come in pairs: `--scope '{...}'` inline, or `--scope-file scope.json`.
+
+| Command | Description |
+|---|---|
+| `connapse connection list [--provider S3] [--skip 0] [--take 50]` | List connections. |
+| `connapse connection get <connection> [--json]` | Show a connection's settings and health. Secrets are never shown. |
+| `connapse connection create <name> --provider <provider> --config <json> [--token\|--token-stdin\|--private-key-file]` | Create a connection. |
+| `connapse connection update <connection> [--name ...] [--config <json>]` | Rename a connection or change its settings. |
+| `connapse connection delete <connection>` | Delete a connection no source uses. |
+| `connapse connection pause\|resume <connection> [--source <id>...]` | Pause or resume syncing for its sources. |
+| `connapse connection test <connection> [--config <json>]` | Test a connection; exits 1 if it fails. |
+| `connapse connection discover <connection> [--include-personal] [--json]` | List the buckets, containers, repositories or spaces it reaches. |
+| `connapse connection replace-secret <connection> [--token-stdin\|--private-key-file]` | Replace an SFTP key or custom source server token. Owner only. |
+| `connapse connection forget-host-key <connection>` | Forget an SFTP server's pinned host key. |
+| `connapse source list [--skip 0] [--take 50] [--json]` | List sources and their sync state. |
+| `connapse source get\|stats <source>` | Show a source, or its document counts, chunks and size. |
+| `connapse source create <name> --connection <connection> --scope <json>` | Create a source. The scope's `"type"` picks its kind; `source scope-schema <provider>` shows the fields. |
+| `connapse source update <source> [--name] [--description] [--scope] [--sync-interval] [--enable\|--disable]` | Change a source; only the options given are sent. |
+| `connapse source delete <source>` | Delete a source and its indexed documents. The data it read from is untouched. |
+| `connapse source sync <source> [--apply-withheld-deletions]` | Sync now; exits 1 if the sync fails. |
+| `connapse source retry-failed <source>` | Queue its failed documents for another try. |
+| `connapse source scope-schema <provider>` | Print the JSON schema of each scope a provider takes. |
+| `connapse settings get <category>` | Print a category (embedding, chunking, search, llm, upload) as JSON. |
+| `connapse settings set <category> key=value... \| --settings <json>` | Change some settings, keeping the rest, or replace the whole category. |
+| `connapse settings reset <category>` | Reset a category to its defaults. |
+| `connapse settings test <embedding\|llm\|crossencoder\|minio> [--settings <json>]` | Check the server can reach the service; exits 1 if not. |
+| `connapse settings reindex [--force] [--container <name>]` and `settings reindex-status` | Re-embed documents in the background and follow progress. |
+| `connapse settings embedding-models` | List the embedding models with vectors stored. |
+| `connapse settings clear-summaries` | Clear container and document summaries so they are written again. |
+| `connapse agent list\|get\|create\|enable\|disable <agent>` | Manage agents: non-human callers that use API keys. |
+| `connapse agent delete <agent> --yes` | Delete an agent and revoke its keys. |
+| `connapse agent key list\|revoke <agent> [key-id]` | List or revoke an agent's keys. |
+| `connapse agent key create <agent> --name <name> --scope knowledge:read [--expires-in-days 30]` | Create a key. The token is printed once. |
+
 ### Any API route
 
 | Command | Description |
