@@ -14,162 +14,6 @@ namespace Connapse.Client.Models
     {
         /// <summary>Stores additional data not described in the OpenAPI description found when deserializing. Can be used for serialization as well.</summary>
         public IDictionary<string, object> AdditionalData { get; set; }
-        /// <summary>The baseUrl property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public string? BaseUrl { get; set; }
-#nullable restore
-#else
-        public string BaseUrl { get; set; }
-#endif
-        /// <summary>The bucketName property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public string? BucketName { get; set; }
-#nullable restore
-#else
-        public string BucketName { get; set; }
-#endif
-        /// <summary>The containerName property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public string? ContainerName { get; set; }
-#nullable restore
-#else
-        public string ContainerName { get; set; }
-#endif
-        /// <summary>The excludeCommentAuthors property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public List<string>? ExcludeCommentAuthors { get; set; }
-#nullable restore
-#else
-        public List<string> ExcludeCommentAuthors { get; set; }
-#endif
-        /// <summary>The excludePatterns property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public List<string>? ExcludePatterns { get; set; }
-#nullable restore
-#else
-        public List<string> ExcludePatterns { get; set; }
-#endif
-        /// <summary>The includeAttachments property</summary>
-        public bool? IncludeAttachments { get; set; }
-        /// <summary>The includeCommentAuthors property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public List<string>? IncludeCommentAuthors { get; set; }
-#nullable restore
-#else
-        public List<string> IncludeCommentAuthors { get; set; }
-#endif
-        /// <summary>The includeComments property</summary>
-        public bool? IncludeComments { get; set; }
-        /// <summary>The includePatterns property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public List<string>? IncludePatterns { get; set; }
-#nullable restore
-#else
-        public List<string> IncludePatterns { get; set; }
-#endif
-        /// <summary>The kind property</summary>
-        public global::Connapse.Client.Models.GitHubContentKind? Kind { get; set; }
-        /// <summary>The maxAttachmentMb property</summary>
-        public int? MaxAttachmentMb { get; set; }
-        /// <summary>The owner property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public string? Owner { get; set; }
-#nullable restore
-#else
-        public string Owner { get; set; }
-#endif
-        /// <summary>The prefix property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public string? Prefix { get; set; }
-#nullable restore
-#else
-        public string Prefix { get; set; }
-#endif
-        /// <summary>The private property</summary>
-        public bool? Private { get; set; }
-        /// <summary>The projectId property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public string? ProjectId { get; set; }
-#nullable restore
-#else
-        public string ProjectId { get; set; }
-#endif
-        /// <summary>The projectKey property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public string? ProjectKey { get; set; }
-#nullable restore
-#else
-        public string ProjectKey { get; set; }
-#endif
-        /// <summary>The projectName property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public string? ProjectName { get; set; }
-#nullable restore
-#else
-        public string ProjectName { get; set; }
-#endif
-        /// <summary>The repo property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public string? Repo { get; set; }
-#nullable restore
-#else
-        public string Repo { get; set; }
-#endif
-        /// <summary>The repoId property</summary>
-        public long? RepoId { get; set; }
-        /// <summary>The scopeId property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public string? ScopeId { get; set; }
-#nullable restore
-#else
-        public string ScopeId { get; set; }
-#endif
-        /// <summary>The spaceId property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public string? SpaceId { get; set; }
-#nullable restore
-#else
-        public string SpaceId { get; set; }
-#endif
-        /// <summary>The spaceKey property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public string? SpaceKey { get; set; }
-#nullable restore
-#else
-        public string SpaceKey { get; set; }
-#endif
-        /// <summary>The spaceName property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public string? SpaceName { get; set; }
-#nullable restore
-#else
-        public string SpaceName { get; set; }
-#endif
-        /// <summary>The subPath property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public string? SubPath { get; set; }
-#nullable restore
-#else
-        public string SubPath { get; set; }
-#endif
         /// <summary>The type property</summary>
         public global::Connapse.Client.Models.SourceScope_type? Type { get; set; }
         /// <summary>
@@ -178,7 +22,6 @@ namespace Connapse.Client.Models
         public SourceScope()
         {
             AdditionalData = new Dictionary<string, object>();
-            Private = false;
         }
         /// <summary>
         /// Creates a new instance of the appropriate class based on discriminator value
@@ -188,7 +31,19 @@ namespace Connapse.Client.Models
         public static global::Connapse.Client.Models.SourceScope CreateFromDiscriminatorValue(IParseNode parseNode)
         {
             if(ReferenceEquals(parseNode, null)) throw new ArgumentNullException(nameof(parseNode));
-            return new global::Connapse.Client.Models.SourceScope();
+            var mappingValue = parseNode.GetChildNode("type")?.GetStringValue();
+            return mappingValue switch
+            {
+                "azureBlob" => new global::Connapse.Client.Models.SourceScopeAzureBlobContainerScope(),
+                "confluence" => new global::Connapse.Client.Models.SourceScopeConfluenceSpaceScope(),
+                "custom" => new global::Connapse.Client.Models.SourceScopeCustomSourceScope(),
+                "filesystem" => new global::Connapse.Client.Models.SourceScopeFilesystemFolderScope(),
+                "github" => new global::Connapse.Client.Models.SourceScopeGitHubRepositoryScope(),
+                "jira" => new global::Connapse.Client.Models.SourceScopeJiraProjectScope(),
+                "s3" => new global::Connapse.Client.Models.SourceScopeS3BucketScope(),
+                "sftp" => new global::Connapse.Client.Models.SourceScopeSftpFolderScope(),
+                _ => new global::Connapse.Client.Models.SourceScope(),
+            };
         }
         /// <summary>
         /// The deserialization information for the current model
@@ -198,30 +53,6 @@ namespace Connapse.Client.Models
         {
             return new Dictionary<string, Action<IParseNode>>
             {
-                { "baseUrl", n => { BaseUrl = n.GetStringValue(); } },
-                { "bucketName", n => { BucketName = n.GetStringValue(); } },
-                { "containerName", n => { ContainerName = n.GetStringValue(); } },
-                { "excludeCommentAuthors", n => { ExcludeCommentAuthors = n.GetCollectionOfPrimitiveValues<string>()?.AsList(); } },
-                { "excludePatterns", n => { ExcludePatterns = n.GetCollectionOfPrimitiveValues<string>()?.AsList(); } },
-                { "includeAttachments", n => { IncludeAttachments = n.GetBoolValue(); } },
-                { "includeCommentAuthors", n => { IncludeCommentAuthors = n.GetCollectionOfPrimitiveValues<string>()?.AsList(); } },
-                { "includeComments", n => { IncludeComments = n.GetBoolValue(); } },
-                { "includePatterns", n => { IncludePatterns = n.GetCollectionOfPrimitiveValues<string>()?.AsList(); } },
-                { "kind", n => { Kind = n.GetEnumValue<global::Connapse.Client.Models.GitHubContentKind>(); } },
-                { "maxAttachmentMb", n => { MaxAttachmentMb = n.GetIntValue(); } },
-                { "owner", n => { Owner = n.GetStringValue(); } },
-                { "prefix", n => { Prefix = n.GetStringValue(); } },
-                { "private", n => { Private = n.GetBoolValue(); } },
-                { "projectId", n => { ProjectId = n.GetStringValue(); } },
-                { "projectKey", n => { ProjectKey = n.GetStringValue(); } },
-                { "projectName", n => { ProjectName = n.GetStringValue(); } },
-                { "repo", n => { Repo = n.GetStringValue(); } },
-                { "repoId", n => { RepoId = n.GetLongValue(); } },
-                { "scopeId", n => { ScopeId = n.GetStringValue(); } },
-                { "spaceId", n => { SpaceId = n.GetStringValue(); } },
-                { "spaceKey", n => { SpaceKey = n.GetStringValue(); } },
-                { "spaceName", n => { SpaceName = n.GetStringValue(); } },
-                { "subPath", n => { SubPath = n.GetStringValue(); } },
                 { "type", n => { Type = n.GetEnumValue<global::Connapse.Client.Models.SourceScope_type>(); } },
             };
         }
@@ -232,30 +63,6 @@ namespace Connapse.Client.Models
         public virtual void Serialize(ISerializationWriter writer)
         {
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
-            writer.WriteStringValue("baseUrl", BaseUrl);
-            writer.WriteStringValue("bucketName", BucketName);
-            writer.WriteStringValue("containerName", ContainerName);
-            writer.WriteCollectionOfPrimitiveValues<string>("excludeCommentAuthors", ExcludeCommentAuthors);
-            writer.WriteCollectionOfPrimitiveValues<string>("excludePatterns", ExcludePatterns);
-            writer.WriteBoolValue("includeAttachments", IncludeAttachments);
-            writer.WriteCollectionOfPrimitiveValues<string>("includeCommentAuthors", IncludeCommentAuthors);
-            writer.WriteBoolValue("includeComments", IncludeComments);
-            writer.WriteCollectionOfPrimitiveValues<string>("includePatterns", IncludePatterns);
-            writer.WriteEnumValue<global::Connapse.Client.Models.GitHubContentKind>("kind", Kind);
-            writer.WriteIntValue("maxAttachmentMb", MaxAttachmentMb);
-            writer.WriteStringValue("owner", Owner);
-            writer.WriteStringValue("prefix", Prefix);
-            writer.WriteBoolValue("private", Private);
-            writer.WriteStringValue("projectId", ProjectId);
-            writer.WriteStringValue("projectKey", ProjectKey);
-            writer.WriteStringValue("projectName", ProjectName);
-            writer.WriteStringValue("repo", Repo);
-            writer.WriteLongValue("repoId", RepoId);
-            writer.WriteStringValue("scopeId", ScopeId);
-            writer.WriteStringValue("spaceId", SpaceId);
-            writer.WriteStringValue("spaceKey", SpaceKey);
-            writer.WriteStringValue("spaceName", SpaceName);
-            writer.WriteStringValue("subPath", SubPath);
             writer.WriteEnumValue<global::Connapse.Client.Models.SourceScope_type>("type", Type);
             writer.WriteAdditionalData(AdditionalData);
         }

@@ -22,12 +22,15 @@ namespace Connapse.Client.Models
 #else
         public string ContainerId { get; set; }
 #endif
+        /// <summary>The force property</summary>
+        public bool? Force { get; set; }
         /// <summary>
         /// Instantiates a new <see cref="global::Connapse.Client.Models.ReindexTriggerRequest"/> and sets the default values.
         /// </summary>
         public ReindexTriggerRequest()
         {
             AdditionalData = new Dictionary<string, object>();
+            Force = false;
         }
         /// <summary>
         /// Creates a new instance of the appropriate class based on discriminator value
@@ -48,6 +51,7 @@ namespace Connapse.Client.Models
             return new Dictionary<string, Action<IParseNode>>
             {
                 { "containerId", n => { ContainerId = n.GetStringValue(); } },
+                { "force", n => { Force = n.GetBoolValue(); } },
             };
         }
         /// <summary>
@@ -58,6 +62,7 @@ namespace Connapse.Client.Models
         {
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
             writer.WriteStringValue("containerId", ContainerId);
+            writer.WriteBoolValue("force", Force);
             writer.WriteAdditionalData(AdditionalData);
         }
     }

@@ -37,10 +37,10 @@ namespace Connapse.Client.Models
         /// <summary>The scope property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public global::Connapse.Client.Models.SourceScope? Scope { get; set; }
+        public global::Connapse.Client.Models.CreateSourceApiRequest.CreateSourceApiRequest_scope? Scope { get; set; }
 #nullable restore
 #else
-        public global::Connapse.Client.Models.SourceScope Scope { get; set; }
+        public global::Connapse.Client.Models.CreateSourceApiRequest.CreateSourceApiRequest_scope Scope { get; set; }
 #endif
         /// <summary>Deprecated: send the typed &quot;scope&quot; instead. Still accepted for one minor release, then removed. Not allowed together with &quot;scope&quot;.</summary>
         [Obsolete("")]
@@ -90,7 +90,7 @@ namespace Connapse.Client.Models
                 { "description", n => { Description = n.GetStringValue(); } },
                 { "name", n => { Name = n.GetStringValue(); } },
                 { "provider", n => { Provider = n.GetEnumValue<global::Connapse.Client.Models.ConnectionProvider>(); } },
-                { "scope", n => { Scope = n.GetObjectValue<global::Connapse.Client.Models.SourceScope>(global::Connapse.Client.Models.SourceScope.CreateFromDiscriminatorValue); } },
+                { "scope", n => { Scope = n.GetObjectValue<global::Connapse.Client.Models.CreateSourceApiRequest.CreateSourceApiRequest_scope>(global::Connapse.Client.Models.CreateSourceApiRequest.CreateSourceApiRequest_scope.CreateFromDiscriminatorValue); } },
                 { "scopeJson", n => { ScopeJson = n.GetStringValue(); } },
                 { "secret", n => { Secret = n.GetStringValue(); } },
                 { "syncIntervalSeconds", n => { SyncIntervalSeconds = n.GetIntValue(); } },
@@ -107,11 +107,222 @@ namespace Connapse.Client.Models
             writer.WriteStringValue("description", Description);
             writer.WriteStringValue("name", Name);
             writer.WriteEnumValue<global::Connapse.Client.Models.ConnectionProvider>("provider", Provider);
-            writer.WriteObjectValue<global::Connapse.Client.Models.SourceScope>("scope", Scope);
+            writer.WriteObjectValue<global::Connapse.Client.Models.CreateSourceApiRequest.CreateSourceApiRequest_scope>("scope", Scope);
             writer.WriteStringValue("scopeJson", ScopeJson);
             writer.WriteStringValue("secret", Secret);
             writer.WriteIntValue("syncIntervalSeconds", SyncIntervalSeconds);
             writer.WriteAdditionalData(AdditionalData);
+        }
+        /// <summary>
+        /// Composed type wrapper for classes <see cref="global::Connapse.Client.Models.CreateSourceApiRequest_scopeMember1"/>, <see cref="global::Connapse.Client.Models.SourceScopeAzureBlobContainerScope"/>, <see cref="global::Connapse.Client.Models.SourceScopeConfluenceSpaceScope"/>, <see cref="global::Connapse.Client.Models.SourceScopeCustomSourceScope"/>, <see cref="global::Connapse.Client.Models.SourceScopeFilesystemFolderScope"/>, <see cref="global::Connapse.Client.Models.SourceScopeGitHubRepositoryScope"/>, <see cref="global::Connapse.Client.Models.SourceScopeJiraProjectScope"/>, <see cref="global::Connapse.Client.Models.SourceScopeS3BucketScope"/>, <see cref="global::Connapse.Client.Models.SourceScopeSftpFolderScope"/>
+        /// </summary>
+        [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
+        public partial class CreateSourceApiRequest_scope : IComposedTypeWrapper, IParsable
+        {
+            /// <summary>Composed type representation for type <see cref="global::Connapse.Client.Models.CreateSourceApiRequest_scopeMember1"/></summary>
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+            public global::Connapse.Client.Models.CreateSourceApiRequest_scopeMember1? CreateSourceApiRequestScopeMember1 { get; set; }
+#nullable restore
+#else
+            public global::Connapse.Client.Models.CreateSourceApiRequest_scopeMember1 CreateSourceApiRequestScopeMember1 { get; set; }
+#endif
+            /// <summary>Composed type representation for type <see cref="global::Connapse.Client.Models.SourceScopeAzureBlobContainerScope"/></summary>
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+            public global::Connapse.Client.Models.SourceScopeAzureBlobContainerScope? SourceScopeAzureBlobContainerScope { get; set; }
+#nullable restore
+#else
+            public global::Connapse.Client.Models.SourceScopeAzureBlobContainerScope SourceScopeAzureBlobContainerScope { get; set; }
+#endif
+            /// <summary>Composed type representation for type <see cref="global::Connapse.Client.Models.SourceScopeConfluenceSpaceScope"/></summary>
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+            public global::Connapse.Client.Models.SourceScopeConfluenceSpaceScope? SourceScopeConfluenceSpaceScope { get; set; }
+#nullable restore
+#else
+            public global::Connapse.Client.Models.SourceScopeConfluenceSpaceScope SourceScopeConfluenceSpaceScope { get; set; }
+#endif
+            /// <summary>Composed type representation for type <see cref="global::Connapse.Client.Models.SourceScopeCustomSourceScope"/></summary>
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+            public global::Connapse.Client.Models.SourceScopeCustomSourceScope? SourceScopeCustomSourceScope { get; set; }
+#nullable restore
+#else
+            public global::Connapse.Client.Models.SourceScopeCustomSourceScope SourceScopeCustomSourceScope { get; set; }
+#endif
+            /// <summary>Composed type representation for type <see cref="global::Connapse.Client.Models.SourceScopeFilesystemFolderScope"/></summary>
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+            public global::Connapse.Client.Models.SourceScopeFilesystemFolderScope? SourceScopeFilesystemFolderScope { get; set; }
+#nullable restore
+#else
+            public global::Connapse.Client.Models.SourceScopeFilesystemFolderScope SourceScopeFilesystemFolderScope { get; set; }
+#endif
+            /// <summary>Composed type representation for type <see cref="global::Connapse.Client.Models.SourceScopeGitHubRepositoryScope"/></summary>
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+            public global::Connapse.Client.Models.SourceScopeGitHubRepositoryScope? SourceScopeGitHubRepositoryScope { get; set; }
+#nullable restore
+#else
+            public global::Connapse.Client.Models.SourceScopeGitHubRepositoryScope SourceScopeGitHubRepositoryScope { get; set; }
+#endif
+            /// <summary>Composed type representation for type <see cref="global::Connapse.Client.Models.SourceScopeJiraProjectScope"/></summary>
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+            public global::Connapse.Client.Models.SourceScopeJiraProjectScope? SourceScopeJiraProjectScope { get; set; }
+#nullable restore
+#else
+            public global::Connapse.Client.Models.SourceScopeJiraProjectScope SourceScopeJiraProjectScope { get; set; }
+#endif
+            /// <summary>Composed type representation for type <see cref="global::Connapse.Client.Models.SourceScopeS3BucketScope"/></summary>
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+            public global::Connapse.Client.Models.SourceScopeS3BucketScope? SourceScopeS3BucketScope { get; set; }
+#nullable restore
+#else
+            public global::Connapse.Client.Models.SourceScopeS3BucketScope SourceScopeS3BucketScope { get; set; }
+#endif
+            /// <summary>Composed type representation for type <see cref="global::Connapse.Client.Models.SourceScopeSftpFolderScope"/></summary>
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+            public global::Connapse.Client.Models.SourceScopeSftpFolderScope? SourceScopeSftpFolderScope { get; set; }
+#nullable restore
+#else
+            public global::Connapse.Client.Models.SourceScopeSftpFolderScope SourceScopeSftpFolderScope { get; set; }
+#endif
+            /// <summary>
+            /// Creates a new instance of the appropriate class based on discriminator value
+            /// </summary>
+            /// <returns>A <see cref="global::Connapse.Client.Models.CreateSourceApiRequest.CreateSourceApiRequest_scope"/></returns>
+            /// <param name="parseNode">The parse node to use to read the discriminator value and create the object</param>
+            public static global::Connapse.Client.Models.CreateSourceApiRequest.CreateSourceApiRequest_scope CreateFromDiscriminatorValue(IParseNode parseNode)
+            {
+                if(ReferenceEquals(parseNode, null)) throw new ArgumentNullException(nameof(parseNode));
+                var mappingValue = parseNode.GetChildNode("type")?.GetStringValue();
+                var result = new global::Connapse.Client.Models.CreateSourceApiRequest.CreateSourceApiRequest_scope();
+                if("azureBlob".Equals(mappingValue, StringComparison.OrdinalIgnoreCase))
+                {
+                    result.SourceScopeAzureBlobContainerScope = new global::Connapse.Client.Models.SourceScopeAzureBlobContainerScope();
+                }
+                else if("confluence".Equals(mappingValue, StringComparison.OrdinalIgnoreCase))
+                {
+                    result.SourceScopeConfluenceSpaceScope = new global::Connapse.Client.Models.SourceScopeConfluenceSpaceScope();
+                }
+                else if("custom".Equals(mappingValue, StringComparison.OrdinalIgnoreCase))
+                {
+                    result.SourceScopeCustomSourceScope = new global::Connapse.Client.Models.SourceScopeCustomSourceScope();
+                }
+                else if("filesystem".Equals(mappingValue, StringComparison.OrdinalIgnoreCase))
+                {
+                    result.SourceScopeFilesystemFolderScope = new global::Connapse.Client.Models.SourceScopeFilesystemFolderScope();
+                }
+                else if("github".Equals(mappingValue, StringComparison.OrdinalIgnoreCase))
+                {
+                    result.SourceScopeGitHubRepositoryScope = new global::Connapse.Client.Models.SourceScopeGitHubRepositoryScope();
+                }
+                else if("jira".Equals(mappingValue, StringComparison.OrdinalIgnoreCase))
+                {
+                    result.SourceScopeJiraProjectScope = new global::Connapse.Client.Models.SourceScopeJiraProjectScope();
+                }
+                else if("s3".Equals(mappingValue, StringComparison.OrdinalIgnoreCase))
+                {
+                    result.SourceScopeS3BucketScope = new global::Connapse.Client.Models.SourceScopeS3BucketScope();
+                }
+                else if("sftp".Equals(mappingValue, StringComparison.OrdinalIgnoreCase))
+                {
+                    result.SourceScopeSftpFolderScope = new global::Connapse.Client.Models.SourceScopeSftpFolderScope();
+                }
+                return result;
+            }
+            /// <summary>
+            /// The deserialization information for the current model
+            /// </summary>
+            /// <returns>A IDictionary&lt;string, Action&lt;IParseNode&gt;&gt;</returns>
+            public virtual IDictionary<string, Action<IParseNode>> GetFieldDeserializers()
+            {
+                if(CreateSourceApiRequestScopeMember1 != null)
+                {
+                    return CreateSourceApiRequestScopeMember1.GetFieldDeserializers();
+                }
+                else if(SourceScopeAzureBlobContainerScope != null)
+                {
+                    return SourceScopeAzureBlobContainerScope.GetFieldDeserializers();
+                }
+                else if(SourceScopeConfluenceSpaceScope != null)
+                {
+                    return SourceScopeConfluenceSpaceScope.GetFieldDeserializers();
+                }
+                else if(SourceScopeCustomSourceScope != null)
+                {
+                    return SourceScopeCustomSourceScope.GetFieldDeserializers();
+                }
+                else if(SourceScopeFilesystemFolderScope != null)
+                {
+                    return SourceScopeFilesystemFolderScope.GetFieldDeserializers();
+                }
+                else if(SourceScopeGitHubRepositoryScope != null)
+                {
+                    return SourceScopeGitHubRepositoryScope.GetFieldDeserializers();
+                }
+                else if(SourceScopeJiraProjectScope != null)
+                {
+                    return SourceScopeJiraProjectScope.GetFieldDeserializers();
+                }
+                else if(SourceScopeS3BucketScope != null)
+                {
+                    return SourceScopeS3BucketScope.GetFieldDeserializers();
+                }
+                else if(SourceScopeSftpFolderScope != null)
+                {
+                    return SourceScopeSftpFolderScope.GetFieldDeserializers();
+                }
+                return new Dictionary<string, Action<IParseNode>>();
+            }
+            /// <summary>
+            /// Serializes information the current object
+            /// </summary>
+            /// <param name="writer">Serialization writer to use to serialize this model</param>
+            public virtual void Serialize(ISerializationWriter writer)
+            {
+                if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
+                if(CreateSourceApiRequestScopeMember1 != null)
+                {
+                    writer.WriteObjectValue<global::Connapse.Client.Models.CreateSourceApiRequest_scopeMember1>(null, CreateSourceApiRequestScopeMember1);
+                }
+                else if(SourceScopeAzureBlobContainerScope != null)
+                {
+                    writer.WriteObjectValue<global::Connapse.Client.Models.SourceScopeAzureBlobContainerScope>(null, SourceScopeAzureBlobContainerScope);
+                }
+                else if(SourceScopeConfluenceSpaceScope != null)
+                {
+                    writer.WriteObjectValue<global::Connapse.Client.Models.SourceScopeConfluenceSpaceScope>(null, SourceScopeConfluenceSpaceScope);
+                }
+                else if(SourceScopeCustomSourceScope != null)
+                {
+                    writer.WriteObjectValue<global::Connapse.Client.Models.SourceScopeCustomSourceScope>(null, SourceScopeCustomSourceScope);
+                }
+                else if(SourceScopeFilesystemFolderScope != null)
+                {
+                    writer.WriteObjectValue<global::Connapse.Client.Models.SourceScopeFilesystemFolderScope>(null, SourceScopeFilesystemFolderScope);
+                }
+                else if(SourceScopeGitHubRepositoryScope != null)
+                {
+                    writer.WriteObjectValue<global::Connapse.Client.Models.SourceScopeGitHubRepositoryScope>(null, SourceScopeGitHubRepositoryScope);
+                }
+                else if(SourceScopeJiraProjectScope != null)
+                {
+                    writer.WriteObjectValue<global::Connapse.Client.Models.SourceScopeJiraProjectScope>(null, SourceScopeJiraProjectScope);
+                }
+                else if(SourceScopeS3BucketScope != null)
+                {
+                    writer.WriteObjectValue<global::Connapse.Client.Models.SourceScopeS3BucketScope>(null, SourceScopeS3BucketScope);
+                }
+                else if(SourceScopeSftpFolderScope != null)
+                {
+                    writer.WriteObjectValue<global::Connapse.Client.Models.SourceScopeSftpFolderScope>(null, SourceScopeSftpFolderScope);
+                }
+            }
         }
     }
 }

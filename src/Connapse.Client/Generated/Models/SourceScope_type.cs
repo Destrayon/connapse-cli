@@ -12,5 +12,33 @@ namespace Connapse.Client.Models
         #pragma warning disable CS1591
         S3,
         #pragma warning restore CS1591
+        [EnumMember(Value = "azureBlob")]
+        #pragma warning disable CS1591
+        AzureBlob,
+        #pragma warning restore CS1591
+        [EnumMember(Value = "filesystem")]
+        #pragma warning disable CS1591
+        Filesystem,
+        #pragma warning restore CS1591
+        [EnumMember(Value = "sftp")]
+        #pragma warning disable CS1591
+        Sftp,
+        #pragma warning restore CS1591
+        [EnumMember(Value = "github")]
+        #pragma warning disable CS1591
+        Github,
+        #pragma warning restore CS1591
+        [EnumMember(Value = "jira")]
+        #pragma warning disable CS1591
+        Jira,
+        #pragma warning restore CS1591
+        [EnumMember(Value = "confluence")]
+        #pragma warning disable CS1591
+        Confluence,
+        #pragma warning restore CS1591
+        [EnumMember(Value = "custom")]
+        #pragma warning disable CS1591
+        Custom,
+        #pragma warning restore CS1591
     }
 }

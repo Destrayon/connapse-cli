@@ -2,10 +2,15 @@
 #pragma warning disable CS0618
 using Connapse.Client.Api.V1.Agents;
 using Connapse.Client.Api.V1.Atlassian;
+using Connapse.Client.Api.V1.Audit;
 using Connapse.Client.Api.V1.Auth;
+using Connapse.Client.Api.V1.Connections;
 using Connapse.Client.Api.V1.Identity;
 using Connapse.Client.Api.V1.Info;
+using Connapse.Client.Api.V1.Invites;
+using Connapse.Client.Api.V1.OauthClients;
 using Connapse.Client.Api.V1.Providers;
+using Connapse.Client.Api.V1.Settings;
 using Connapse.Client.Api.V1.Sources;
 using Microsoft.Kiota.Abstractions.Extensions;
 using Microsoft.Kiota.Abstractions;
@@ -31,10 +36,20 @@ namespace Connapse.Client.Api.V1
         {
             get => new global::Connapse.Client.Api.V1.Atlassian.AtlassianRequestBuilder(PathParameters, RequestAdapter);
         }
+        /// <summary>The audit property</summary>
+        public global::Connapse.Client.Api.V1.Audit.AuditRequestBuilder Audit
+        {
+            get => new global::Connapse.Client.Api.V1.Audit.AuditRequestBuilder(PathParameters, RequestAdapter);
+        }
         /// <summary>The auth property</summary>
         public global::Connapse.Client.Api.V1.Auth.AuthRequestBuilder Auth
         {
             get => new global::Connapse.Client.Api.V1.Auth.AuthRequestBuilder(PathParameters, RequestAdapter);
+        }
+        /// <summary>The connections property</summary>
+        public global::Connapse.Client.Api.V1.Connections.ConnectionsRequestBuilder Connections
+        {
+            get => new global::Connapse.Client.Api.V1.Connections.ConnectionsRequestBuilder(PathParameters, RequestAdapter);
         }
         /// <summary>The identity property</summary>
         public global::Connapse.Client.Api.V1.Identity.IdentityRequestBuilder Identity
@@ -46,10 +61,25 @@ namespace Connapse.Client.Api.V1
         {
             get => new global::Connapse.Client.Api.V1.Info.InfoRequestBuilder(PathParameters, RequestAdapter);
         }
+        /// <summary>The invites property</summary>
+        public global::Connapse.Client.Api.V1.Invites.InvitesRequestBuilder Invites
+        {
+            get => new global::Connapse.Client.Api.V1.Invites.InvitesRequestBuilder(PathParameters, RequestAdapter);
+        }
+        /// <summary>The oauthClients property</summary>
+        public global::Connapse.Client.Api.V1.OauthClients.OauthClientsRequestBuilder OauthClients
+        {
+            get => new global::Connapse.Client.Api.V1.OauthClients.OauthClientsRequestBuilder(PathParameters, RequestAdapter);
+        }
         /// <summary>The providers property</summary>
         public global::Connapse.Client.Api.V1.Providers.ProvidersRequestBuilder Providers
         {
             get => new global::Connapse.Client.Api.V1.Providers.ProvidersRequestBuilder(PathParameters, RequestAdapter);
+        }
+        /// <summary>The settings property</summary>
+        public global::Connapse.Client.Api.V1.Settings.SettingsRequestBuilder Settings
+        {
+            get => new global::Connapse.Client.Api.V1.Settings.SettingsRequestBuilder(PathParameters, RequestAdapter);
         }
         /// <summary>The sources property</summary>
         public global::Connapse.Client.Api.V1.Sources.SourcesRequestBuilder Sources

@@ -47,13 +47,14 @@ namespace Connapse.Client.Api.V1.Agents.Item.Keys
         {
         }
         /// <summary>
-        /// List API keys for an agent (Admin only)
+        /// List API keys for an agent, revoked ones included (Admin only)
         /// </summary>
         /// <returns>A List&lt;global::Connapse.Client.Models.AgentKeyListItem&gt;</returns>
         /// <param name="cancellationToken">Cancellation token to use when cancelling requests</param>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
         /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 401 status code</exception>
         /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 403 status code</exception>
+        /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 404 status code</exception>
         /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 429 status code</exception>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -69,13 +70,14 @@ namespace Connapse.Client.Api.V1.Agents.Item.Keys
             {
                 { "401", global::Connapse.Client.Models.ProblemDetails.CreateFromDiscriminatorValue },
                 { "403", global::Connapse.Client.Models.ProblemDetails.CreateFromDiscriminatorValue },
+                { "404", global::Connapse.Client.Models.ProblemDetails.CreateFromDiscriminatorValue },
                 { "429", global::Connapse.Client.Models.ProblemDetails.CreateFromDiscriminatorValue },
             };
             var collectionResult = await RequestAdapter.SendCollectionAsync<global::Connapse.Client.Models.AgentKeyListItem>(requestInfo, global::Connapse.Client.Models.AgentKeyListItem.CreateFromDiscriminatorValue, errorMapping, cancellationToken).ConfigureAwait(false);
             return collectionResult?.AsList();
         }
         /// <summary>
-        /// Create an API key for an agent. Token is shown only once. (Admin only)
+        /// Create an API key for an agent, with scopes from knowledge:read, knowledge:write and agent:ingest. Token is shown only once. (Admin only)
         /// </summary>
         /// <returns>A <see cref="global::Connapse.Client.Models.CreateAgentKeyResponse"/></returns>
         /// <param name="body">The request body</param>
@@ -108,7 +110,7 @@ namespace Connapse.Client.Api.V1.Agents.Item.Keys
             return await RequestAdapter.SendAsync<global::Connapse.Client.Models.CreateAgentKeyResponse>(requestInfo, global::Connapse.Client.Models.CreateAgentKeyResponse.CreateFromDiscriminatorValue, errorMapping, cancellationToken).ConfigureAwait(false);
         }
         /// <summary>
-        /// List API keys for an agent (Admin only)
+        /// List API keys for an agent, revoked ones included (Admin only)
         /// </summary>
         /// <returns>A <see cref="RequestInformation"/></returns>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
@@ -127,7 +129,7 @@ namespace Connapse.Client.Api.V1.Agents.Item.Keys
             return requestInfo;
         }
         /// <summary>
-        /// Create an API key for an agent. Token is shown only once. (Admin only)
+        /// Create an API key for an agent, with scopes from knowledge:read, knowledge:write and agent:ingest. Token is shown only once. (Admin only)
         /// </summary>
         /// <returns>A <see cref="RequestInformation"/></returns>
         /// <param name="body">The request body</param>

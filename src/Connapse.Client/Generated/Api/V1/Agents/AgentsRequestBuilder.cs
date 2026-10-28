@@ -75,7 +75,7 @@ namespace Connapse.Client.Api.V1.Agents
             return collectionResult?.AsList();
         }
         /// <summary>
-        /// Create a new agent (Admin only)
+        /// Create a new agent (Admin only). The name is 2-64 letters, digits, hyphens and underscores, unique among agents.
         /// </summary>
         /// <returns>A <see cref="global::Connapse.Client.Models.AgentDto"/></returns>
         /// <param name="body">The request body</param>
@@ -127,7 +127,7 @@ namespace Connapse.Client.Api.V1.Agents
             return requestInfo;
         }
         /// <summary>
-        /// Create a new agent (Admin only)
+        /// Create a new agent (Admin only). The name is 2-64 letters, digits, hyphens and underscores, unique among agents.
         /// </summary>
         /// <returns>A <see cref="RequestInformation"/></returns>
         /// <param name="body">The request body</param>

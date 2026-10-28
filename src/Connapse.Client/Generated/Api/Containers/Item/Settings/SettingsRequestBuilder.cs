@@ -34,6 +34,34 @@ namespace Connapse.Client.Api.Containers.Item.Settings
         {
         }
         /// <summary>
+        /// Clear per-container settings overrides, so the container follows the global settings
+        /// </summary>
+        /// <param name="cancellationToken">Cancellation token to use when cancelling requests</param>
+        /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
+        /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 401 status code</exception>
+        /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 403 status code</exception>
+        /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 404 status code</exception>
+        /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 429 status code</exception>
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+        public async Task DeleteAsync(Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = default, CancellationToken cancellationToken = default)
+        {
+#nullable restore
+#else
+        public async Task DeleteAsync(Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
+        {
+#endif
+            var requestInfo = ToDeleteRequestInformation(requestConfiguration);
+            var errorMapping = new Dictionary<string, ParsableFactory<IParsable>>
+            {
+                { "401", global::Connapse.Client.Models.ProblemDetails.CreateFromDiscriminatorValue },
+                { "403", global::Connapse.Client.Models.ProblemDetails.CreateFromDiscriminatorValue },
+                { "404", global::Connapse.Client.Models.ProblemDetails.CreateFromDiscriminatorValue },
+                { "429", global::Connapse.Client.Models.ProblemDetails.CreateFromDiscriminatorValue },
+            };
+            await RequestAdapter.SendNoContentAsync(requestInfo, errorMapping, cancellationToken).ConfigureAwait(false);
+        }
+        /// <summary>
         /// Get per-container settings overrides
         /// </summary>
         /// <returns>A <see cref="global::Connapse.Client.Models.ContainerSettingsOverrides"/></returns>
@@ -94,6 +122,25 @@ namespace Connapse.Client.Api.Containers.Item.Settings
                 { "429", global::Connapse.Client.Models.ProblemDetails.CreateFromDiscriminatorValue },
             };
             return await RequestAdapter.SendAsync<global::Connapse.Client.Models.ContainerSettingsOverrides>(requestInfo, global::Connapse.Client.Models.ContainerSettingsOverrides.CreateFromDiscriminatorValue, errorMapping, cancellationToken).ConfigureAwait(false);
+        }
+        /// <summary>
+        /// Clear per-container settings overrides, so the container follows the global settings
+        /// </summary>
+        /// <returns>A <see cref="RequestInformation"/></returns>
+        /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+        public RequestInformation ToDeleteRequestInformation(Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = default)
+        {
+#nullable restore
+#else
+        public RequestInformation ToDeleteRequestInformation(Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default)
+        {
+#endif
+            var requestInfo = new RequestInformation(Method.DELETE, UrlTemplate, PathParameters);
+            requestInfo.Configure(requestConfiguration);
+            requestInfo.Headers.TryAdd("Accept", "application/problem+json");
+            return requestInfo;
         }
         /// <summary>
         /// Get per-container settings overrides

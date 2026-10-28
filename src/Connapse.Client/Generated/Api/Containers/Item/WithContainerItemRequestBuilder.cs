@@ -7,6 +7,7 @@ using Connapse.Client.Api.Containers.Item.RetryFailed;
 using Connapse.Client.Api.Containers.Item.Search;
 using Connapse.Client.Api.Containers.Item.Settings;
 using Connapse.Client.Api.Containers.Item.Stats;
+using Connapse.Client.Api.Containers.Item.Summaries;
 using Connapse.Client.Api.Containers.Item.Sync;
 using Connapse.Client.Models;
 using Microsoft.Kiota.Abstractions.Extensions;
@@ -59,6 +60,11 @@ namespace Connapse.Client.Api.Containers.Item
         public global::Connapse.Client.Api.Containers.Item.Stats.StatsRequestBuilder Stats
         {
             get => new global::Connapse.Client.Api.Containers.Item.Stats.StatsRequestBuilder(PathParameters, RequestAdapter);
+        }
+        /// <summary>The summaries property</summary>
+        public global::Connapse.Client.Api.Containers.Item.Summaries.SummariesRequestBuilder Summaries
+        {
+            get => new global::Connapse.Client.Api.Containers.Item.Summaries.SummariesRequestBuilder(PathParameters, RequestAdapter);
         }
         /// <summary>The sync property</summary>
         public global::Connapse.Client.Api.Containers.Item.Sync.SyncRequestBuilder Sync
@@ -141,6 +147,41 @@ namespace Connapse.Client.Api.Containers.Item
             return await RequestAdapter.SendAsync<global::Connapse.Client.Models.Container>(requestInfo, global::Connapse.Client.Models.Container.CreateFromDiscriminatorValue, errorMapping, cancellationToken).ConfigureAwait(false);
         }
         /// <summary>
+        /// Rename a container or change its description. Its files stay where they are.
+        /// </summary>
+        /// <returns>A <see cref="global::Connapse.Client.Models.Container"/></returns>
+        /// <param name="body">The request body</param>
+        /// <param name="cancellationToken">Cancellation token to use when cancelling requests</param>
+        /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
+        /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 400 status code</exception>
+        /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 401 status code</exception>
+        /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 403 status code</exception>
+        /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 404 status code</exception>
+        /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 409 status code</exception>
+        /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 429 status code</exception>
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+        public async Task<global::Connapse.Client.Models.Container?> PatchAsync(global::Connapse.Client.Models.UpdateContainerApiRequest body, Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = default, CancellationToken cancellationToken = default)
+        {
+#nullable restore
+#else
+        public async Task<global::Connapse.Client.Models.Container> PatchAsync(global::Connapse.Client.Models.UpdateContainerApiRequest body, Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
+        {
+#endif
+            if(ReferenceEquals(body, null)) throw new ArgumentNullException(nameof(body));
+            var requestInfo = ToPatchRequestInformation(body, requestConfiguration);
+            var errorMapping = new Dictionary<string, ParsableFactory<IParsable>>
+            {
+                { "400", global::Connapse.Client.Models.ProblemDetails.CreateFromDiscriminatorValue },
+                { "401", global::Connapse.Client.Models.ProblemDetails.CreateFromDiscriminatorValue },
+                { "403", global::Connapse.Client.Models.ProblemDetails.CreateFromDiscriminatorValue },
+                { "404", global::Connapse.Client.Models.ProblemDetails.CreateFromDiscriminatorValue },
+                { "409", global::Connapse.Client.Models.ProblemDetails.CreateFromDiscriminatorValue },
+                { "429", global::Connapse.Client.Models.ProblemDetails.CreateFromDiscriminatorValue },
+            };
+            return await RequestAdapter.SendAsync<global::Connapse.Client.Models.Container>(requestInfo, global::Connapse.Client.Models.Container.CreateFromDiscriminatorValue, errorMapping, cancellationToken).ConfigureAwait(false);
+        }
+        /// <summary>
         /// Delete a container. It must be empty first — deleting a container deletes its stored objects.
         /// </summary>
         /// <returns>A <see cref="RequestInformation"/></returns>
@@ -176,6 +217,28 @@ namespace Connapse.Client.Api.Containers.Item
             var requestInfo = new RequestInformation(Method.GET, UrlTemplate, PathParameters);
             requestInfo.Configure(requestConfiguration);
             requestInfo.Headers.TryAdd("Accept", "application/json");
+            return requestInfo;
+        }
+        /// <summary>
+        /// Rename a container or change its description. Its files stay where they are.
+        /// </summary>
+        /// <returns>A <see cref="RequestInformation"/></returns>
+        /// <param name="body">The request body</param>
+        /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+        public RequestInformation ToPatchRequestInformation(global::Connapse.Client.Models.UpdateContainerApiRequest body, Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = default)
+        {
+#nullable restore
+#else
+        public RequestInformation ToPatchRequestInformation(global::Connapse.Client.Models.UpdateContainerApiRequest body, Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default)
+        {
+#endif
+            if(ReferenceEquals(body, null)) throw new ArgumentNullException(nameof(body));
+            var requestInfo = new RequestInformation(Method.PATCH, UrlTemplate, PathParameters);
+            requestInfo.Configure(requestConfiguration);
+            requestInfo.Headers.TryAdd("Accept", "application/json");
+            requestInfo.SetContentFromParsable(RequestAdapter, "application/json", body);
             return requestInfo;
         }
         /// <summary>

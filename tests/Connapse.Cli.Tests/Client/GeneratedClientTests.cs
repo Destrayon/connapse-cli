@@ -88,11 +88,10 @@ public class GeneratedClientTests
     }
 
     /// <summary>
-    /// The workaround the client's README gives until CON-77: the merged SourceScope's Type enum only
-    /// knows "s3", so another provider's scope sends its type through AdditionalData.
+    /// Since CON-77 each provider's scope is its own typed class, and the shared Type enum knows every provider.
     /// </summary>
     [Fact]
-    public async Task CreateSource_AGitHubScope_SendsItsTypeThroughAdditionalData()
+    public async Task CreateSource_AGitHubScope_SendsItsTypedFields()
     {
         string body = "";
         _handler.Responder = request =>
@@ -100,14 +99,20 @@ public class GeneratedClientTests
             body = request.Content!.ReadAsStringAsync().GetAwaiter().GetResult();
             return MockHttpMessageHandler.Json(HttpStatusCode.Created, "{}");
         };
-        var scope = new SourceScope { Owner = "octo", Repo = "docs" };
-        scope.AdditionalData["type"] = "github";
 
         await Client().Api.Sources.PostAsync(new CreateSourceApiRequest
         {
             Name = "docs",
             ConnectionId = Guid.Parse("7b1c9e2a-0000-4000-8000-000000000004"),
-            Scope = scope,
+            Scope = new CreateSourceApiRequest.CreateSourceApiRequest_scope
+            {
+                SourceScopeGitHubRepositoryScope = new SourceScopeGitHubRepositoryScope
+                {
+                    Type = SourceScope_type.Github,
+                    Owner = "octo",
+                    Repo = "docs",
+                },
+            },
         });
 
         Assert.Contains("\"type\":\"github\"", body);
