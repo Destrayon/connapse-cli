@@ -39,6 +39,7 @@ namespace Connapse.Client.Api.V1.Atlassian.Sites.Item.Test
         /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 401 status code</exception>
         /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 403 status code</exception>
         /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 404 status code</exception>
+        /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 409 status code</exception>
         /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 429 status code</exception>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -55,6 +56,7 @@ namespace Connapse.Client.Api.V1.Atlassian.Sites.Item.Test
                 { "401", global::Connapse.Client.Models.ProblemDetails.CreateFromDiscriminatorValue },
                 { "403", global::Connapse.Client.Models.ProblemDetails.CreateFromDiscriminatorValue },
                 { "404", global::Connapse.Client.Models.ProblemDetails.CreateFromDiscriminatorValue },
+                { "409", global::Connapse.Client.Models.ProblemDetails.CreateFromDiscriminatorValue },
                 { "429", global::Connapse.Client.Models.ProblemDetails.CreateFromDiscriminatorValue },
             };
             return await RequestAdapter.SendAsync<global::Connapse.Client.Models.AtlassianTestReport>(requestInfo, global::Connapse.Client.Models.AtlassianTestReport.CreateFromDiscriminatorValue, errorMapping, cancellationToken).ConfigureAwait(false);

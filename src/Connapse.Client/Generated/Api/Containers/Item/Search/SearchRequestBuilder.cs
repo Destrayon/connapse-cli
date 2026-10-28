@@ -28,7 +28,7 @@ namespace Connapse.Client.Api.Containers.Item.Search
         /// </summary>
         /// <param name="pathParameters">Path parameters for the request</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
-        public SearchRequestBuilder(Dictionary<string, object> pathParameters, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/containers/{containerId}/search{?minScore*,mode*,path*,topK*}", pathParameters)
+        public SearchRequestBuilder(Dictionary<string, object> pathParameters, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/containers/{containerId}/search{?minScore*,mode*,path*,q*,topK*}", pathParameters)
         {
         }
         /// <summary>
@@ -36,7 +36,7 @@ namespace Connapse.Client.Api.Containers.Item.Search
         /// </summary>
         /// <param name="rawUrl">The raw URL to use for the request builder.</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
-        public SearchRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/containers/{containerId}/search{?minScore*,mode*,path*,topK*}", rawUrl)
+        public SearchRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/containers/{containerId}/search{?minScore*,mode*,path*,q*,topK*}", rawUrl)
         {
         }
         /// <summary>
@@ -84,11 +84,11 @@ namespace Connapse.Client.Api.Containers.Item.Search
         /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 429 status code</exception>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public async Task<global::Connapse.Client.Models.SearchResult?> PostAsync(global::Connapse.Client.Models.ContainerSearchRequest body, Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = default, CancellationToken cancellationToken = default)
+        public async Task<global::Connapse.Client.Models.SearchResult?> PostAsync(global::Connapse.Client.Models.SearchApiRequest body, Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = default, CancellationToken cancellationToken = default)
         {
 #nullable restore
 #else
-        public async Task<global::Connapse.Client.Models.SearchResult> PostAsync(global::Connapse.Client.Models.ContainerSearchRequest body, Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
+        public async Task<global::Connapse.Client.Models.SearchResult> PostAsync(global::Connapse.Client.Models.SearchApiRequest body, Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
         {
 #endif
             if(ReferenceEquals(body, null)) throw new ArgumentNullException(nameof(body));
@@ -117,7 +117,7 @@ namespace Connapse.Client.Api.Containers.Item.Search
         public RequestInformation ToGetRequestInformation(Action<RequestConfiguration<global::Connapse.Client.Api.Containers.Item.Search.SearchRequestBuilder.SearchRequestBuilderGetQueryParameters>> requestConfiguration = default)
         {
 #endif
-            var requestInfo = new RequestInformation(Method.GET, "{+baseurl}/api/containers/{containerId}/search?q={q}{&minScore*,mode*,path*,topK*}", PathParameters);
+            var requestInfo = new RequestInformation(Method.GET, UrlTemplate, PathParameters);
             requestInfo.Configure(requestConfiguration);
             requestInfo.Headers.TryAdd("Accept", "application/json");
             return requestInfo;
@@ -130,11 +130,11 @@ namespace Connapse.Client.Api.Containers.Item.Search
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public RequestInformation ToPostRequestInformation(global::Connapse.Client.Models.ContainerSearchRequest body, Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = default)
+        public RequestInformation ToPostRequestInformation(global::Connapse.Client.Models.SearchApiRequest body, Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = default)
         {
 #nullable restore
 #else
-        public RequestInformation ToPostRequestInformation(global::Connapse.Client.Models.ContainerSearchRequest body, Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default)
+        public RequestInformation ToPostRequestInformation(global::Connapse.Client.Models.SearchApiRequest body, Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default)
         {
 #endif
             if(ReferenceEquals(body, null)) throw new ArgumentNullException(nameof(body));

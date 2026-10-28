@@ -34,7 +34,7 @@ namespace Connapse.Client.Api.V1.Auth.Users.Item.Roles
         {
         }
         /// <summary>
-        /// Assign roles to a user (Admin only)
+        /// Replace a user&apos;s roles (Admin only). Nobody changes their own account or the Owner&apos;s, only the Owner manages Admins, and Owner and Agent are never assigned.
         /// </summary>
         /// <param name="body">The request body</param>
         /// <param name="cancellationToken">Cancellation token to use when cancelling requests</param>
@@ -66,7 +66,7 @@ namespace Connapse.Client.Api.V1.Auth.Users.Item.Roles
             await RequestAdapter.SendNoContentAsync(requestInfo, errorMapping, cancellationToken).ConfigureAwait(false);
         }
         /// <summary>
-        /// Assign roles to a user (Admin only)
+        /// Replace a user&apos;s roles (Admin only). Nobody changes their own account or the Owner&apos;s, only the Owner manages Admins, and Owner and Agent are never assigned.
         /// </summary>
         /// <returns>A <see cref="RequestInformation"/></returns>
         /// <param name="body">The request body</param>

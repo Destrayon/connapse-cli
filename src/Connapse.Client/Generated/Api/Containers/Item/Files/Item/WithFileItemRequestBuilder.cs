@@ -2,6 +2,7 @@
 #pragma warning disable CS0618
 using Connapse.Client.Api.Containers.Item.Files.Item.Content;
 using Connapse.Client.Api.Containers.Item.Files.Item.ReindexCheck;
+using Connapse.Client.Api.Containers.Item.Files.Item.Retry;
 using Connapse.Client.Models;
 using Microsoft.Kiota.Abstractions.Extensions;
 using Microsoft.Kiota.Abstractions.Serialization;
@@ -28,6 +29,11 @@ namespace Connapse.Client.Api.Containers.Item.Files.Item
         public global::Connapse.Client.Api.Containers.Item.Files.Item.ReindexCheck.ReindexCheckRequestBuilder ReindexCheck
         {
             get => new global::Connapse.Client.Api.Containers.Item.Files.Item.ReindexCheck.ReindexCheckRequestBuilder(PathParameters, RequestAdapter);
+        }
+        /// <summary>The retry property</summary>
+        public global::Connapse.Client.Api.Containers.Item.Files.Item.Retry.RetryRequestBuilder Retry
+        {
+            get => new global::Connapse.Client.Api.Containers.Item.Files.Item.Retry.RetryRequestBuilder(PathParameters, RequestAdapter);
         }
         /// <summary>
         /// Instantiates a new <see cref="global::Connapse.Client.Api.Containers.Item.Files.Item.WithFileItemRequestBuilder"/> and sets the default values.

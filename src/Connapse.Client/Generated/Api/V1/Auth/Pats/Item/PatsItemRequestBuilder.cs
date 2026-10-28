@@ -34,11 +34,12 @@ namespace Connapse.Client.Api.V1.Auth.Pats.Item
         {
         }
         /// <summary>
-        /// Revoke a personal access token by ID
+        /// Revoke one of your personal access tokens by id. Only a person signed in themselves may: not a personal access token or agent key.
         /// </summary>
         /// <param name="cancellationToken">Cancellation token to use when cancelling requests</param>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
         /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 401 status code</exception>
+        /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 403 status code</exception>
         /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 404 status code</exception>
         /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 429 status code</exception>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
@@ -54,13 +55,14 @@ namespace Connapse.Client.Api.V1.Auth.Pats.Item
             var errorMapping = new Dictionary<string, ParsableFactory<IParsable>>
             {
                 { "401", global::Connapse.Client.Models.ProblemDetails.CreateFromDiscriminatorValue },
+                { "403", global::Connapse.Client.Models.ProblemDetails.CreateFromDiscriminatorValue },
                 { "404", global::Connapse.Client.Models.ProblemDetails.CreateFromDiscriminatorValue },
                 { "429", global::Connapse.Client.Models.ProblemDetails.CreateFromDiscriminatorValue },
             };
             await RequestAdapter.SendNoContentAsync(requestInfo, errorMapping, cancellationToken).ConfigureAwait(false);
         }
         /// <summary>
-        /// Revoke a personal access token by ID
+        /// Revoke one of your personal access tokens by id. Only a person signed in themselves may: not a personal access token or agent key.
         /// </summary>
         /// <returns>A <see cref="RequestInformation"/></returns>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>

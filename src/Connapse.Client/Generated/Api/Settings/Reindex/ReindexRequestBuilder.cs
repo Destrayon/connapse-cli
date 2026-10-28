@@ -40,7 +40,7 @@ namespace Connapse.Client.Api.Settings.Reindex
         {
         }
         /// <summary>
-        /// Start background re-embedding of documents with outdated embedding models
+        /// Start re-embedding in the background: without force, only documents whose embedding or chunking settings changed; with force, every document. Cross-model search is turned on meanwhile.
         /// </summary>
         /// <returns>A <see cref="global::Connapse.Client.Models.ReindexStartedResponse"/></returns>
         /// <param name="body">The request body</param>
@@ -71,7 +71,7 @@ namespace Connapse.Client.Api.Settings.Reindex
             return await RequestAdapter.SendAsync<global::Connapse.Client.Models.ReindexStartedResponse>(requestInfo, global::Connapse.Client.Models.ReindexStartedResponse.CreateFromDiscriminatorValue, errorMapping, cancellationToken).ConfigureAwait(false);
         }
         /// <summary>
-        /// Start background re-embedding of documents with outdated embedding models
+        /// Start re-embedding in the background: without force, only documents whose embedding or chunking settings changed; with force, every document. Cross-model search is turned on meanwhile.
         /// </summary>
         /// <returns>A <see cref="RequestInformation"/></returns>
         /// <param name="body">The request body</param>

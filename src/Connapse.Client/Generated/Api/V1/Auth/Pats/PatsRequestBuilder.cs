@@ -47,12 +47,13 @@ namespace Connapse.Client.Api.V1.Auth.Pats
         {
         }
         /// <summary>
-        /// List personal access tokens for the authenticated user
+        /// List your personal access tokens, newest first, revoked ones included. Only a person signed in themselves may: not a personal access token or agent key.
         /// </summary>
         /// <returns>A List&lt;global::Connapse.Client.Models.PatListItem&gt;</returns>
         /// <param name="cancellationToken">Cancellation token to use when cancelling requests</param>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
         /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 401 status code</exception>
+        /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 403 status code</exception>
         /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 429 status code</exception>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -67,13 +68,14 @@ namespace Connapse.Client.Api.V1.Auth.Pats
             var errorMapping = new Dictionary<string, ParsableFactory<IParsable>>
             {
                 { "401", global::Connapse.Client.Models.ProblemDetails.CreateFromDiscriminatorValue },
+                { "403", global::Connapse.Client.Models.ProblemDetails.CreateFromDiscriminatorValue },
                 { "429", global::Connapse.Client.Models.ProblemDetails.CreateFromDiscriminatorValue },
             };
             var collectionResult = await RequestAdapter.SendCollectionAsync<global::Connapse.Client.Models.PatListItem>(requestInfo, global::Connapse.Client.Models.PatListItem.CreateFromDiscriminatorValue, errorMapping, cancellationToken).ConfigureAwait(false);
             return collectionResult?.AsList();
         }
         /// <summary>
-        /// Create a personal access token (the raw token is returned only on creation)
+        /// Create a personal access token; its value is returned only here. The name is required (at most 256 characters), scopes are from knowledge:read, knowledge:write, agent:ingest, admin:users, admin:audit, admin:oauth-clients, admin:settings and admin:sources, and an expiry must be in the future. Only a person signed in themselves may: not a personal access token or agent key.
         /// </summary>
         /// <returns>A <see cref="global::Connapse.Client.Models.PatCreateResponse"/></returns>
         /// <param name="body">The request body</param>
@@ -81,6 +83,7 @@ namespace Connapse.Client.Api.V1.Auth.Pats
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
         /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 400 status code</exception>
         /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 401 status code</exception>
+        /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 403 status code</exception>
         /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 429 status code</exception>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -97,12 +100,13 @@ namespace Connapse.Client.Api.V1.Auth.Pats
             {
                 { "400", global::Connapse.Client.Models.ProblemDetails.CreateFromDiscriminatorValue },
                 { "401", global::Connapse.Client.Models.ProblemDetails.CreateFromDiscriminatorValue },
+                { "403", global::Connapse.Client.Models.ProblemDetails.CreateFromDiscriminatorValue },
                 { "429", global::Connapse.Client.Models.ProblemDetails.CreateFromDiscriminatorValue },
             };
             return await RequestAdapter.SendAsync<global::Connapse.Client.Models.PatCreateResponse>(requestInfo, global::Connapse.Client.Models.PatCreateResponse.CreateFromDiscriminatorValue, errorMapping, cancellationToken).ConfigureAwait(false);
         }
         /// <summary>
-        /// List personal access tokens for the authenticated user
+        /// List your personal access tokens, newest first, revoked ones included. Only a person signed in themselves may: not a personal access token or agent key.
         /// </summary>
         /// <returns>A <see cref="RequestInformation"/></returns>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
@@ -121,7 +125,7 @@ namespace Connapse.Client.Api.V1.Auth.Pats
             return requestInfo;
         }
         /// <summary>
-        /// Create a personal access token (the raw token is returned only on creation)
+        /// Create a personal access token; its value is returned only here. The name is required (at most 256 characters), scopes are from knowledge:read, knowledge:write, agent:ingest, admin:users, admin:audit, admin:oauth-clients, admin:settings and admin:sources, and an expiry must be in the future. Only a person signed in themselves may: not a personal access token or agent key.
         /// </summary>
         /// <returns>A <see cref="RequestInformation"/></returns>
         /// <param name="body">The request body</param>

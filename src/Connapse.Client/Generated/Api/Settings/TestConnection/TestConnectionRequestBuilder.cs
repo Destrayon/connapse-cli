@@ -34,7 +34,7 @@ namespace Connapse.Client.Api.Settings.TestConnection
         {
         }
         /// <summary>
-        /// Test connectivity to external services (Ollama, MinIO, etc.)
+        /// Test connectivity to external services (Ollama, MinIO, etc.). An API key left out is the saved one only when the provider and every address are the saved ones; otherwise send the key.
         /// </summary>
         /// <returns>A <see cref="global::Connapse.Client.Models.ConnectionTestResult"/></returns>
         /// <param name="body">The request body</param>
@@ -67,7 +67,7 @@ namespace Connapse.Client.Api.Settings.TestConnection
             return await RequestAdapter.SendAsync<global::Connapse.Client.Models.ConnectionTestResult>(requestInfo, global::Connapse.Client.Models.ConnectionTestResult.CreateFromDiscriminatorValue, errorMapping, cancellationToken).ConfigureAwait(false);
         }
         /// <summary>
-        /// Test connectivity to external services (Ollama, MinIO, etc.)
+        /// Test connectivity to external services (Ollama, MinIO, etc.). An API key left out is the saved one only when the provider and every address are the saved ones; otherwise send the key.
         /// </summary>
         /// <returns>A <see cref="RequestInformation"/></returns>
         /// <param name="body">The request body</param>
