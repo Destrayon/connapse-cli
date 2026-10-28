@@ -34,7 +34,7 @@ public static class ConnectionDiscoverCommand
             if (parseResult.GetValue(jsonOption))
             {
                 Console.WriteLine(AdminHelpers.ToJson(found));
-                return CliExitCodes.Success;
+                return Exit(found);
             }
 
             Console.WriteLine($"Outcome: {found.Outcome}");
@@ -52,11 +52,15 @@ public static class ConnectionDiscoverCommand
                 Console.WriteLine($"Install: {found.InstallUrl}");
             if (!string.IsNullOrEmpty(found.TroubleshootingUrl))
                 Console.WriteLine($"Troubleshooting: {found.TroubleshootingUrl}");
-            return CliExitCodes.Success;
+            return Exit(found);
         }));
 
         return cmd;
     }
+
+    /// <summary>Only a listing is a success; NotConfigured, Denied and Failed exit 1 so scripts don't read them as empty.</summary>
+    private static int Exit(Connapse.Client.Models.ConnectionDiscovery found) =>
+        found.Outcome == Connapse.Client.Models.DiscoveryOutcome.Listed ? CliExitCodes.Success : CliExitCodes.UserError;
 
     private static void Section(string title, IEnumerable<string?>? items)
     {

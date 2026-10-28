@@ -291,6 +291,21 @@ public sealed class ConnectionCommandTests : IDisposable
         Assert.Contains("  ENG  Engineering", result.Output);
     }
 
+    [Theory]
+    [InlineData("NotConfigured")]
+    [InlineData("Denied")]
+    [InlineData("Failed")]
+    public async Task Discover_AnythingButListed_ExitsOne(string outcome)
+    {
+        _host.Routes(($"GET /api/v1/connections/{Id}/discover", CommandHost.Json(
+            $$"""{"outcome":"{{outcome}}","message":"Access denied."}""")));
+
+        var result = await _host.RunAsync("connection", "discover", Id);
+
+        Assert.Equal(1, result.ExitCode);
+        Assert.Contains("Access denied.", result.Output);
+    }
+
     [Fact]
     public async Task ForgetHostKey_DeletesTheSavedKey()
     {
@@ -300,6 +315,30 @@ public sealed class ConnectionCommandTests : IDisposable
 
         Assert.Equal(0, result.ExitCode);
         Assert.Contains("Forgot the host key for 'docs-bucket'.", result.Output);
+    }
+
+    [Fact]
+    public async Task ReplaceSecret_ReadsThePassphraseFromItsFile()
+    {
+        var key = Path.GetTempFileName();
+        var passphrase = Path.GetTempFileName();
+        File.WriteAllText(key, "-----BEGIN OPENSSH PRIVATE KEY-----");
+        File.WriteAllText(passphrase, "pw\n");
+        try
+        {
+            _host.Routes(($"PUT /api/v1/connections/{Id}/secret", CommandHost.Json(Connection)));
+
+            var result = await _host.RunAsync("connection", "replace-secret", Id,
+                "--private-key-file", key, "--passphrase-file", passphrase);
+
+            Assert.Equal(0, result.ExitCode);
+            Assert.Contains("\"passphrase\":\"pw\"", _host.Bodies.Single());
+        }
+        finally
+        {
+            File.Delete(key);
+            File.Delete(passphrase);
+        }
     }
 
     [Fact]

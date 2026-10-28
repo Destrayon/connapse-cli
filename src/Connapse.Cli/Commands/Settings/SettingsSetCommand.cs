@@ -63,6 +63,11 @@ public static class SettingsSetCommand
             }
 
             var saved = await SettingsHelpers.PutAsync(api, category, settings, ct);
+            if (saved["success"]?.GetValueKind() == System.Text.Json.JsonValueKind.False)
+            {
+                Console.Error.WriteLine(saved["message"]?.GetValue<string>() ?? $"The server didn't save the '{category}' settings.");
+                return CliExitCodes.UserError;
+            }
             AdminHelpers.WriteSuccess(saved["message"]?.GetValue<string>() ?? $"Saved the '{category}' settings.");
             if (saved["legacyVectorsExist"]?.GetValue<bool>() == true)
                 AdminHelpers.WriteWarning(

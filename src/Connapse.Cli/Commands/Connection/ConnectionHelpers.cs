@@ -54,7 +54,8 @@ internal sealed class SecretOptions
     public Option<string?> Token { get; } = new("--token") { Description = "The access token or password." };
     public Option<bool> TokenStdin { get; } = new("--token-stdin") { Description = "Read the token from stdin." };
     public Option<string?> PrivateKeyFile { get; } = new("--private-key-file") { Description = "A file holding the SSH private key (SFTP)." };
-    public Option<string?> Passphrase { get; } = new("--passphrase") { Description = "The private key's passphrase." };
+    public Option<string?> Passphrase { get; } = new("--passphrase") { Description = "The private key's passphrase. --passphrase-file keeps it out of the shell's history." };
+    public Option<string?> PassphraseFile { get; } = new("--passphrase-file") { Description = "A file holding the private key's passphrase." };
 
     public void AddTo(Command command)
     {
@@ -62,6 +63,7 @@ internal sealed class SecretOptions
         command.Options.Add(TokenStdin);
         command.Options.Add(PrivateKeyFile);
         command.Options.Add(Passphrase);
+        command.Options.Add(PassphraseFile);
     }
 
     public (string? Token, string? PrivateKey, string? Passphrase) Read(ParseResult parseResult)
@@ -76,6 +78,13 @@ internal sealed class SecretOptions
 
         var keyFile = parseResult.GetValue(PrivateKeyFile);
         var key = keyFile is null ? null : AdminHelpers.ReadFile(keyFile, "--private-key-file");
-        return (token, key, parseResult.GetValue(Passphrase));
+        var passphrase = parseResult.GetValue(Passphrase);
+        if (parseResult.GetValue(PassphraseFile) is { } passphraseFile)
+        {
+            if (passphrase is not null)
+                throw new Services.CliValidationError("Pass --passphrase or --passphrase-file, not both.");
+            passphrase = AdminHelpers.ReadFile(passphraseFile, "--passphrase-file").TrimEnd('\r', '\n');
+        }
+        return (token, key, passphrase);
     }
 }

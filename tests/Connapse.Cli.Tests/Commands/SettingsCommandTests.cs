@@ -78,6 +78,17 @@ public sealed class SettingsCommandTests : IDisposable
     }
 
     [Fact]
+    public async Task Set_TheServerSaysItFailed_ExitsOne()
+    {
+        _host.Routes(("PUT /api/settings/search", CommandHost.Json("""{"success":false,"message":"topK must be positive."}""")));
+
+        var result = await _host.RunAsync("settings", "set", "search", "--settings", """{"topK":-1}""");
+
+        Assert.Equal(1, result.ExitCode);
+        Assert.Contains("topK must be positive.", result.Error);
+    }
+
+    [Fact]
     public async Task Set_NewEmbeddingModel_WarnsAboutOldVectors()
     {
         _host.Routes(
