@@ -31,6 +31,7 @@ public static class RootCommandBuilder
         root.Subcommands.Add(AuthCommand.Create(services, orgOption));
         root.Subcommands.Add(OrgCommand.Create(services, orgOption));
         root.Subcommands.Add(ContainerCommand.Create(services, orgOption));
+        root.Subcommands.Add(ConnectionCommand.Create(services, orgOption));
         root.Subcommands.Add(FilesCommand.Create(services, orgOption));
         root.Subcommands.Add(UploadCommand.Create(services, orgOption));
         root.Subcommands.Add(SearchCommand.Create(services, orgOption));
