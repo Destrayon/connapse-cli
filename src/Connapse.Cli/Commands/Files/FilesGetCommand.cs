@@ -3,6 +3,7 @@ using System.Net;
 using Connapse.Cli.Commands.Container;
 using Connapse.Cli.Services;
 using Connapse.Client;
+using Connapse.Client.Models;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Connapse.Cli.Commands.Files;
@@ -19,7 +20,7 @@ public static class FilesGetCommand
 
         var fileOption = new Option<string>("--file")
         {
-            Description = "File ID (GUID) or file path inside the container.",
+            Description = "File ID (GUID) or file path inside the container, such as docs/guide.md.",
             Required = true,
         };
 
@@ -40,7 +41,7 @@ public static class FilesGetCommand
 
             var fileId = Guid.TryParse(fileRef, out _)
                 ? fileRef
-                : await ResolveFileIdByNameAsync(client, containerId.Value, fileRef, ct)
+                : await ResolveFileIdByPathAsync(client, containerId.Value, fileRef, ct)
                     ?? throw new CliValidationError($"File '{fileRef}' not found in container '{containerName}'.");
 
             try
@@ -62,19 +63,43 @@ public static class FilesGetCommand
         return cmd;
     }
 
-    private static async Task<string?> ResolveFileIdByNameAsync(
+    /// <summary>
+    /// Finds a file by its path in the container. The server lists only what sits directly in one
+    /// folder, so this lists the file's own folder, every page of it, and matches the full path.
+    /// An exact match wins; otherwise a single match ignoring case is used, and several are an error.
+    /// </summary>
+    private static async Task<string?> ResolveFileIdByPathAsync(
         ConnapseApiClient client,
         Guid containerId,
-        string nameOrPath,
+        string path,
         CancellationToken ct)
     {
-        var normalized = nameOrPath.StartsWith('/') ? nameOrPath : "/" + nameOrPath;
-        var listing = await client.Api.Containers[containerId].Files.GetAsync(r => r.QueryParameters.Path = "/", ct);
+        var normalized = "/" + path.Replace('\\', '/').Trim().TrimStart('/');
+        var folder = normalized[..(normalized.LastIndexOf('/') + 1)];
 
-        return listing?.Items?
-            .Where(item => item.IsFolder != true)
-            .FirstOrDefault(item => string.Equals(item.Name, nameOrPath, StringComparison.OrdinalIgnoreCase)
-                || string.Equals(item.Path, normalized, StringComparison.OrdinalIgnoreCase))?
-            .Id;
+        var entries = await Paging.ReadAllAsync<BrowseEntry>(async (skip, take) =>
+        {
+            var page = await client.Api.Containers[containerId].Files.GetAsync(r =>
+            {
+                r.QueryParameters.Path = folder;
+                r.QueryParameters.Skip = skip;
+                r.QueryParameters.Take = take;
+            }, ct);
+            return (page?.Items ?? [], page?.HasMore ?? false);
+        });
+
+        var files = entries.Where(e => e.IsFolder != true && e.Id is not null).ToList();
+
+        var exact = files.FirstOrDefault(e => string.Equals(e.Path, normalized, StringComparison.Ordinal));
+        if (exact is not null)
+            return exact.Id;
+
+        var caseless = files.Where(e => string.Equals(e.Path, normalized, StringComparison.OrdinalIgnoreCase)).ToList();
+        return caseless.Count switch
+        {
+            0 => null,
+            1 => caseless[0].Id,
+            _ => throw new CliValidationError($"More than one file matches '{path}' when case is ignored; give its exact path or ID."),
+        };
     }
 }
