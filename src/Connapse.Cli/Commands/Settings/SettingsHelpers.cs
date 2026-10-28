@@ -1,4 +1,5 @@
 using System.CommandLine;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -19,20 +20,37 @@ internal static class SettingsHelpers
     public static Argument<string> CategoryArgument() =>
         new("category") { Description = $"The settings category: {Categories}." };
 
-    public static async Task<JsonObject> GetAsync(ApiClient api, string category, CancellationToken ct)
+    public static async Task<JsonObject> GetAsync(ApiClient api, string category, CancellationToken ct) =>
+        (await ReadAsync(api, category, ct)).Settings;
+
+    /// <summary>
+    /// The settings and their version: the ETag the server sent, or null when it sent none (a server from before
+    /// versioned saves) or only a weak one, which If-Match never matches (RFC 9110 §13.1.1).
+    /// </summary>
+    public static async Task<(JsonObject Settings, EntityTagHeaderValue? Version)> ReadAsync(ApiClient api, string category, CancellationToken ct)
     {
         using var response = await AdminHelpers.AdminAsync(AdminHelpers.SettingsScope,
             () => api.SendRawAsync(HttpMethod.Get, Path(category), content: null, ct));
         var text = await response.Content.ReadAsStringAsync(ct);
-        return JsonNode.Parse(text) as JsonObject
+        var settings = JsonNode.Parse(text) as JsonObject
             ?? throw new CliServerError($"The server's '{category}' settings aren't a JSON object.");
+        return (settings, response.Headers.ETag is { IsWeak: false } etag ? etag : null);
     }
 
-    public static async Task<JsonObject> PutAsync(ApiClient api, string category, JsonObject settings, CancellationToken ct)
+    /// <summary>
+    /// Saves the category. With <paramref name="version"/>, only if the settings still have it: the server
+    /// answers 412 Precondition Failed when someone saved them since, and stores nothing.
+    /// </summary>
+    public static async Task<JsonObject> PutAsync(
+        ApiClient api, string category, JsonObject settings, CancellationToken ct, EntityTagHeaderValue? version = null)
     {
         using var content = new StringContent(settings.ToJsonString(), Encoding.UTF8, "application/json");
+        // HttpRequestHeaders has no public constructor; a message's own is the way to build one.
+        using var conditions = new HttpRequestMessage();
+        if (version is not null)
+            conditions.Headers.IfMatch.Add(version);
         using var response = await AdminHelpers.AdminAsync(AdminHelpers.SettingsScope,
-            () => api.SendRawAsync(HttpMethod.Put, Path(category), content, ct));
+            () => api.SendRawAsync(HttpMethod.Put, Path(category), content, ct, conditions.Headers));
         var text = await response.Content.ReadAsStringAsync(ct);
         return string.IsNullOrWhiteSpace(text) ? [] : JsonNode.Parse(text) as JsonObject ?? [];
     }

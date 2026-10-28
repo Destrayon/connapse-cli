@@ -1,4 +1,6 @@
 using System.CommandLine;
+using System.Net;
+using System.Net.Http.Headers;
 using System.Text.Json.Nodes;
 using Connapse.Cli.Commands.Admin;
 using Connapse.Cli.Services;
@@ -39,6 +41,8 @@ public static class SettingsSetCommand
 
             var api = services.GetRequiredService<ApiClient>();
             JsonObject settings;
+            // The version the change is made on; null for --settings, which replaces whatever is saved.
+            EntityTagHeaderValue? version = null;
             if (replacement is not null)
             {
                 AdminHelpers.ParseJsonObject(replacement, replaceOptions.Inline.Name);
@@ -47,7 +51,7 @@ public static class SettingsSetCommand
             else
             {
                 // The server replaces the whole category, so the change goes onto what is saved now.
-                settings = await SettingsHelpers.GetAsync(api, category, ct);
+                (settings, version) = await SettingsHelpers.ReadAsync(api, category, ct);
                 foreach (var pair in pairs)
                 {
                     var eq = pair.IndexOf('=');
@@ -62,7 +66,19 @@ public static class SettingsSetCommand
                 }
             }
 
-            var saved = await SettingsHelpers.PutAsync(api, category, settings, ct);
+            JsonObject saved;
+            try
+            {
+                saved = await SettingsHelpers.PutAsync(api, category, settings, ct, version);
+            }
+            catch (ApiRequestException ex) when (ex.StatusCode == HttpStatusCode.PreconditionFailed)
+            {
+                // Someone saved the category after it was read; saving anyway would undo their change.
+                Console.Error.WriteLine(
+                    $"Settings changed, reload: the '{category}' settings were saved by someone else after this command read them, so nothing was saved. " +
+                    "Run the command again to make your change on top of theirs.");
+                return CliExitCodes.UserError;
+            }
             if (saved["success"]?.GetValueKind() == System.Text.Json.JsonValueKind.False)
             {
                 Console.Error.WriteLine(saved["message"]?.GetValue<string>() ?? $"The server didn't save the '{category}' settings.");
