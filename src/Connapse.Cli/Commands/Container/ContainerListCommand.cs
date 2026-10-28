@@ -15,15 +15,17 @@ public static class ContainerListCommand
         {
             var client = services.GetRequiredService<ConnapseApiClient>();
 
-            var paged = await client.Api.Containers.GetAsync(r =>
+            var containers = await Paging.ReadAllAsync<Connapse.Client.Models.Container>(async (skip, take) =>
             {
-                r.QueryParameters.Skip = 0;
-                r.QueryParameters.Take = 100;
-            }, ct);
+                var page = await client.Api.Containers.GetAsync(r =>
+                {
+                    r.QueryParameters.Skip = skip;
+                    r.QueryParameters.Take = take;
+                }, ct);
+                return (page?.Items ?? [], page?.HasMore ?? false);
+            });
 
-            var containers = paged?.Items;
-
-            if (containers is null || containers.Count == 0)
+            if (containers.Count == 0)
             {
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine("No containers found.");
@@ -32,9 +34,7 @@ public static class ContainerListCommand
             }
 
             Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine(paged!.HasMore == true
-                ? $"Showing {containers.Count} of {paged.TotalCount} container(s)"
-                : $"Found {containers.Count} container(s)");
+            Console.WriteLine($"Found {containers.Count} container(s)");
             Console.ResetColor();
             Console.WriteLine();
 
