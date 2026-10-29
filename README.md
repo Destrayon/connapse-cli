@@ -144,7 +144,7 @@ These need the Owner or Admin role. A personal access token also needs the match
 | `connapse source retry-failed <source>` | Queue its failed documents for another try. |
 | `connapse source scope-schema <provider>` | Print the JSON schema of each scope a provider takes. |
 | `connapse settings get <category>` | Print a category (embedding, chunking, search, llm, upload) as JSON. |
-| `connapse settings set <category> key=value... \| --settings <json>` | Change some settings, keeping the rest, or replace the whole category. |
+| `connapse settings set <category> key=value... \| --settings <json>` | Change some settings, keeping the rest, or replace the whole category. With key=value pairs, the save is refused if someone else saved the category after it was read. |
 | `connapse settings reset <category>` | Reset a category to its defaults. |
 | `connapse settings test <embedding\|llm\|crossencoder\|minio> [--settings <json>]` | Check the server can reach the service; exits 1 if not. |
 | `connapse settings reindex [--force] [--container <name>]` and `settings reindex-status` | Re-embed documents in the background and follow progress. |

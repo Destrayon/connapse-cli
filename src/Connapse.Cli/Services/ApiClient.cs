@@ -65,9 +65,10 @@ public sealed class ApiClient
         using var response = await SendWithAuthAsync(HttpMethod.Delete, path, content: null, ct);
     }
 
-    public async Task<HttpResponseMessage> SendRawAsync(HttpMethod method, string path, HttpContent? content, CancellationToken ct = default)
+    public async Task<HttpResponseMessage> SendRawAsync(
+        HttpMethod method, string path, HttpContent? content, CancellationToken ct = default, HttpRequestHeaders? headers = null)
     {
-        return await SendWithAuthAsync(method, path, content, ct);
+        return await SendWithAuthAsync(method, path, content, ct, headers);
     }
 
     /// <summary>

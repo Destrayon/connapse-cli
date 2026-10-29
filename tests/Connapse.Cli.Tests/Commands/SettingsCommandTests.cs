@@ -103,6 +103,57 @@ public sealed class SettingsCommandTests : IDisposable
     }
 
     [Fact]
+    public async Task Set_SendsTheVersionItReadInIfMatch()
+    {
+        _host.Routes(
+            ("GET /api/settings/chunking", Tagged(CommandHost.Json(Chunking), "\"v1\"")),
+            ("PUT /api/settings/chunking", CommandHost.Json("""{"success":true}""")));
+
+        var result = await _host.RunAsync("settings", "set", "chunking", "overlap=32");
+
+        Assert.Equal(0, result.ExitCode);
+        var put = _host.Handler.Requests.Single(r => r.Method == HttpMethod.Put);
+        Assert.Equal("\"v1\"", put.Headers.IfMatch.Single().ToString());
+    }
+
+    [Fact]
+    public async Task Set_ServerSentNoVersion_SavesWithoutIfMatch()
+    {
+        _host.Routes(
+            ("GET /api/settings/chunking", CommandHost.Json(Chunking)),
+            ("PUT /api/settings/chunking", CommandHost.Json("""{"success":true}""")));
+
+        var result = await _host.RunAsync("settings", "set", "chunking", "overlap=32");
+
+        Assert.Equal(0, result.ExitCode);
+        Assert.Empty(_host.Handler.Requests.Single(r => r.Method == HttpMethod.Put).Headers.IfMatch);
+    }
+
+    [Fact]
+    public async Task Set_ChangedSinceItWasRead_SaysReloadAndExitsOne()
+    {
+        _host.Routes(
+            ("GET /api/settings/chunking", Tagged(CommandHost.Json(Chunking), "\"v1\"")),
+            ("PUT /api/settings/chunking", CommandHost.Json(
+                """{"type":"https://github.com/Destrayon/Connapse/blob/main/docs/problems.md#settings-changed","title":"Settings changed since they were read","status":412,"detail":"The chunking settings were changed after you read them. Read them again and make your change again."}""",
+                HttpStatusCode.PreconditionFailed)));
+
+        var result = await _host.RunAsync("settings", "set", "chunking", "overlap=32");
+
+        Assert.Equal(1, result.ExitCode);
+        Assert.Contains("settings changed, reload", result.Error, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("nothing was saved", result.Error);
+        Assert.DoesNotContain("updated", result.Output);
+    }
+
+    private static Func<HttpResponseMessage> Tagged(Func<HttpResponseMessage> response, string etag) => () =>
+    {
+        var message = response();
+        message.Headers.ETag = System.Net.Http.Headers.EntityTagHeaderValue.Parse(etag);
+        return message;
+    };
+
+    [Fact]
     public async Task Set_APairWithoutAnEquals_IsAValidationError()
     {
         _host.Routes(("GET /api/settings/chunking", CommandHost.Json(Chunking)));
