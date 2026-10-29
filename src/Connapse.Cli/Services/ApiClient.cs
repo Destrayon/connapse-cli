@@ -28,17 +28,20 @@ public sealed class ApiClient
     private readonly CredentialStore _credStore;
     private readonly IOrgContextProvider _orgContext;
     private readonly IEditionProvider _editionProvider;
+    private readonly ServerFeatures _serverFeatures;
 
     public ApiClient(
         IHttpClientFactory httpClientFactory,
         CredentialStore credStore,
         IOrgContextProvider orgContext,
-        IEditionProvider editionProvider)
+        IEditionProvider editionProvider,
+        ServerFeatures? serverFeatures = null)
     {
         _httpClientFactory = httpClientFactory;
         _credStore = credStore;
         _orgContext = orgContext;
         _editionProvider = editionProvider;
+        _serverFeatures = serverFeatures ?? new ServerFeatures(httpClientFactory);
     }
 
     /// <summary>Whether a sign-in is saved; without one, requests go to the default server unauthenticated.</summary>
@@ -121,6 +124,9 @@ public sealed class ApiClient
             var body = await response.Content.ReadAsStringAsync(ct);
             var status = response.StatusCode;
             response.Dispose();
+            // A server older than the CLI has no route for a newer feature: say which, not "404".
+            if (await _serverFeatures.IsMissingRouteAsync(status, body, c => SendOnceAsync(HttpMethod.Options, path, null, c), ct))
+                throw await _serverFeatures.MissingAsync(method, path, ct);
             var (message, problem) = ApiRequestException.ParseBody(body);
             var fullMessage = $"{(int)status} {status}: {message}";
             throw new ApiRequestException(status, fullMessage, body, problem);

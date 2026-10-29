@@ -169,10 +169,20 @@ For example, `connapse api GET "/api/sources?take=50" --paginate`, or `connapse 
 
 | Command | Description |
 |---|---|
-| `connapse version` | Print the installed CLI version. |
+| `connapse version` | Print the installed CLI version, and the server's version and features when signed in. |
 | `connapse update` | Check for and install a newer version from GitHub. |
 | `connapse update --check` | Check for a newer version without installing. |
 | `connapse update --include-prerelease` | Include pre-release versions. |
+
+### Older servers
+
+The CLI works with the current Connapse server release and the one before it. When a command needs something your server doesn't have yet, it says which feature is missing and which server version you run, and exits with code 1:
+
+```
+Error: This server doesn't support sources (it has no GET /api/sources). It runs Connapse 0.3.x or earlier (it doesn't report its version). Upgrade the server to use this command.
+```
+
+`tests/server/smoke/run-smoke-test.sh <image> [missing-features]` runs the CLI against a released server image to check this.
 
 ## Configuration
 

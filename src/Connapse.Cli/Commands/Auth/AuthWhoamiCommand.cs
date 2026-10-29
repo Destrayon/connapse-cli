@@ -25,7 +25,17 @@ public static class AuthWhoamiCommand
 
             var edition = await editionDetector.GetEditionAsync(forceRefresh: true, ct);
 
-            var me = await client.Api.V1.Auth.Me.GetAsync(cancellationToken: ct);
+            // A server from before /api/v1/auth/me can't say who the token belongs to; the rest still shows.
+            Connapse.Client.Models.MeResponse? me = null;
+            bool meMissing = false;
+            try
+            {
+                me = await client.Api.V1.Auth.Me.GetAsync(cancellationToken: ct);
+            }
+            catch (ServerFeatureMissingException)
+            {
+                meMissing = true;
+            }
 
             var config = configStore.Load();
 
@@ -45,6 +55,10 @@ public static class AuthWhoamiCommand
                     PrintRow("Name", me.DisplayName);
                 if (me.Roles is { Count: > 0 })
                     PrintRow("Roles", string.Join(", ", me.Roles));
+            }
+            else if (meMissing)
+            {
+                PrintRow("Email", $"{creds.UserEmail} (as signed in; this server can't report the user)");
             }
 
             if (edition == ServerEdition.Cloud)
