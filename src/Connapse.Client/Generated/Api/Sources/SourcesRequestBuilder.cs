@@ -76,7 +76,7 @@ namespace Connapse.Client.Api.Sources
             return await RequestAdapter.SendAsync<global::Connapse.Client.Models.PagedResponseOfSourceResponse>(requestInfo, global::Connapse.Client.Models.PagedResponseOfSourceResponse.CreateFromDiscriminatorValue, errorMapping, cancellationToken).ConfigureAwait(false);
         }
         /// <summary>
-        /// Create a source inside an existing connection. Administrator only — a source chooses what external data is indexed.
+        /// Create a source inside an existing connection. Administrator only, and a token needs admin:sources: a source chooses what external data is indexed.
         /// </summary>
         /// <returns>A <see cref="global::Connapse.Client.Models.SourceResponse"/></returns>
         /// <param name="body">The request body</param>
@@ -130,7 +130,7 @@ namespace Connapse.Client.Api.Sources
             return requestInfo;
         }
         /// <summary>
-        /// Create a source inside an existing connection. Administrator only — a source chooses what external data is indexed.
+        /// Create a source inside an existing connection. Administrator only, and a token needs admin:sources: a source chooses what external data is indexed.
         /// </summary>
         /// <returns>A <see cref="RequestInformation"/></returns>
         /// <param name="body">The request body</param>

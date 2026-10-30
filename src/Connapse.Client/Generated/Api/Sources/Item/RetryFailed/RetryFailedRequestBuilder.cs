@@ -34,7 +34,7 @@ namespace Connapse.Client.Api.Sources.Item.RetryFailed
         {
         }
         /// <summary>
-        /// Re-enqueue every document of a source whose ingestion failed, with a fresh attempt budget, rather than waiting for the retry cooldown or a change to the file.
+        /// Re-enqueue every document of a source whose ingestion failed, with a fresh attempt budget, rather than waiting for the retry cooldown or a change to the file. Administrator only; a token needs admin:sources.
         /// </summary>
         /// <returns>A <see cref="global::Connapse.Client.Models.RetryFailedResponse"/></returns>
         /// <param name="cancellationToken">Cancellation token to use when cancelling requests</param>
@@ -63,7 +63,7 @@ namespace Connapse.Client.Api.Sources.Item.RetryFailed
             return await RequestAdapter.SendAsync<global::Connapse.Client.Models.RetryFailedResponse>(requestInfo, global::Connapse.Client.Models.RetryFailedResponse.CreateFromDiscriminatorValue, errorMapping, cancellationToken).ConfigureAwait(false);
         }
         /// <summary>
-        /// Re-enqueue every document of a source whose ingestion failed, with a fresh attempt budget, rather than waiting for the retry cooldown or a change to the file.
+        /// Re-enqueue every document of a source whose ingestion failed, with a fresh attempt budget, rather than waiting for the retry cooldown or a change to the file. Administrator only; a token needs admin:sources.
         /// </summary>
         /// <returns>A <see cref="RequestInformation"/></returns>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
