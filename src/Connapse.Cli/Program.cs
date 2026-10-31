@@ -1,5 +1,4 @@
 using System.CommandLine;
-using System.Net.Http;
 using Connapse.Cli.Commands;
 using Connapse.Cli.Services;
 using Microsoft.Extensions.DependencyInjection;
@@ -61,30 +60,7 @@ internal static class Program
         services.AddSingleton<OrgContextProvider>(sp =>
             (OrgContextProvider)sp.GetRequiredService<IOrgContextProvider>());
 
-        foreach (var (name, followRedirects) in new[] { (HttpClientNames.ConnapseServer, true), (HttpClientNames.ConnapseServerNoRedirect, false) })
-        {
-            services.AddHttpClient(name, (sp, client) =>
-            {
-                var credStore = sp.GetRequiredService<CredentialStore>();
-                var baseUrl = credStore.Load()?.ApiBaseUrl ?? "https://localhost:5001";
-                client.BaseAddress = new Uri(baseUrl);
-                client.Timeout = TimeSpan.FromMinutes(10);
-            })
-            .ConfigurePrimaryHttpMessageHandler(sp =>
-            {
-                var credStore = sp.GetRequiredService<CredentialStore>();
-                var baseUrl = credStore.Load()?.ApiBaseUrl ?? "https://localhost:5001";
-                var serverUri = new Uri(baseUrl);
-                var isLocalhost = serverUri.Host is "localhost" or "127.0.0.1" or "::1";
-                return new HttpClientHandler
-                {
-                    AllowAutoRedirect = followRedirects,
-                    ServerCertificateCustomValidationCallback = isLocalhost
-                        ? (_, _, _, _) => true
-                        : null,
-                };
-            });
-        }
+        services.AddConnapseServerClients();
 
         services.AddSingleton<EditionDetector>();
         services.AddSingleton<IEditionProvider>(sp => sp.GetRequiredService<EditionDetector>());
