@@ -44,6 +44,7 @@ public sealed class CommandHost : IDisposable
         collection.AddSingleton<OrgContextProvider>(sp => (OrgContextProvider)sp.GetRequiredService<IOrgContextProvider>());
         collection.AddSingleton<IHttpClientFactory>(new MockHttpClientFactory(Handler, BaseUri));
         collection.AddSingleton<IEditionProvider, SelfHostedEdition>();
+        collection.AddSingleton<EditionDetector>();
         collection.AddSingleton<ApiClient>();
         collection.AddSingleton(sp => ApiClientHandler.CreateClient(sp.GetRequiredService<ApiClient>()));
         collection.AddSingleton<IConsolePrompt, ConsolePrompt>();
@@ -83,7 +84,10 @@ public sealed class CommandHost : IDisposable
         () => new HttpResponseMessage(status);
 
     /// <summary>Parses and runs a command line, mapping errors the way Program.Main does.</summary>
-    public async Task<CommandResult> RunAsync(params string[] args)
+    public Task<CommandResult> RunAsync(params string[] args) => RunWithInputAsync(null, args);
+
+    /// <summary>Runs a command line with <paramref name="input"/>, when given, as what the user types on stdin.</summary>
+    public async Task<CommandResult> RunWithInputAsync(string? input, params string[] args)
     {
         var orgOption = new Option<string?>("--org") { Recursive = true };
         var verboseOption = new Option<bool>("--verbose") { Recursive = true };
@@ -91,8 +95,11 @@ public sealed class CommandHost : IDisposable
 
         var output = new StringWriter();
         var error = new StringWriter();
+        var originalIn = Console.In;
         var originalOut = Console.Out;
         var originalError = Console.Error;
+        if (input is not null)
+            Console.SetIn(new StringReader(input));
         Console.SetOut(output);
         Console.SetError(error);
         int exit;
@@ -111,6 +118,7 @@ public sealed class CommandHost : IDisposable
         }
         finally
         {
+            Console.SetIn(originalIn);
             Console.SetOut(originalOut);
             Console.SetError(originalError);
         }
@@ -121,6 +129,9 @@ public sealed class CommandHost : IDisposable
     /// <summary>The requests sent, as "METHOD /path?query".</summary>
     public IReadOnlyList<string> Sent =>
         Handler.Requests.Select(r => $"{r.Method} {r.RequestUri!.PathAndQuery}").ToList();
+
+    /// <summary>The credentials the CLI has stored, as a later command would load them.</summary>
+    public CliCredentials? StoredCredentials => _services.GetRequiredService<CredentialStore>().Load();
 
     public void Dispose()
     {

@@ -19,6 +19,9 @@ namespace Connapse.Cli.Services;
 /// </summary>
 public sealed class ApiClient
 {
+    private const string ApiKeyHeader = "X-Api-Key";
+    private const string PersonalAccessTokenPrefix = "cnp_";
+
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         PropertyNameCaseInsensitive = true,
@@ -152,7 +155,7 @@ public sealed class ApiClient
 
         var creds = _credStore.Load();
         if (creds is not null)
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", creds.ApiKey);
+            AddCredentials(request, creds.ApiKey);
 
         var orgSlug = _orgContext.CurrentOrgSlug;
         if (!string.IsNullOrWhiteSpace(orgSlug))
@@ -164,6 +167,23 @@ public sealed class ApiClient
 
         using var client = _httpClientFactory.CreateClient(clientName);
         return await client.SendAsync(request, ct);
+    }
+
+    /// <summary>
+    /// The server reads a personal access token only from X-Api-Key; as a Bearer token it goes to
+    /// the sign-in token handler and is rejected. Every other token is a sign-in token.
+    /// </summary>
+    private static void AddCredentials(HttpRequestMessage request, string token)
+    {
+        if (token.StartsWith(PersonalAccessTokenPrefix, StringComparison.Ordinal))
+        {
+            request.Headers.Remove(ApiKeyHeader);
+            request.Headers.Add(ApiKeyHeader, token);
+        }
+        else
+        {
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        }
     }
 
     private async Task<bool> TryRefreshAsync(CancellationToken ct)

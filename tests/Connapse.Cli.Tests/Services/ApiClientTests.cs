@@ -65,6 +65,27 @@ public sealed class ApiClientTests : IDisposable
     }
 
     [Fact]
+    public async Task Personal_access_token_goes_in_the_api_key_header_not_authorization()
+    {
+        _credStore.Save(new CliCredentials(
+            ApiKey: "cnp_abc123",
+            ApiBaseUrl: "https://server.example",
+            UserEmail: "alice@example.com",
+            RefreshToken: null,
+            ExpiresAt: null));
+        _handler.Responder = _ => new HttpResponseMessage(HttpStatusCode.OK)
+        {
+            Content = new StringContent("{}"),
+        };
+
+        await CreateClient().GetAsync<object>("/api/containers");
+
+        var req = Assert.Single(_handler.Requests);
+        Assert.Equal("cnp_abc123", req.Headers.GetValues("X-Api-Key").Single());
+        Assert.Null(req.Headers.Authorization);
+    }
+
+    [Fact]
     public async Task Injects_org_header_when_cloud_and_org_set()
     {
         _orgContext.CurrentOrgSlug = "khastra";
