@@ -2,6 +2,7 @@ using System.CommandLine;
 using System.Net;
 using Connapse.Cli.Commands.Admin;
 using Connapse.Cli.Services;
+using Connapse.Client;
 using Connapse.Client.Models;
 
 namespace Connapse.Cli.Commands.Memory;
@@ -9,14 +10,37 @@ namespace Connapse.Cli.Commands.Memory;
 /// <summary>The options the memory commands share, the hint shown when the server refuses, and how a fact is printed.</summary>
 internal static class MemoryHelpers
 {
-    /// <summary>The caller's own personal space, which the server makes on first use.</summary>
-    public const string PersonalSpace = "my-memory";
+    public static Option<string?> SpaceOption(string description) => new("--space") { Description = description };
 
-    public static Option<string> SpaceOption(string description) => new("--space")
+    /// <summary>
+    /// The space <paramref name="spaceOption"/> names. The server has no default space, so when it is missing
+    /// this fails before the command's own request, naming the spaces the caller can see when that lookup works.
+    /// </summary>
+    public static async Task<string> RequireSpaceAsync(
+        ParseResult parseResult, Option<string?> spaceOption, ConnapseApiClient client, CancellationToken ct)
     {
-        Description = description,
-        DefaultValueFactory = _ => PersonalSpace,
-    };
+        var space = parseResult.GetValue(spaceOption);
+        if (!string.IsNullOrWhiteSpace(space))
+            return space;
+
+        var message = "Pass --space <name-or-id> to say which memory space to use.";
+        try
+        {
+            var page = await client.Api.Memory.Spaces.GetAsync(r => r.QueryParameters.Limit = 20, ct);
+            var names = (page?.Items ?? []).Select(s => s.Name).Where(n => !string.IsNullOrEmpty(n)).ToList();
+            message += names.Count > 0
+                ? $"{Environment.NewLine}  Spaces you can see: {string.Join(", ", names)}"
+                : $"{Environment.NewLine}  You can't see any memory spaces yet.";
+            if (!string.IsNullOrEmpty(page?.NextCursor))
+                message += $"{Environment.NewLine}  More exist; 'connapse api GET /api/memory/spaces' lists them all.";
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            // The list is only a hint; the missing option is the error.
+        }
+
+        throw new CliValidationError(message);
+    }
 
     public static Option<bool> JsonOption() => new("--json") { Description = "Print the server's JSON." };
 

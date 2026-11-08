@@ -12,7 +12,7 @@ public static class MemoryListCommand
     public static Command Create(IServiceProvider services, Option<string?> orgOption)
     {
         var spaceOption = MemoryHelpers.SpaceOption(
-            $"The space to list, by name or ID. Defaults to '{MemoryHelpers.PersonalSpace}', your own personal space.");
+            "Required: the space to list, by name or ID, e.g. 'team-notes'.");
         var queryOption = new Option<string?>("--query") { Description = "Only facts containing this text." };
         var subjectOption = new Option<string?>("--subject") { Description = "Only facts about this subject." };
         var statusOption = new Option<string?>("--status")
@@ -39,8 +39,8 @@ public static class MemoryListCommand
 
         cmd.SetAction(services.WithOrgContext(orgOption, async (parseResult, ct) =>
         {
-            var space = parseResult.GetRequiredValue(spaceOption);
             var client = services.GetRequiredService<ConnapseApiClient>();
+            var space = await MemoryHelpers.RequireSpaceAsync(parseResult, spaceOption, client, ct);
             var page = await client.Api.Memory.Spaces[space].Facts.GetAsync(r =>
             {
                 r.QueryParameters.Q = parseResult.GetValue(queryOption);

@@ -16,7 +16,7 @@ public static class MemorySaveCommand
         var attributeArg = new Argument<string>("attribute") { Description = "Which property of the subject, e.g. 'owner'." };
         var valueArg = new Argument<string>("value") { Description = "The value, e.g. 'team-payments'." };
         var spaceOption = MemoryHelpers.SpaceOption(
-            $"The space to save into, by name or ID. Defaults to '{MemoryHelpers.PersonalSpace}', your own personal space.");
+            "Required: the space to save into, by name or ID, e.g. 'team-notes'.");
         var validFromOption = new Option<string?>("--valid-from")
         {
             Description = "When the fact became true: an ISO 8601 date or time; one without an offset is UTC.",
@@ -45,7 +45,8 @@ public static class MemorySaveCommand
 
         cmd.SetAction(services.WithOrgContext(orgOption, async (parseResult, ct) =>
         {
-            var space = parseResult.GetRequiredValue(spaceOption);
+            var client = services.GetRequiredService<ConnapseApiClient>();
+            var space = await MemoryHelpers.RequireSpaceAsync(parseResult, spaceOption, client, ct);
             var sources = parseResult.GetValue(sourceOption);
             var body = new RememberMemoryFactRequest
             {
@@ -58,7 +59,6 @@ public static class MemorySaveCommand
                 Reason = parseResult.GetValue(reasonOption),
             };
 
-            var client = services.GetRequiredService<ConnapseApiClient>();
             var saved = await MemoryHelpers.WriteAsync(() =>
                 client.Api.Memory.Spaces[space].Facts.PostAsync(body, cancellationToken: ct))
                 ?? throw new CliServerError("The server returned no saved fact.");

@@ -16,7 +16,7 @@ public sealed class MemoryCommandTests : IDisposable
         "replacesId":null,"reason":"from the on-call doc","author":{"userId":null,"agentId":null,"name":"alice"},
         "sources":[{"kind":"Document","ref":"{{DocId}}"}]}
         """;
-    private const string Space = $$"""{"id":"{{SpaceId}}","name":"my-memory","audience":"Personal"}""";
+    private const string Space = $$"""{"id":"{{SpaceId}}","name":"team-notes","audience":"Team"}""";
     private const string TeamSpace = $$"""{"id":"{{SpaceId}}","name":"team notes","audience":"Team"}""";
 
     private readonly CommandHost _host = new();
@@ -24,16 +24,16 @@ public sealed class MemoryCommandTests : IDisposable
     public void Dispose() => _host.Dispose();
 
     [Fact]
-    public async Task Save_PostsTheFactToMyMemoryByDefault()
+    public async Task Save_PostsTheFactToTheNamedSpace()
     {
-        _host.Routes(("POST /api/memory/spaces/my-memory/facts", CommandHost.Json(
+        _host.Routes(("POST /api/memory/spaces/team-notes/facts", CommandHost.Json(
             $$"""{"fact":{{Fact}},"savedTo":{{Space}}}""", HttpStatusCode.Created)));
 
-        var result = await _host.RunAsync("memory", "save", "billing-service", "owner", "team-payments",
+        var result = await _host.RunAsync("memory", "save", "billing-service", "owner", "team-payments", "--space", "team-notes",
             "--reason", "from the on-call doc", "--source", DocId, "--valid-from", "2026-11-01");
 
         Assert.Equal(0, result.ExitCode);
-        Assert.Equal("POST /api/memory/spaces/my-memory/facts", _host.Sent.Single());
+        Assert.Equal("POST /api/memory/spaces/team-notes/facts", _host.Sent.Single());
         var body = _host.Bodies.Single();
         Assert.Contains("\"subject\":\"billing-service\"", body);
         Assert.Contains("\"attribute\":\"owner\"", body);
@@ -41,7 +41,7 @@ public sealed class MemoryCommandTests : IDisposable
         Assert.Contains("\"validFrom\":\"2026-11-01\"", body);
         Assert.Contains($"\"sources\":[\"{DocId}\"]", body);
         Assert.Contains("\"reason\":\"from the on-call doc\"", body);
-        Assert.Contains("Saved to my-memory:", result.Output);
+        Assert.Contains("Saved to team-notes:", result.Output);
         Assert.Contains("billing-service / owner = team-payments", result.Output);
         Assert.Contains(FactId, result.Output);
     }
@@ -64,24 +64,24 @@ public sealed class MemoryCommandTests : IDisposable
     [Fact]
     public async Task Save_Json_PrintsTheServersResponse()
     {
-        _host.Routes(("POST /api/memory/spaces/my-memory/facts", CommandHost.Json(
+        _host.Routes(("POST /api/memory/spaces/team-notes/facts", CommandHost.Json(
             $$"""{"fact":{{Fact}},"savedTo":{{Space}}}""", HttpStatusCode.Created)));
 
-        var result = await _host.RunAsync("memory", "save", "billing-service", "owner", "team-payments", "--json");
+        var result = await _host.RunAsync("memory", "save", "billing-service", "owner", "team-payments", "--space", "team-notes", "--json");
 
         Assert.Equal(0, result.ExitCode);
         using var doc = System.Text.Json.JsonDocument.Parse(result.Output);
         Assert.Equal(FactId, doc.RootElement.GetProperty("fact").GetProperty("id").GetString());
-        Assert.Equal("my-memory", doc.RootElement.GetProperty("savedTo").GetProperty("name").GetString());
+        Assert.Equal("team-notes", doc.RootElement.GetProperty("savedTo").GetProperty("name").GetString());
     }
 
     [Fact]
     public async Task Save_Forbidden_NamesTheRoleAndScope()
     {
-        _host.Routes(("POST /api/memory/spaces/my-memory/facts", CommandHost.Json(
+        _host.Routes(("POST /api/memory/spaces/team-notes/facts", CommandHost.Json(
             """{"title":"Forbidden","status":403,"detail":"Not allowed."}""", HttpStatusCode.Forbidden)));
 
-        var result = await _host.RunAsync("memory", "save", "a", "b", "c");
+        var result = await _host.RunAsync("memory", "save", "a", "b", "c", "--space", "team-notes");
 
         Assert.NotEqual(0, result.ExitCode);
         Assert.Contains("Editor role", result.Error);
@@ -91,11 +91,11 @@ public sealed class MemoryCommandTests : IDisposable
     [Fact]
     public async Task Save_ABadDate_ShowsTheServersProblem()
     {
-        _host.Routes(("POST /api/memory/spaces/my-memory/facts", CommandHost.Json(
+        _host.Routes(("POST /api/memory/spaces/team-notes/facts", CommandHost.Json(
             """{"title":"Bad Request","status":400,"detail":"validFrom must be an ISO 8601 date or time."}""",
             HttpStatusCode.BadRequest)));
 
-        var result = await _host.RunAsync("memory", "save", "a", "b", "c", "--valid-from", "someday");
+        var result = await _host.RunAsync("memory", "save", "a", "b", "c", "--space", "team-notes", "--valid-from", "someday");
 
         Assert.NotEqual(0, result.ExitCode);
         Assert.Contains("validFrom must be an ISO 8601 date or time.", result.Error);
@@ -109,22 +109,59 @@ public sealed class MemoryCommandTests : IDisposable
             "spaces":[{{Space}}],"skippedSpaces":0,"nextCursor":null}
             """)));
 
-        var result = await _host.RunAsync("memory", "recall", "payments", "--space", "my-memory",
+        var result = await _host.RunAsync("memory", "recall", "payments", "--space", "team-notes",
             "--subject", "billing-service", "--attribute", "owner", "--as-of", "2026-11-02", "--history", "--limit", "5");
 
         Assert.Equal(0, result.ExitCode);
         var sent = _host.Sent.Single();
         Assert.StartsWith("GET /api/memory/facts?", sent);
         Assert.Contains("q=payments", sent);
-        Assert.Contains("space=my-memory", sent);
+        Assert.Contains("space=team-notes", sent);
         Assert.Contains("subject=billing-service", sent);
         Assert.Contains("attribute=owner", sent);
         Assert.Contains("asOf=2026-11-02", sent);
         Assert.Contains("includeHistory=true", sent);
         Assert.Contains("limit=5", sent);
         Assert.Contains("billing-service / owner = team-payments", result.Output);
-        Assert.Contains("my-memory", result.Output);
+        Assert.Contains("team-notes", result.Output);
         Assert.Contains($"Sources: oncall.md ({DocId})", result.Output);
+    }
+
+    [Theory]
+    [InlineData("save", "a", "b", "c")]
+    [InlineData("list")]
+    public async Task WithoutSpace_FailsAndNamesTheSpacesYouCanSee(params string[] args)
+    {
+        _host.Routes(("GET /api/memory/spaces", CommandHost.Json(
+            """{"items":[{"id":"1","name":"team-notes"},{"id":"2","name":"runbooks"}],"nextCursor":null,"total":2}""")));
+
+        var result = await _host.RunAsync(["memory", .. args]);
+
+        Assert.Equal(1, result.ExitCode);
+        Assert.Contains("Pass --space <name-or-id>", result.Error);
+        Assert.Contains("Spaces you can see: team-notes, runbooks", result.Error);
+        Assert.Equal("GET /api/memory/spaces?limit=20", _host.Sent.Single());
+    }
+
+    [Fact]
+    public async Task WithoutSpace_WhenTheSpacesCantBeListed_StillSaysToPassSpace()
+    {
+        var result = await _host.RunAsync("memory", "save", "a", "b", "c");
+
+        Assert.Equal(1, result.ExitCode);
+        Assert.Contains("Pass --space <name-or-id>", result.Error);
+        Assert.DoesNotContain(_host.Sent, s => s.StartsWith("POST", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task WithoutSpace_AndNoSpaces_SaysSo()
+    {
+        _host.Routes(("GET /api/memory/spaces", CommandHost.Json("""{"items":[],"nextCursor":null,"total":0}""")));
+
+        var result = await _host.RunAsync("memory", "list");
+
+        Assert.Equal(1, result.ExitCode);
+        Assert.Contains("You can't see any memory spaces yet.", result.Error);
     }
 
     [Fact]
@@ -158,18 +195,18 @@ public sealed class MemoryCommandTests : IDisposable
     }
 
     [Fact]
-    public async Task List_ReadsMyMemoryByDefaultAndPrintsTheNextCursor()
+    public async Task List_SendsTheFiltersAndPrintsTheNextCursor()
     {
-        _host.Routes(("GET /api/memory/spaces/my-memory/facts", CommandHost.Json($$"""
+        _host.Routes(("GET /api/memory/spaces/team-notes/facts", CommandHost.Json($$"""
             {"facts":[{"fact":{{Fact}},"sources":[]}],"nextCursor":"next-page"}
             """)));
 
-        var result = await _host.RunAsync("memory", "list", "--subject", "billing-service", "--status", "all",
+        var result = await _host.RunAsync("memory", "list", "--space", "team-notes", "--subject", "billing-service", "--status", "all",
             "--sort", "subject", "--limit", "20", "--cursor", "this-page");
 
         Assert.Equal(0, result.ExitCode);
         var sent = _host.Sent.Single();
-        Assert.StartsWith("GET /api/memory/spaces/my-memory/facts?", sent);
+        Assert.StartsWith("GET /api/memory/spaces/team-notes/facts?", sent);
         Assert.Contains("subject=billing-service", sent);
         Assert.Contains("status=all", sent);
         Assert.Contains("sort=subject", sent);

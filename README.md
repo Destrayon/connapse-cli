@@ -156,13 +156,13 @@ Organization commands are no-ops on self-hosted servers and exit 0 with a friend
 
 ### Memory
 
-A fact is a subject, an attribute and a value, saved to a memory space. `--space` takes a space's name or ID; it defaults to `my-memory`, your personal space, which the server creates on first use. Saving and forgetting need the Editor role, and a token also needs `knowledge:write`. Every command takes `--json`.
+A fact is a subject, an attribute and a value, saved to a memory space. `--space` takes a space's name or ID, such as `team-notes`. `save` and `list` require it; if it is missing, they fail and list the spaces you can see. `recall` without `--space` searches every space you can read. Saving and forgetting need the Editor role, and a token also needs `knowledge:write`. Every command takes `--json`.
 
 | Command | Description |
 |---|---|
-| `connapse memory save <subject> <attribute> <value> [--space] [--valid-from] [--valid-to] [--source <doc-id>]... [--reason]` | Save a fact. |
+| `connapse memory save <subject> <attribute> <value> --space <name> [--valid-from] [--valid-to] [--source <doc-id>]... [--reason]` | Save a fact. |
 | `connapse memory recall [query] [--space] [--subject] [--attribute] [--as-of] [--history] [--limit] [--cursor]` | Recall facts from every space you can read, or one. |
-| `connapse memory list [--space] [--query] [--subject] [--status] [--sort] [--limit] [--cursor]` | List the facts in a space. |
+| `connapse memory list --space <name> [--query] [--subject] [--status] [--sort] [--limit] [--cursor]` | List the facts in a space. |
 | `connapse memory forget <fact-id>` | Delete a fact and every corrected version of it. |
 
 ### Administration
