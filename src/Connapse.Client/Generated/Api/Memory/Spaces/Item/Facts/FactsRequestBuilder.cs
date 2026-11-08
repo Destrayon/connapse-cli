@@ -73,6 +73,41 @@ namespace Connapse.Client.Api.Memory.Spaces.Item.Facts
             return await RequestAdapter.SendAsync<global::Connapse.Client.Models.MemoryFactsListed>(requestInfo, global::Connapse.Client.Models.MemoryFactsListed.CreateFromDiscriminatorValue, errorMapping, cancellationToken).ConfigureAwait(false);
         }
         /// <summary>
+        /// Stores one fact in a memory space, by id or name; &quot;my-memory&quot; is your own personal space, made on first use. A personal space&apos;s facts only you see; a team space&apos;s everyone sees, except that a fact citing documents is shown only to people who can read all of them
+        /// </summary>
+        /// <returns>A <see cref="global::Connapse.Client.Models.MemoryRememberedResponse"/></returns>
+        /// <param name="body">The request body</param>
+        /// <param name="cancellationToken">Cancellation token to use when cancelling requests</param>
+        /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
+        /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 400 status code</exception>
+        /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 401 status code</exception>
+        /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 403 status code</exception>
+        /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 404 status code</exception>
+        /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 429 status code</exception>
+        /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 503 status code</exception>
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+        public async Task<global::Connapse.Client.Models.MemoryRememberedResponse?> PostAsync(global::Connapse.Client.Models.RememberMemoryFactRequest body, Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = default, CancellationToken cancellationToken = default)
+        {
+#nullable restore
+#else
+        public async Task<global::Connapse.Client.Models.MemoryRememberedResponse> PostAsync(global::Connapse.Client.Models.RememberMemoryFactRequest body, Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
+        {
+#endif
+            if(ReferenceEquals(body, null)) throw new ArgumentNullException(nameof(body));
+            var requestInfo = ToPostRequestInformation(body, requestConfiguration);
+            var errorMapping = new Dictionary<string, ParsableFactory<IParsable>>
+            {
+                { "400", global::Connapse.Client.Models.ProblemDetails.CreateFromDiscriminatorValue },
+                { "401", global::Connapse.Client.Models.ProblemDetails.CreateFromDiscriminatorValue },
+                { "403", global::Connapse.Client.Models.ProblemDetails.CreateFromDiscriminatorValue },
+                { "404", global::Connapse.Client.Models.ProblemDetails.CreateFromDiscriminatorValue },
+                { "429", global::Connapse.Client.Models.ProblemDetails.CreateFromDiscriminatorValue },
+                { "503", global::Connapse.Client.Models.ProblemDetails.CreateFromDiscriminatorValue },
+            };
+            return await RequestAdapter.SendAsync<global::Connapse.Client.Models.MemoryRememberedResponse>(requestInfo, global::Connapse.Client.Models.MemoryRememberedResponse.CreateFromDiscriminatorValue, errorMapping, cancellationToken).ConfigureAwait(false);
+        }
+        /// <summary>
         /// One page of the facts in a memory space the caller can see, filtered and sorted, with the cursor for the next page
         /// </summary>
         /// <returns>A <see cref="RequestInformation"/></returns>
@@ -89,6 +124,28 @@ namespace Connapse.Client.Api.Memory.Spaces.Item.Facts
             var requestInfo = new RequestInformation(Method.GET, UrlTemplate, PathParameters);
             requestInfo.Configure(requestConfiguration);
             requestInfo.Headers.TryAdd("Accept", "application/json");
+            return requestInfo;
+        }
+        /// <summary>
+        /// Stores one fact in a memory space, by id or name; &quot;my-memory&quot; is your own personal space, made on first use. A personal space&apos;s facts only you see; a team space&apos;s everyone sees, except that a fact citing documents is shown only to people who can read all of them
+        /// </summary>
+        /// <returns>A <see cref="RequestInformation"/></returns>
+        /// <param name="body">The request body</param>
+        /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+        public RequestInformation ToPostRequestInformation(global::Connapse.Client.Models.RememberMemoryFactRequest body, Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = default)
+        {
+#nullable restore
+#else
+        public RequestInformation ToPostRequestInformation(global::Connapse.Client.Models.RememberMemoryFactRequest body, Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default)
+        {
+#endif
+            if(ReferenceEquals(body, null)) throw new ArgumentNullException(nameof(body));
+            var requestInfo = new RequestInformation(Method.POST, UrlTemplate, PathParameters);
+            requestInfo.Configure(requestConfiguration);
+            requestInfo.Headers.TryAdd("Accept", "application/json");
+            requestInfo.SetContentFromParsable(RequestAdapter, "application/json", body);
             return requestInfo;
         }
         /// <summary>

@@ -154,6 +154,17 @@ Organization commands are no-ops on self-hosted servers and exit 0 with a friend
 | `connapse search "<query>" --container <name> [--mode Hybrid] [--top 10] [--path /x] [--min-score 0.5]` | Search inside a container. |
 | `connapse reindex --container <name> [--force] [--no-detect-changes]` | Re-process all documents. |
 
+### Memory
+
+A fact is a subject, an attribute and a value, saved to a memory space. `--space` takes a space's name or ID; it defaults to `my-memory`, your personal space, which the server creates on first use. Saving and forgetting need the Editor role, and a token also needs `knowledge:write`. Every command takes `--json`.
+
+| Command | Description |
+|---|---|
+| `connapse memory save <subject> <attribute> <value> [--space] [--valid-from] [--valid-to] [--source <doc-id>]... [--reason]` | Save a fact. |
+| `connapse memory recall [query] [--space] [--subject] [--attribute] [--as-of] [--history] [--limit] [--cursor]` | Recall facts from every space you can read, or one. |
+| `connapse memory list [--space] [--query] [--subject] [--status] [--sort] [--limit] [--cursor]` | List the facts in a space. |
+| `connapse memory forget <fact-id>` | Delete a fact and every corrected version of it. |
+
 ### Administration
 
 These need the Owner or Admin role. A personal access token also needs the matching scope: `admin:sources` for connections and source changes, `admin:settings` for settings, and `admin:users` for agents. Reading sources needs only `knowledge:read`. Wherever a command takes a connection, source or agent, it accepts a name or an ID. JSON options come in pairs: `--scope '{...}'` inline, or `--scope-file scope.json`.

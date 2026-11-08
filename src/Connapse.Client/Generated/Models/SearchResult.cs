@@ -30,6 +30,8 @@ namespace Connapse.Client.Models
 #else
         public List<global::Connapse.Client.Models.SearchHit> Hits { get; set; }
 #endif
+        /// <summary>The pendingDocuments property</summary>
+        public int? PendingDocuments { get; set; }
         /// <summary>The totalMatches property</summary>
         public int? TotalMatches { get; set; }
         /// <summary>
@@ -38,6 +40,7 @@ namespace Connapse.Client.Models
         public SearchResult()
         {
             AdditionalData = new Dictionary<string, object>();
+            PendingDocuments = 0;
         }
         /// <summary>
         /// Creates a new instance of the appropriate class based on discriminator value
@@ -59,6 +62,7 @@ namespace Connapse.Client.Models
             {
                 { "duration", n => { Duration = n.GetStringValue(); } },
                 { "hits", n => { Hits = n.GetCollectionOfObjectValues<global::Connapse.Client.Models.SearchHit>(global::Connapse.Client.Models.SearchHit.CreateFromDiscriminatorValue)?.AsList(); } },
+                { "pendingDocuments", n => { PendingDocuments = n.GetIntValue(); } },
                 { "totalMatches", n => { TotalMatches = n.GetIntValue(); } },
             };
         }
@@ -71,6 +75,7 @@ namespace Connapse.Client.Models
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
             writer.WriteStringValue("duration", Duration);
             writer.WriteCollectionOfObjectValues<global::Connapse.Client.Models.SearchHit>("hits", Hits);
+            writer.WriteIntValue("pendingDocuments", PendingDocuments);
             writer.WriteIntValue("totalMatches", TotalMatches);
             writer.WriteAdditionalData(AdditionalData);
         }
