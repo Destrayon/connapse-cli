@@ -1,0 +1,137 @@
+name: Install scripts
+
+# Runs install.sh and install.ps1 from this checkout against real GitHub releases, so a change to a
+# script, or a release that ships a broken asset, shows up before a user's one-liner fails.
+on:
+  pull_request:
+    paths:
+      - install.sh
+      - install.ps1
+      - .github/workflows/install-scripts.yml
+  push:
+    branches: [ main ]
+    paths:
+      - install.sh
+      - install.ps1
+      - .github/workflows/install-scripts.yml
+  # Releases are created with GITHUB_TOKEN, which starts no workflows, so a weekly run checks the latest one.
+  schedule:
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  # An older release pinned by tag, to prove pinning picks that exact version.
+  PINNED_VERSION: v0.4.3
+
+jobs:
+  unix:
+    name: install.sh (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # macos-latest is Apple Silicon (osx-arm64); macos-15-intel is the last Intel image (osx-x64).
+        os: [ ubuntu-latest, macos-latest, macos-15-intel ]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Latest release into the default directory
+        shell: bash
+        run: |
+          sh install.sh
+          test -x "$HOME/.local/bin/connapse"
+          latest=$(gh release view -R "$GITHUB_REPOSITORY" --json tagName -q .tagName)
+          "$HOME/.local/bin/connapse" --version | tee version.txt
+          grep -q "^${latest#v}" version.txt
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Pinned version through the environment, read from stdin like the one-liner
+        shell: bash
+        run: |
+          CONNAPSE_VERSION="$PINNED_VERSION" CONNAPSE_INSTALL_DIR="$RUNNER_TEMP/pinned" sh < install.sh
+          "$RUNNER_TEMP/pinned/connapse" --version | tee version.txt
+          grep -q "^${PINNED_VERSION#v}" version.txt
+
+      - name: Pinned version through flags, without the leading v
+        shell: bash
+        run: |
+          sh -s -- --version "${PINNED_VERSION#v}" --install-dir "$RUNNER_TEMP/flags" < install.sh
+          "$RUNNER_TEMP/flags/connapse" --version | grep -q "^${PINNED_VERSION#v}"
+
+      - name: A missing version fails
+        shell: bash
+        run: |
+          if sh install.sh --version v0.0.0-does-not-exist --install-dir "$RUNNER_TEMP/missing"; then
+            echo "::error::install.sh succeeded for a release that does not exist"
+            exit 1
+          fi
+
+  windows:
+    name: install.ps1 (${{ matrix.shell }})
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # Windows PowerShell 5.1 is what a fresh Windows has; pwsh is PowerShell 7.
+        shell: [ powershell, pwsh ]
+
+    defaults:
+      run:
+        shell: ${{ matrix.shell }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Latest release through irm | iex style, with the default directory and PATH edit
+        run: |
+          Get-Content -Raw install.ps1 | Invoke-Expression
+          $dir = Join-Path $env:LOCALAPPDATA 'Programs\connapse'
+          $exe = Join-Path $dir 'connapse.exe'
+          if (-not (Test-Path $exe)) { throw "missing $exe" }
+          $userPath = [Environment]::GetEnvironmentVariable('Path', 'User') -split ';'
+          if ($userPath -notcontains $dir) { throw "user PATH does not contain $dir" }
+          $latest = gh release view -R $env:GITHUB_REPOSITORY --json tagName -q .tagName
+          $v = & $exe --version
+          Write-Host $v
+          if (-not $v.StartsWith($latest.TrimStart('v'))) { throw "expected $latest, got $v" }
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Running it again does not add PATH twice
+        run: |
+          Get-Content -Raw install.ps1 | Invoke-Expression
+          $dir = Join-Path $env:LOCALAPPDATA 'Programs\connapse'
+          $count = @([Environment]::GetEnvironmentVariable('Path', 'User') -split ';' | Where-Object { $_ -eq $dir }).Count
+          if ($count -ne 1) { throw "user PATH lists $dir $count times" }
+
+      - name: Pinned version through the environment
+        run: |
+          $env:CONNAPSE_VERSION = $env:PINNED_VERSION
+          $env:CONNAPSE_INSTALL_DIR = Join-Path $env:RUNNER_TEMP 'pinned'
+          $env:CONNAPSE_NO_MODIFY_PATH = '1'
+          Get-Content -Raw install.ps1 | Invoke-Expression
+          $v = & (Join-Path $env:RUNNER_TEMP 'pinned\connapse.exe') --version
+          Write-Host $v
+          if (-not $v.StartsWith($env:PINNED_VERSION.TrimStart('v'))) { throw "expected $env:PINNED_VERSION, got $v" }
+
+      - name: Pinned version through parameters
+        run: |
+          $dir = Join-Path $env:RUNNER_TEMP 'params'
+          & ([scriptblock]::Create((Get-Content -Raw install.ps1))) -Version $env:PINNED_VERSION.TrimStart('v') -InstallDir $dir -NoModifyPath
+          $v = & (Join-Path $dir 'connapse.exe') --version
+          if (-not $v.StartsWith($env:PINNED_VERSION.TrimStart('v'))) { throw "expected $env:PINNED_VERSION, got $v" }
+
+      - name: A missing version fails
+        run: |
+          $failed = $false
+          try {
+            & ([scriptblock]::Create((Get-Content -Raw install.ps1))) -Version v0.0.0-does-not-exist -InstallDir (Join-Path $env:RUNNER_TEMP 'missing') -NoModifyPath
+          } catch { $failed = $true; Write-Host "failed as expected: $_" }
+          if (-not $failed) { throw 'install.ps1 succeeded for a release that does not exist' }

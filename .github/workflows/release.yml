@@ -146,6 +146,11 @@ jobs:
           merge-multiple: true
           path: release-assets
 
+      # install.sh and install.ps1 check the downloaded binary against this file.
+      - name: Write checksums
+        working-directory: release-assets
+        run: sha256sum connapse-cli-* > checksums.txt && cat checksums.txt
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -154,23 +159,25 @@ jobs:
           body: |
             ## Install
 
-            ### NuGet global tool (requires .NET 10 SDK)
+            No .NET needed. These commands install exactly this release, ${{ github.ref_name }}.
+
+            **macOS / Linux**
+            ```bash
+            curl -fsSL https://raw.githubusercontent.com/Destrayon/connapse-cli/main/install.sh | sh -s -- --version ${{ github.ref_name }}
+            ```
+
+            **Windows (PowerShell)**
+            ```powershell
+            $env:CONNAPSE_VERSION = '${{ github.ref_name }}'; irm https://raw.githubusercontent.com/Destrayon/connapse-cli/main/install.ps1 | iex
+            ```
+
+            ### .NET global tool (requires .NET 10 SDK)
             ```bash
             dotnet tool install -g Connapse.CLI --version ${{ steps.version.outputs.VERSION }}
             ```
 
-            ### Self-contained binary (no .NET required)
-            Download the binary for your platform below:
-            - **Windows**: `connapse-cli-win-x64.exe`
-            - **Linux**: `connapse-cli-linux-x64`
-            - **macOS (Intel)**: `connapse-cli-osx-x64`
-            - **macOS (Apple Silicon)**: `connapse-cli-osx-arm64`
-
-            ```bash
-            # Linux / macOS
-            chmod +x connapse-cli-linux-x64
-            sudo mv connapse-cli-linux-x64 /usr/local/bin/connapse
-            ```
+            ### Manual download
+            Binaries for each platform are attached below (`connapse-cli-win-x64.exe`, `connapse-cli-linux-x64`, `connapse-cli-osx-x64`, `connapse-cli-osx-arm64`), with SHA-256 sums in `checksums.txt`.
 
             ## Quick start
             ```bash

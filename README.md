@@ -6,7 +6,37 @@ The CLI works with both Connapse Cloud (multi-tenant) and self-hosted Connapse s
 
 ## Install
 
-### Option 1: .NET global tool (requires .NET 10 SDK)
+### One command, no .NET needed
+
+**macOS / Linux**
+```bash
+curl -fsSL https://raw.githubusercontent.com/Destrayon/connapse-cli/main/install.sh | sh
+```
+
+**Windows (PowerShell)**
+```powershell
+irm https://raw.githubusercontent.com/Destrayon/connapse-cli/main/install.ps1 | iex
+```
+
+Each script downloads the self-contained binary for your platform from the [latest release](https://github.com/Destrayon/connapse-cli/releases/latest), checks its SHA-256 sum when the release publishes one, and prints `connapse --version`. On macOS and Linux it installs to `~/.local/bin`; on Windows it installs to `%LOCALAPPDATA%\Programs\connapse` and adds that folder to your user `PATH` (open a new terminal afterwards). Run the same command again to upgrade.
+
+To install a specific release, prereleases included:
+```bash
+curl -fsSL https://raw.githubusercontent.com/Destrayon/connapse-cli/main/install.sh | sh -s -- --version v0.5.1-alpha.1
+```
+```powershell
+$env:CONNAPSE_VERSION = 'v0.5.1-alpha.1'; irm https://raw.githubusercontent.com/Destrayon/connapse-cli/main/install.ps1 | iex
+```
+
+| Setting | install.sh | install.ps1 |
+|---|---|---|
+| Version (default: latest) | `--version <tag>` or `CONNAPSE_VERSION` | `-Version <tag>` or `CONNAPSE_VERSION` |
+| Install directory | `--install-dir <dir>` or `CONNAPSE_INSTALL_DIR` | `-InstallDir <dir>` or `CONNAPSE_INSTALL_DIR` |
+| Leave `PATH` alone | — (never edits shell profiles; prints a hint instead) | `-NoModifyPath` or `CONNAPSE_NO_MODIFY_PATH=1` |
+
+Published builds: Windows x64, Linux x64 (glibc), macOS Intel and Apple Silicon. On other platforms, use the .NET tool.
+
+### .NET global tool (requires .NET 10 SDK)
 
 ```bash
 dotnet tool install -g Connapse.CLI
@@ -18,26 +48,11 @@ Upgrade later with:
 dotnet tool update -g Connapse.CLI
 ```
 
-### Option 2: Self-contained binary (no .NET required)
+### Manual download
 
-Download the binary for your platform from the [latest release](https://github.com/Destrayon/connapse-cli/releases/latest):
+Download the binary for your platform from the [latest release](https://github.com/Destrayon/connapse-cli/releases/latest) (`connapse-cli-win-x64.exe`, `connapse-cli-linux-x64`, `connapse-cli-osx-x64` or `connapse-cli-osx-arm64`), rename it to `connapse` (`connapse.exe` on Windows), make it executable, and put it in a directory on your `PATH`.
 
-| Platform | Asset |
-|---|---|
-| Windows (x64) | `connapse-cli-win-x64.exe` |
-| Linux (x64) | `connapse-cli-linux-x64` |
-| macOS (Intel) | `connapse-cli-osx-x64` |
-| macOS (Apple Silicon) | `connapse-cli-osx-arm64` |
-
-On Linux or macOS:
-```bash
-chmod +x connapse-cli-linux-x64
-sudo mv connapse-cli-linux-x64 /usr/local/bin/connapse
-```
-
-On Windows, add the `.exe` to a directory in your `PATH`.
-
-### Option 3: Build from source
+### Build from source
 
 ```bash
 git clone https://github.com/Destrayon/connapse-cli
