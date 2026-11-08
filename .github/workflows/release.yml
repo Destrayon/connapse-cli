@@ -120,14 +120,39 @@ jobs:
         with:
           user: psummers
 
+      # Up to 3 tries for transient nuget.org/network errors. --skip-duplicate makes
+      # a retry safe: if an earlier try's upload landed but its reply was lost,
+      # nuget.org answers 409 for the existing version and the push is skipped,
+      # so a version is never published twice. Auth rejections (401/403, e.g. the
+      # expired stored key that failed the 0.5.0 run, CC-9) won't heal on retry,
+      # so they fail at once.
       - name: Push to NuGet.org
         env:
           NUGET_API_KEY: ${{ steps.nuget-login.outputs.NUGET_API_KEY }}
         run: |
-          dotnet nuget push nupkgs/*.nupkg \
-            --api-key "$NUGET_API_KEY" \
-            --source https://api.nuget.org/v3/index.json \
-            --skip-duplicate
+          set -o pipefail
+          if [ -z "$NUGET_API_KEY" ]; then
+            echo "::error::NuGet/login returned no API key; check the Trusted Publishing policy on nuget.org"
+            exit 1
+          fi
+          for attempt in 1 2 3; do
+            if dotnet nuget push nupkgs/*.nupkg \
+                --api-key "$NUGET_API_KEY" \
+                --source https://api.nuget.org/v3/index.json \
+                --skip-duplicate 2>&1 | tee push.log; then
+              exit 0
+            fi
+            if grep -qE '\b(401|403)\b' push.log; then
+              echo "::error::nuget.org rejected the API key; retrying won't help"
+              exit 1
+            fi
+            if [ "$attempt" -lt 3 ]; then
+              echo "::warning::NuGet push try $attempt failed; retrying in $((attempt * 15))s"
+              sleep $((attempt * 15))
+            fi
+          done
+          echo "::error::NuGet push failed after 3 tries"
+          exit 1
 
   create-release:
     name: Create GitHub Release
