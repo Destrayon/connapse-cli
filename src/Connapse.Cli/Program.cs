@@ -17,6 +17,8 @@ internal static class Program
         Recursive = true,
     };
 
+    internal static readonly Option<string?> ProfileOption = RootCommandBuilder.CreateProfileOption();
+
     internal static readonly Option<bool> VerboseOption = new("--verbose")
     {
         Description = "Print full stack traces for unexpected errors.",
@@ -25,10 +27,12 @@ internal static class Program
 
     public static async Task<int> Main(string[] args)
     {
-        await using var services = BuildServiceProvider();
+        var profiles = new ProfileContext(ProfileStore.FromEnvironment());
+        await using var services = BuildServiceProvider(profiles);
 
-        var root = RootCommandBuilder.Build(services, OrgOption, VerboseOption);
+        var root = RootCommandBuilder.Build(services, OrgOption, VerboseOption, ProfileOption);
         var parseResult = root.Parse(args);
+        profiles.Select(parseResult.GetValue(ProfileOption));
 
         var config = new InvocationConfiguration
         {
@@ -43,17 +47,15 @@ internal static class Program
         }
         catch (Exception ex)
         {
-            return CliRuntime.HandleException(ex, verbose);
+            return CliRuntime.HandleException(ex, verbose, profiles.NamedProfileOrNull);
         }
     }
 
-    private static ServiceProvider BuildServiceProvider()
+    private static ServiceProvider BuildServiceProvider(ProfileContext profiles)
     {
         var services = new ServiceCollection();
-        var homeDirectory = HomeDirectoryResolver.GetHomeDirectory();
 
-        services.AddSingleton(new CredentialStore(homeDirectory));
-        services.AddSingleton(new ConfigStore(homeDirectory));
+        services.AddProfileStores(profiles);
         services.AddSingleton<IClock, SystemClock>();
         services.AddSingleton<OrgResolver>();
         services.AddSingleton<IOrgContextProvider, OrgContextProvider>();

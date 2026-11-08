@@ -19,9 +19,20 @@ public sealed class CredentialStore
     private readonly string _filePath;
 
     public CredentialStore(string baseDirectory)
+        : this(Path.Combine(baseDirectory, ".connapse"), "credentials.json")
     {
-        _filePath = Path.Combine(baseDirectory, ".connapse", "credentials.json");
     }
+
+    private CredentialStore(string directory, string fileName)
+    {
+        _filePath = Path.Combine(directory, fileName);
+    }
+
+    /// <summary>The store for <paramref name="profile"/>: its credentials.json, in the profile's own directory.</summary>
+    public static CredentialStore ForProfile(CliProfile profile) =>
+        new(profile.Directory, "credentials.json");
+
+    public string FilePath => _filePath;
 
     public CliCredentials? Load()
     {

@@ -15,12 +15,15 @@ public static class AuthLogoutCommand
         {
             var credStore = services.GetRequiredService<CredentialStore>();
             var configStore = services.GetRequiredService<ConfigStore>();
+            var profile = services.GetRequiredService<ProfileContext>().Current;
 
             var current = credStore.Load();
             if (current is null)
             {
                 Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine("Not logged in (no credentials found).");
+                Console.WriteLine(profile.IsDefault
+                    ? "Not logged in (no credentials found)."
+                    : $"Not logged in to profile '{profile.Name}' (no credentials found).");
                 Console.ResetColor();
                 return Task.FromResult(CliExitCodes.Success);
             }
@@ -31,7 +34,9 @@ public static class AuthLogoutCommand
             configStore.Save(new CliConfig { ApiBaseUrl = existing.ApiBaseUrl });
 
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Logged out. Credentials cleared.");
+            Console.WriteLine(profile.IsDefault
+                ? "Logged out. Credentials cleared."
+                : $"Logged out of profile '{profile.Name}'. Credentials cleared.");
             Console.ResetColor();
 
             return Task.FromResult(CliExitCodes.Success);
