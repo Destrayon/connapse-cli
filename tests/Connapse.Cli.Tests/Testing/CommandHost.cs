@@ -24,6 +24,12 @@ public sealed class CommandHost : IDisposable
     /// <summary>The profiles in this host's home; the signed-in login is the default profile.</summary>
     public ProfileStore Profiles { get; }
 
+    /// <summary>Each wait the CLI took after the server said it was too busy; nothing really waits.</summary>
+    public List<TimeSpan> Waits { get; } = new();
+
+    /// <summary>Called with each wait, so a test's fake server can move its clock on.</summary>
+    public Action<TimeSpan>? OnWait { get; set; }
+
     /// <summary>Request bodies, read as they're sent; the client disposes them afterwards.</summary>
     public List<string> Bodies { get; } = new();
 
@@ -50,6 +56,13 @@ public sealed class CommandHost : IDisposable
         collection.AddSingleton<IHttpClientFactory>(new MockHttpClientFactory(Handler, BaseUri));
         collection.AddSingleton<IEditionProvider, SelfHostedEdition>();
         collection.AddSingleton<EditionDetector>();
+        collection.AddSingleton(new RateLimitRetry(
+            delay: (wait, _) =>
+            {
+                Waits.Add(wait);
+                OnWait?.Invoke(wait);
+                return Task.CompletedTask;
+            }));
         collection.AddSingleton<ApiClient>();
         collection.AddSingleton(sp => ApiClientHandler.CreateClient(sp.GetRequiredService<ApiClient>()));
         collection.AddSingleton<IConsolePrompt, ConsolePrompt>();
