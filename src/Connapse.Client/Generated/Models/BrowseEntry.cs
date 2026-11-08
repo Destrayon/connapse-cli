@@ -52,6 +52,8 @@ namespace Connapse.Client.Models
 #else
         public string Status { get; set; }
 #endif
+        /// <summary>The updatedAt property</summary>
+        public DateTimeOffset? UpdatedAt { get; set; }
         /// <summary>
         /// Instantiates a new <see cref="global::Connapse.Client.Models.BrowseEntry"/> and sets the default values.
         /// </summary>
@@ -84,6 +86,7 @@ namespace Connapse.Client.Models
                 { "path", n => { Path = n.GetStringValue(); } },
                 { "sizeBytes", n => { SizeBytes = n.GetLongValue(); } },
                 { "status", n => { Status = n.GetStringValue(); } },
+                { "updatedAt", n => { UpdatedAt = n.GetDateTimeOffsetValue(); } },
             };
         }
         /// <summary>
@@ -100,6 +103,7 @@ namespace Connapse.Client.Models
             writer.WriteStringValue("path", Path);
             writer.WriteLongValue("sizeBytes", SizeBytes);
             writer.WriteStringValue("status", Status);
+            writer.WriteDateTimeOffsetValue("updatedAt", UpdatedAt);
             writer.WriteAdditionalData(AdditionalData);
         }
     }
