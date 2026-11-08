@@ -266,13 +266,9 @@ git push origin v0.5.0
 
 The `.github/workflows/release.yml` workflow builds four self-contained binaries, packs a NuGet global tool, and creates a GitHub Release with all five assets.
 
-**NuGet publish requires the `NUGET_API_KEY` secret.** Create a scoped API key at [nuget.org/account/apikeys](https://www.nuget.org/account/apikeys) (glob pattern `Connapse.CLI*`) and set it on the repo:
+**NuGet publish uses [Trusted Publishing](https://learn.microsoft.com/nuget/nuget-org/trusted-publishing), not a stored API key.** Each release run trades its GitHub OIDC token for a nuget.org key that lasts one hour, so there is no secret to expire or rotate. It needs a Trusted Publishing policy on nuget.org owned by `psummers` for repo `Destrayon/connapse-cli`, workflow `release.yml`, no environment. Don't add a `NUGET_API_KEY` secret: a stored key expires, and an expired key is what failed the 0.5.0 publish.
 
-```bash
-gh secret set NUGET_API_KEY --repo Destrayon/connapse-cli
-```
-
-If the secret is missing the release workflow still succeeds — the NuGet publish step is skipped, but binary assets are still attached to the release.
+If the NuGet login or push fails, the job fails and no GitHub Release is created. Re-running the failed job is safe: the push uses `--skip-duplicate`, so a version that already reached nuget.org is skipped rather than published again.
 
 ## License
 
