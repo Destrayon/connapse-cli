@@ -11,3 +11,6 @@ failed file.
    200 requests a minute. Done when they pass.
 3. **Ship** — Release build and tests with CI's flags, PR into `main` naming the sources.
    Done when the PR is open and the PM is told.
+- Phase 1: RateLimitRetry.cs added, ApiClient.cs sends through it; passthrough unchanged.
+- Phase 2: RateLimitRetryTests.cs, UploadCommandTests.cs, CommandHost.cs; 226 pass in Release. Next: live 311-file upload against the pinned server, then PR.
+- Phase 3: live run against the pinned server (default 200/min): 311/311 uploaded, exit 0, one 62s wait; server stats show 311 documents. CI-flag Release build + tests green. Next: PR.
