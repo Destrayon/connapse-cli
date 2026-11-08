@@ -22,6 +22,8 @@ namespace Connapse.Client.Models
 #else
         public string Description { get; set; }
 #endif
+        /// <summary>The kind property</summary>
+        public global::Connapse.Client.Models.ContainerKind? Kind { get; set; }
         /// <summary>The name property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -56,6 +58,7 @@ namespace Connapse.Client.Models
             return new Dictionary<string, Action<IParseNode>>
             {
                 { "description", n => { Description = n.GetStringValue(); } },
+                { "kind", n => { Kind = n.GetEnumValue<global::Connapse.Client.Models.ContainerKind>(); } },
                 { "name", n => { Name = n.GetStringValue(); } },
             };
         }
@@ -67,6 +70,7 @@ namespace Connapse.Client.Models
         {
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
             writer.WriteStringValue("description", Description);
+            writer.WriteEnumValue<global::Connapse.Client.Models.ContainerKind>("kind", Kind);
             writer.WriteStringValue("name", Name);
             writer.WriteAdditionalData(AdditionalData);
         }

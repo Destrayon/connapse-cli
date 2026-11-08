@@ -88,14 +88,6 @@ namespace Connapse.Client.Models
 #endif
         /// <summary>The processingDocumentCount property</summary>
         public int? ProcessingDocumentCount { get; set; }
-        /// <summary>The summary property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public string? Summary { get; set; }
-#nullable restore
-#else
-        public string Summary { get; set; }
-#endif
         /// <summary>The syncIntervalSeconds property</summary>
         public int? SyncIntervalSeconds { get; set; }
         /// <summary>The updatedAt property</summary>
@@ -154,7 +146,6 @@ namespace Connapse.Client.Models
                 { "lastSyncedAt", n => { LastSyncedAt = n.GetDateTimeOffsetValue(); } },
                 { "name", n => { Name = n.GetStringValue(); } },
                 { "processingDocumentCount", n => { ProcessingDocumentCount = n.GetIntValue(); } },
-                { "summary", n => { Summary = n.GetStringValue(); } },
                 { "syncIntervalSeconds", n => { SyncIntervalSeconds = n.GetIntValue(); } },
                 { "updatedAt", n => { UpdatedAt = n.GetDateTimeOffsetValue(); } },
                 { "warning", n => { Warning = n.GetStringValue(); } },
@@ -184,7 +175,6 @@ namespace Connapse.Client.Models
             writer.WriteStringValue("lastSyncTroubleshootingUrl", LastSyncTroubleshootingUrl);
             writer.WriteStringValue("name", Name);
             writer.WriteIntValue("processingDocumentCount", ProcessingDocumentCount);
-            writer.WriteStringValue("summary", Summary);
             writer.WriteIntValue("syncIntervalSeconds", SyncIntervalSeconds);
             writer.WriteDateTimeOffsetValue("updatedAt", UpdatedAt);
             writer.WriteStringValue("warning", Warning);

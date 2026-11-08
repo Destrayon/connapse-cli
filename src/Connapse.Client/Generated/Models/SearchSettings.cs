@@ -58,6 +58,8 @@ namespace Connapse.Client.Models
         public int? CrossEncoderTopN { get; set; }
         /// <summary>The enableCrossModelSearch property</summary>
         public bool? EnableCrossModelSearch { get; set; }
+        /// <summary>The enableLinkSearch property</summary>
+        public bool? EnableLinkSearch { get; set; }
         /// <summary>The fusionAlpha property</summary>
         public float? FusionAlpha { get; set; }
         /// <summary>The fusionMethod property</summary>
@@ -78,6 +80,12 @@ namespace Connapse.Client.Models
 #else
         public string KeywordRanker { get; set; }
 #endif
+        /// <summary>The linkMaxHops property</summary>
+        public int? LinkMaxHops { get; set; }
+        /// <summary>The linkSeeds property</summary>
+        public int? LinkSeeds { get; set; }
+        /// <summary>The linkWeight property</summary>
+        public float? LinkWeight { get; set; }
         /// <summary>The minimumScore property</summary>
         public double? MinimumScore { get; set; }
         /// <summary>The mode property</summary>
@@ -102,6 +110,10 @@ namespace Connapse.Client.Models
         public bool? SentenceWindowSubstituteOnSearch { get; set; }
         /// <summary>The topK property</summary>
         public int? TopK { get; set; }
+        /// <summary>The useKeywordSearch property</summary>
+        public bool? UseKeywordSearch { get; set; }
+        /// <summary>The useVectorSearch property</summary>
+        public bool? UseVectorSearch { get; set; }
         /// <summary>The vectorIndexEfSearch property</summary>
         public int? VectorIndexEfSearch { get; set; }
         /// <summary>The vectorIndexMinVectors property</summary>
@@ -141,16 +153,22 @@ namespace Connapse.Client.Models
                 { "crossEncoderTimeoutSeconds", n => { CrossEncoderTimeoutSeconds = n.GetIntValue(); } },
                 { "crossEncoderTopN", n => { CrossEncoderTopN = n.GetIntValue(); } },
                 { "enableCrossModelSearch", n => { EnableCrossModelSearch = n.GetBoolValue(); } },
+                { "enableLinkSearch", n => { EnableLinkSearch = n.GetBoolValue(); } },
                 { "fusionAlpha", n => { FusionAlpha = n.GetFloatValue(); } },
                 { "fusionMethod", n => { FusionMethod = n.GetStringValue(); } },
                 { "hybridCandidatePool", n => { HybridCandidatePool = n.GetIntValue(); } },
                 { "keywordRanker", n => { KeywordRanker = n.GetStringValue(); } },
+                { "linkMaxHops", n => { LinkMaxHops = n.GetIntValue(); } },
+                { "linkSeeds", n => { LinkSeeds = n.GetIntValue(); } },
+                { "linkWeight", n => { LinkWeight = n.GetFloatValue(); } },
                 { "minimumScore", n => { MinimumScore = n.GetDoubleValue(); } },
                 { "mode", n => { Mode = n.GetStringValue(); } },
                 { "rerankCandidates", n => { RerankCandidates = n.GetIntValue(); } },
                 { "reranker", n => { Reranker = n.GetStringValue(); } },
                 { "sentenceWindowSubstituteOnSearch", n => { SentenceWindowSubstituteOnSearch = n.GetBoolValue(); } },
                 { "topK", n => { TopK = n.GetIntValue(); } },
+                { "useKeywordSearch", n => { UseKeywordSearch = n.GetBoolValue(); } },
+                { "useVectorSearch", n => { UseVectorSearch = n.GetBoolValue(); } },
                 { "vectorIndexEfSearch", n => { VectorIndexEfSearch = n.GetIntValue(); } },
                 { "vectorIndexMinVectors", n => { VectorIndexMinVectors = n.GetIntValue(); } },
             };
@@ -172,16 +190,22 @@ namespace Connapse.Client.Models
             writer.WriteIntValue("crossEncoderTimeoutSeconds", CrossEncoderTimeoutSeconds);
             writer.WriteIntValue("crossEncoderTopN", CrossEncoderTopN);
             writer.WriteBoolValue("enableCrossModelSearch", EnableCrossModelSearch);
+            writer.WriteBoolValue("enableLinkSearch", EnableLinkSearch);
             writer.WriteFloatValue("fusionAlpha", FusionAlpha);
             writer.WriteStringValue("fusionMethod", FusionMethod);
             writer.WriteIntValue("hybridCandidatePool", HybridCandidatePool);
             writer.WriteStringValue("keywordRanker", KeywordRanker);
+            writer.WriteIntValue("linkMaxHops", LinkMaxHops);
+            writer.WriteIntValue("linkSeeds", LinkSeeds);
+            writer.WriteFloatValue("linkWeight", LinkWeight);
             writer.WriteDoubleValue("minimumScore", MinimumScore);
             writer.WriteStringValue("mode", Mode);
             writer.WriteIntValue("rerankCandidates", RerankCandidates);
             writer.WriteStringValue("reranker", Reranker);
             writer.WriteBoolValue("sentenceWindowSubstituteOnSearch", SentenceWindowSubstituteOnSearch);
             writer.WriteIntValue("topK", TopK);
+            writer.WriteBoolValue("useKeywordSearch", UseKeywordSearch);
+            writer.WriteBoolValue("useVectorSearch", UseVectorSearch);
             writer.WriteIntValue("vectorIndexEfSearch", VectorIndexEfSearch);
             writer.WriteIntValue("vectorIndexMinVectors", VectorIndexMinVectors);
             writer.WriteAdditionalData(AdditionalData);

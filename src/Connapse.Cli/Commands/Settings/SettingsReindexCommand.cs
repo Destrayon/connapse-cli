@@ -8,7 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Connapse.Cli.Commands.Settings;
 
-/// <summary><c>settings reindex</c>, <c>reindex-status</c>, <c>embedding-models</c> and <c>clear-summaries</c>.</summary>
+/// <summary><c>settings reindex</c>, <c>reindex-status</c> and <c>embedding-models</c>.</summary>
 public static class SettingsReindexCommand
 {
     public static Command Create(IServiceProvider services, Option<string?> orgOption)
@@ -89,24 +89,6 @@ public static class SettingsReindexCommand
                 Console.WriteLine($"{m.ModelId + (m.IsCurrent == true ? " (current)" : ""),-50} {m.Dimensions ?? 0,6} {m.VectorCount ?? 0,10}");
             if (models.HasLegacyVectors == true)
                 AdminHelpers.WriteWarning("Some vectors were made by another model; 'connapse settings reindex' re-embeds them.");
-            return CliExitCodes.Success;
-        }));
-
-        return cmd;
-    }
-
-    public static Command CreateClearSummaries(IServiceProvider services, Option<string?> orgOption)
-    {
-        var cmd = new Command("clear-summaries",
-            "Clear every container and document summary; the next sweep writes them again. Embeddings and documents are kept.");
-
-        cmd.SetAction(services.WithOrgContext(orgOption, async (_, ct) =>
-        {
-            var client = services.GetRequiredService<ConnapseApiClient>();
-            var cleared = await AdminHelpers.AdminAsync(AdminHelpers.SettingsScope,
-                () => client.Api.V1.Settings.Summaries.Clear.PostAsync(cancellationToken: ct));
-
-            AdminHelpers.WriteSuccess($"Cleared {cleared?.Containers ?? 0} container and {cleared?.Documents ?? 0} document summaries.");
             return CliExitCodes.Success;
         }));
 

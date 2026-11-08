@@ -9,31 +9,45 @@ namespace Connapse.Client.Models
 {
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
     #pragma warning disable CS1591
-    public partial class SummariesCleared : IAdditionalDataHolder, IParsable
+    public partial class ShownMemorySource : IAdditionalDataHolder, IParsable
     #pragma warning restore CS1591
     {
         /// <summary>Stores additional data not described in the OpenAPI description found when deserializing. Can be used for serialization as well.</summary>
         public IDictionary<string, object> AdditionalData { get; set; }
-        /// <summary>The containers property</summary>
-        public int? Containers { get; set; }
-        /// <summary>The documents property</summary>
-        public int? Documents { get; set; }
+        /// <summary>The kind property</summary>
+        public global::Connapse.Client.Models.MemorySourceKind? Kind { get; set; }
+        /// <summary>The ref property</summary>
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+        public string? Ref { get; set; }
+#nullable restore
+#else
+        public string Ref { get; set; }
+#endif
+        /// <summary>The title property</summary>
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+        public string? Title { get; set; }
+#nullable restore
+#else
+        public string Title { get; set; }
+#endif
         /// <summary>
-        /// Instantiates a new <see cref="global::Connapse.Client.Models.SummariesCleared"/> and sets the default values.
+        /// Instantiates a new <see cref="global::Connapse.Client.Models.ShownMemorySource"/> and sets the default values.
         /// </summary>
-        public SummariesCleared()
+        public ShownMemorySource()
         {
             AdditionalData = new Dictionary<string, object>();
         }
         /// <summary>
         /// Creates a new instance of the appropriate class based on discriminator value
         /// </summary>
-        /// <returns>A <see cref="global::Connapse.Client.Models.SummariesCleared"/></returns>
+        /// <returns>A <see cref="global::Connapse.Client.Models.ShownMemorySource"/></returns>
         /// <param name="parseNode">The parse node to use to read the discriminator value and create the object</param>
-        public static global::Connapse.Client.Models.SummariesCleared CreateFromDiscriminatorValue(IParseNode parseNode)
+        public static global::Connapse.Client.Models.ShownMemorySource CreateFromDiscriminatorValue(IParseNode parseNode)
         {
             if(ReferenceEquals(parseNode, null)) throw new ArgumentNullException(nameof(parseNode));
-            return new global::Connapse.Client.Models.SummariesCleared();
+            return new global::Connapse.Client.Models.ShownMemorySource();
         }
         /// <summary>
         /// The deserialization information for the current model
@@ -43,8 +57,9 @@ namespace Connapse.Client.Models
         {
             return new Dictionary<string, Action<IParseNode>>
             {
-                { "containers", n => { Containers = n.GetIntValue(); } },
-                { "documents", n => { Documents = n.GetIntValue(); } },
+                { "kind", n => { Kind = n.GetEnumValue<global::Connapse.Client.Models.MemorySourceKind>(); } },
+                { "ref", n => { Ref = n.GetStringValue(); } },
+                { "title", n => { Title = n.GetStringValue(); } },
             };
         }
         /// <summary>
@@ -54,8 +69,9 @@ namespace Connapse.Client.Models
         public virtual void Serialize(ISerializationWriter writer)
         {
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
-            writer.WriteIntValue("containers", Containers);
-            writer.WriteIntValue("documents", Documents);
+            writer.WriteEnumValue<global::Connapse.Client.Models.MemorySourceKind>("kind", Kind);
+            writer.WriteStringValue("ref", Ref);
+            writer.WriteStringValue("title", Title);
             writer.WriteAdditionalData(AdditionalData);
         }
     }

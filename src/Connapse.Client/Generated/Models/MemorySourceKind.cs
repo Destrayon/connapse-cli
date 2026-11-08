@@ -5,12 +5,16 @@ namespace Connapse.Client.Models
 {
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
     #pragma warning disable CS1591
-    public enum SourceScopeFilesystemFolderScope_type
+    public enum MemorySourceKind
     #pragma warning restore CS1591
     {
-        [EnumMember(Value = "filesystem")]
+        [EnumMember(Value = "Document")]
         #pragma warning disable CS1591
-        Filesystem,
+        Document,
+        #pragma warning restore CS1591
+        [EnumMember(Value = "Node")]
+        #pragma warning disable CS1591
+        Node,
         #pragma warning restore CS1591
     }
 }

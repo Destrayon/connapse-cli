@@ -34,7 +34,7 @@ namespace Connapse.Client.Api.Settings.Item
         {
         }
         /// <summary>
-        /// Get settings for a specific category. API keys are never returned.
+        /// Get settings for a specific category. API keys are never returned. The ETag header identifies these settings; send it in If-Match on PUT to save only if nobody changed them since.
         /// </summary>
         /// <returns>A <see cref="global::Connapse.Client.Api.Settings.Item.WithCategoryItemRequestBuilder.WithCategoryGetResponse"/></returns>
         /// <param name="cancellationToken">Cancellation token to use when cancelling requests</param>
@@ -63,10 +63,10 @@ namespace Connapse.Client.Api.Settings.Item
             return await RequestAdapter.SendAsync<global::Connapse.Client.Api.Settings.Item.WithCategoryItemRequestBuilder.WithCategoryGetResponse>(requestInfo, global::Connapse.Client.Api.Settings.Item.WithCategoryItemRequestBuilder.WithCategoryGetResponse.CreateFromDiscriminatorValue, errorMapping, cancellationToken).ConfigureAwait(false);
         }
         /// <summary>
-        /// Update settings for a specific category. An API key left out or null keeps its value; an empty one clears it.
+        /// Update settings for a specific category. An API key left out or null keeps its value; an empty one clears it. Send the ETag from GET in If-Match to have the save refused with 412 if the settings changed since.
         /// </summary>
         /// <returns>A <see cref="global::Connapse.Client.Models.SettingsSavedResponse"/></returns>
-        /// <param name="body">The category&apos;s settings: embedding: EmbeddingSettings, chunking: ChunkingSettings, search: SearchSettings, llm: LlmSettings, upload: UploadSettings, summary: SummarySettings.</param>
+        /// <param name="body">The category&apos;s settings: embedding: EmbeddingSettings, chunking: ChunkingSettings, search: SearchSettings, llm: LlmSettings, upload: UploadSettings.</param>
         /// <param name="cancellationToken">Cancellation token to use when cancelling requests</param>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
         /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 400 status code</exception>
@@ -74,6 +74,7 @@ namespace Connapse.Client.Api.Settings.Item
         /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 403 status code</exception>
         /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 404 status code</exception>
         /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 409 status code</exception>
+        /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 412 status code</exception>
         /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 429 status code</exception>
         /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 500 status code</exception>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
@@ -94,13 +95,14 @@ namespace Connapse.Client.Api.Settings.Item
                 { "403", global::Connapse.Client.Models.ProblemDetails.CreateFromDiscriminatorValue },
                 { "404", global::Connapse.Client.Models.ProblemDetails.CreateFromDiscriminatorValue },
                 { "409", global::Connapse.Client.Models.ProblemDetails.CreateFromDiscriminatorValue },
+                { "412", global::Connapse.Client.Models.ProblemDetails.CreateFromDiscriminatorValue },
                 { "429", global::Connapse.Client.Models.ProblemDetails.CreateFromDiscriminatorValue },
                 { "500", global::Connapse.Client.Models.ProblemDetails.CreateFromDiscriminatorValue },
             };
             return await RequestAdapter.SendAsync<global::Connapse.Client.Models.SettingsSavedResponse>(requestInfo, global::Connapse.Client.Models.SettingsSavedResponse.CreateFromDiscriminatorValue, errorMapping, cancellationToken).ConfigureAwait(false);
         }
         /// <summary>
-        /// Get settings for a specific category. API keys are never returned.
+        /// Get settings for a specific category. API keys are never returned. The ETag header identifies these settings; send it in If-Match on PUT to save only if nobody changed them since.
         /// </summary>
         /// <returns>A <see cref="RequestInformation"/></returns>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
@@ -119,10 +121,10 @@ namespace Connapse.Client.Api.Settings.Item
             return requestInfo;
         }
         /// <summary>
-        /// Update settings for a specific category. An API key left out or null keeps its value; an empty one clears it.
+        /// Update settings for a specific category. An API key left out or null keeps its value; an empty one clears it. Send the ETag from GET in If-Match to have the save refused with 412 if the settings changed since.
         /// </summary>
         /// <returns>A <see cref="RequestInformation"/></returns>
-        /// <param name="body">The category&apos;s settings: embedding: EmbeddingSettings, chunking: ChunkingSettings, search: SearchSettings, llm: LlmSettings, upload: UploadSettings, summary: SummarySettings.</param>
+        /// <param name="body">The category&apos;s settings: embedding: EmbeddingSettings, chunking: ChunkingSettings, search: SearchSettings, llm: LlmSettings, upload: UploadSettings.</param>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -150,7 +152,7 @@ namespace Connapse.Client.Api.Settings.Item
             return new global::Connapse.Client.Api.Settings.Item.WithCategoryItemRequestBuilder(rawUrl, RequestAdapter);
         }
         /// <summary>
-        /// Composed type wrapper for classes <see cref="global::Connapse.Client.Models.ChunkingSettings"/>, <see cref="global::Connapse.Client.Models.EmbeddingSettings"/>, <see cref="global::Connapse.Client.Models.LlmSettings"/>, <see cref="global::Connapse.Client.Models.SearchSettings"/>, <see cref="global::Connapse.Client.Models.SummarySettings"/>, <see cref="global::Connapse.Client.Models.UploadSettings"/>
+        /// Composed type wrapper for classes <see cref="global::Connapse.Client.Models.ChunkingSettings"/>, <see cref="global::Connapse.Client.Models.EmbeddingSettings"/>, <see cref="global::Connapse.Client.Models.LlmSettings"/>, <see cref="global::Connapse.Client.Models.SearchSettings"/>, <see cref="global::Connapse.Client.Models.UploadSettings"/>
         /// </summary>
         [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
         public partial class WithCategoryGetResponse : IComposedTypeWrapper, IParsable
@@ -187,14 +189,6 @@ namespace Connapse.Client.Api.Settings.Item
 #else
             public global::Connapse.Client.Models.SearchSettings SearchSettings { get; set; }
 #endif
-            /// <summary>Composed type representation for type <see cref="global::Connapse.Client.Models.SummarySettings"/></summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-            public global::Connapse.Client.Models.SummarySettings? SummarySettings { get; set; }
-#nullable restore
-#else
-            public global::Connapse.Client.Models.SummarySettings SummarySettings { get; set; }
-#endif
             /// <summary>Composed type representation for type <see cref="global::Connapse.Client.Models.UploadSettings"/></summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -216,7 +210,6 @@ namespace Connapse.Client.Api.Settings.Item
                 result.EmbeddingSettings = new global::Connapse.Client.Models.EmbeddingSettings();
                 result.LlmSettings = new global::Connapse.Client.Models.LlmSettings();
                 result.SearchSettings = new global::Connapse.Client.Models.SearchSettings();
-                result.SummarySettings = new global::Connapse.Client.Models.SummarySettings();
                 result.UploadSettings = new global::Connapse.Client.Models.UploadSettings();
                 return result;
             }
@@ -226,9 +219,9 @@ namespace Connapse.Client.Api.Settings.Item
             /// <returns>A IDictionary&lt;string, Action&lt;IParseNode&gt;&gt;</returns>
             public virtual IDictionary<string, Action<IParseNode>> GetFieldDeserializers()
             {
-                if(ChunkingSettings != null || EmbeddingSettings != null || LlmSettings != null || SearchSettings != null || SummarySettings != null || UploadSettings != null)
+                if(ChunkingSettings != null || EmbeddingSettings != null || LlmSettings != null || SearchSettings != null || UploadSettings != null)
                 {
-                    return ParseNodeHelper.MergeDeserializersForIntersectionWrapper(ChunkingSettings, EmbeddingSettings, LlmSettings, SearchSettings, SummarySettings, UploadSettings);
+                    return ParseNodeHelper.MergeDeserializersForIntersectionWrapper(ChunkingSettings, EmbeddingSettings, LlmSettings, SearchSettings, UploadSettings);
                 }
                 return new Dictionary<string, Action<IParseNode>>();
             }
@@ -239,11 +232,11 @@ namespace Connapse.Client.Api.Settings.Item
             public virtual void Serialize(ISerializationWriter writer)
             {
                 if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
-                writer.WriteObjectValue<global::Connapse.Client.Models.ChunkingSettings>(null, ChunkingSettings, EmbeddingSettings, LlmSettings, SearchSettings, SummarySettings, UploadSettings);
+                writer.WriteObjectValue<global::Connapse.Client.Models.ChunkingSettings>(null, ChunkingSettings, EmbeddingSettings, LlmSettings, SearchSettings, UploadSettings);
             }
         }
         /// <summary>
-        /// Composed type wrapper for classes <see cref="global::Connapse.Client.Models.ChunkingSettings"/>, <see cref="global::Connapse.Client.Models.EmbeddingSettings"/>, <see cref="global::Connapse.Client.Models.LlmSettings"/>, <see cref="global::Connapse.Client.Models.SearchSettings"/>, <see cref="global::Connapse.Client.Models.SummarySettings"/>, <see cref="global::Connapse.Client.Models.UploadSettings"/>
+        /// Composed type wrapper for classes <see cref="global::Connapse.Client.Models.ChunkingSettings"/>, <see cref="global::Connapse.Client.Models.EmbeddingSettings"/>, <see cref="global::Connapse.Client.Models.LlmSettings"/>, <see cref="global::Connapse.Client.Models.SearchSettings"/>, <see cref="global::Connapse.Client.Models.UploadSettings"/>
         /// </summary>
         [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
         public partial class WithCategoryPutRequestBody : IComposedTypeWrapper, IParsable
@@ -280,14 +273,6 @@ namespace Connapse.Client.Api.Settings.Item
 #else
             public global::Connapse.Client.Models.SearchSettings SearchSettings { get; set; }
 #endif
-            /// <summary>Composed type representation for type <see cref="global::Connapse.Client.Models.SummarySettings"/></summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-            public global::Connapse.Client.Models.SummarySettings? SummarySettings { get; set; }
-#nullable restore
-#else
-            public global::Connapse.Client.Models.SummarySettings SummarySettings { get; set; }
-#endif
             /// <summary>Composed type representation for type <see cref="global::Connapse.Client.Models.UploadSettings"/></summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -309,7 +294,6 @@ namespace Connapse.Client.Api.Settings.Item
                 result.EmbeddingSettings = new global::Connapse.Client.Models.EmbeddingSettings();
                 result.LlmSettings = new global::Connapse.Client.Models.LlmSettings();
                 result.SearchSettings = new global::Connapse.Client.Models.SearchSettings();
-                result.SummarySettings = new global::Connapse.Client.Models.SummarySettings();
                 result.UploadSettings = new global::Connapse.Client.Models.UploadSettings();
                 return result;
             }
@@ -319,9 +303,9 @@ namespace Connapse.Client.Api.Settings.Item
             /// <returns>A IDictionary&lt;string, Action&lt;IParseNode&gt;&gt;</returns>
             public virtual IDictionary<string, Action<IParseNode>> GetFieldDeserializers()
             {
-                if(ChunkingSettings != null || EmbeddingSettings != null || LlmSettings != null || SearchSettings != null || SummarySettings != null || UploadSettings != null)
+                if(ChunkingSettings != null || EmbeddingSettings != null || LlmSettings != null || SearchSettings != null || UploadSettings != null)
                 {
-                    return ParseNodeHelper.MergeDeserializersForIntersectionWrapper(ChunkingSettings, EmbeddingSettings, LlmSettings, SearchSettings, SummarySettings, UploadSettings);
+                    return ParseNodeHelper.MergeDeserializersForIntersectionWrapper(ChunkingSettings, EmbeddingSettings, LlmSettings, SearchSettings, UploadSettings);
                 }
                 return new Dictionary<string, Action<IParseNode>>();
             }
@@ -332,7 +316,7 @@ namespace Connapse.Client.Api.Settings.Item
             public virtual void Serialize(ISerializationWriter writer)
             {
                 if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
-                writer.WriteObjectValue<global::Connapse.Client.Models.ChunkingSettings>(null, ChunkingSettings, EmbeddingSettings, LlmSettings, SearchSettings, SummarySettings, UploadSettings);
+                writer.WriteObjectValue<global::Connapse.Client.Models.ChunkingSettings>(null, ChunkingSettings, EmbeddingSettings, LlmSettings, SearchSettings, UploadSettings);
             }
         }
     }

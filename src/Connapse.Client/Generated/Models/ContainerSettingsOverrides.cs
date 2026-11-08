@@ -38,14 +38,6 @@ namespace Connapse.Client.Models
 #else
         public global::Connapse.Client.Models.SearchSettings Search { get; set; }
 #endif
-        /// <summary>The summary property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public global::Connapse.Client.Models.SummarySettings? Summary { get; set; }
-#nullable restore
-#else
-        public global::Connapse.Client.Models.SummarySettings Summary { get; set; }
-#endif
         /// <summary>The upload property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -82,7 +74,6 @@ namespace Connapse.Client.Models
                 { "chunking", n => { Chunking = n.GetObjectValue<global::Connapse.Client.Models.ChunkingSettings>(global::Connapse.Client.Models.ChunkingSettings.CreateFromDiscriminatorValue); } },
                 { "embedding", n => { Embedding = n.GetObjectValue<global::Connapse.Client.Models.EmbeddingSettings>(global::Connapse.Client.Models.EmbeddingSettings.CreateFromDiscriminatorValue); } },
                 { "search", n => { Search = n.GetObjectValue<global::Connapse.Client.Models.SearchSettings>(global::Connapse.Client.Models.SearchSettings.CreateFromDiscriminatorValue); } },
-                { "summary", n => { Summary = n.GetObjectValue<global::Connapse.Client.Models.SummarySettings>(global::Connapse.Client.Models.SummarySettings.CreateFromDiscriminatorValue); } },
                 { "upload", n => { Upload = n.GetObjectValue<global::Connapse.Client.Models.UploadSettings>(global::Connapse.Client.Models.UploadSettings.CreateFromDiscriminatorValue); } },
             };
         }
@@ -96,7 +87,6 @@ namespace Connapse.Client.Models
             writer.WriteObjectValue<global::Connapse.Client.Models.ChunkingSettings>("chunking", Chunking);
             writer.WriteObjectValue<global::Connapse.Client.Models.EmbeddingSettings>("embedding", Embedding);
             writer.WriteObjectValue<global::Connapse.Client.Models.SearchSettings>("search", Search);
-            writer.WriteObjectValue<global::Connapse.Client.Models.SummarySettings>("summary", Summary);
             writer.WriteObjectValue<global::Connapse.Client.Models.UploadSettings>("upload", Upload);
             writer.WriteAdditionalData(AdditionalData);
         }

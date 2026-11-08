@@ -37,7 +37,6 @@ namespace Connapse.Client.Models
                 "azureBlob" => new global::Connapse.Client.Models.SourceScopeAzureBlobContainerScope(),
                 "confluence" => new global::Connapse.Client.Models.SourceScopeConfluenceSpaceScope(),
                 "custom" => new global::Connapse.Client.Models.SourceScopeCustomSourceScope(),
-                "filesystem" => new global::Connapse.Client.Models.SourceScopeFilesystemFolderScope(),
                 "github" => new global::Connapse.Client.Models.SourceScopeGitHubRepositoryScope(),
                 "jira" => new global::Connapse.Client.Models.SourceScopeJiraProjectScope(),
                 "s3" => new global::Connapse.Client.Models.SourceScopeS3BucketScope(),

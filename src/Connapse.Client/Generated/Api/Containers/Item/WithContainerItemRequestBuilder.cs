@@ -7,7 +7,6 @@ using Connapse.Client.Api.Containers.Item.RetryFailed;
 using Connapse.Client.Api.Containers.Item.Search;
 using Connapse.Client.Api.Containers.Item.Settings;
 using Connapse.Client.Api.Containers.Item.Stats;
-using Connapse.Client.Api.Containers.Item.Summaries;
 using Connapse.Client.Api.Containers.Item.Sync;
 using Connapse.Client.Models;
 using Microsoft.Kiota.Abstractions.Extensions;
@@ -60,11 +59,6 @@ namespace Connapse.Client.Api.Containers.Item
         public global::Connapse.Client.Api.Containers.Item.Stats.StatsRequestBuilder Stats
         {
             get => new global::Connapse.Client.Api.Containers.Item.Stats.StatsRequestBuilder(PathParameters, RequestAdapter);
-        }
-        /// <summary>The summaries property</summary>
-        public global::Connapse.Client.Api.Containers.Item.Summaries.SummariesRequestBuilder Summaries
-        {
-            get => new global::Connapse.Client.Api.Containers.Item.Summaries.SummariesRequestBuilder(PathParameters, RequestAdapter);
         }
         /// <summary>The sync property</summary>
         public global::Connapse.Client.Api.Containers.Item.Sync.SyncRequestBuilder Sync

@@ -9,7 +9,7 @@ public sealed class SourceCommandTests : IDisposable
     private const string Id = "7b1c9e2a-0000-4000-8000-0000000000d1";
     private const string ConnectionId = "7b1c9e2a-0000-4000-8000-0000000000c1";
     private const string Source = $$"""
-        {"id":"{{Id}}","name":"handbook","description":"HR docs","kind":"s3","summary":"s3://docs/hr",
+        {"id":"{{Id}}","name":"handbook","description":"HR docs","kind":"s3",
         "connectionId":"{{ConnectionId}}","enabled":true,"documentCount":12,"failedDocumentCount":1,
         "processingDocumentCount":0,"syncIntervalSeconds":3600,"lastSyncStatus":"Succeeded",
         "lastSyncedAt":"2026-10-02T00:00:00Z","withheldDeletions":0}
@@ -46,7 +46,6 @@ public sealed class SourceCommandTests : IDisposable
         var result = await _host.RunAsync("source", "get", "Handbook");
 
         Assert.Equal(0, result.ExitCode);
-        Assert.Contains("Scope:       s3://docs/hr", result.Output);
         Assert.Contains("Documents:   12 (0 processing, 1 failed)", result.Output);
     }
 
@@ -104,6 +103,18 @@ public sealed class SourceCommandTests : IDisposable
         Assert.Equal(1, result.ExitCode);
         Assert.Contains("needs a \"type\"", result.Error);
         Assert.Contains("s3", result.Error);
+        Assert.Empty(_host.Sent);
+    }
+
+    [Fact]
+    public async Task Create_AFilesystemScope_IsRefusedBecauseConnapse040DroppedIt()
+    {
+        var result = await _host.RunAsync("source", "create", "handbook", "--connection", ConnectionId,
+            "--scope", """{"type":"filesystem","path":"/data"}""");
+
+        Assert.Equal(1, result.ExitCode);
+        Assert.Contains("one of azureBlob, confluence, custom, github, jira, s3, sftp.", result.Error);
+        Assert.DoesNotContain("filesystem", result.Error);
         Assert.Empty(_host.Sent);
     }
 

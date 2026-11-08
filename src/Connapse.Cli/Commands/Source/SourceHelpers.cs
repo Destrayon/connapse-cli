@@ -11,7 +11,7 @@ namespace Connapse.Cli.Commands.Source;
 internal static class SourceHelpers
 {
     /// <summary>The scope types the generated client knows, as a scope's "type" names them.</summary>
-    public const string ScopeTypes = "azureBlob, confluence, custom, filesystem, github, jira, s3, sftp";
+    public const string ScopeTypes = "azureBlob, confluence, custom, github, jira, s3, sftp";
 
     public static Argument<string> SourceArgument() => new("source")
     {
@@ -47,7 +47,6 @@ internal static class SourceHelpers
             scope.SourceScopeAzureBlobContainerScope is not null ||
             scope.SourceScopeConfluenceSpaceScope is not null ||
             scope.SourceScopeCustomSourceScope is not null ||
-            scope.SourceScopeFilesystemFolderScope is not null ||
             scope.SourceScopeGitHubRepositoryScope is not null ||
             scope.SourceScopeJiraProjectScope is not null ||
             scope.SourceScopeS3BucketScope is not null ||
@@ -63,8 +62,6 @@ internal static class SourceHelpers
         if (!string.IsNullOrEmpty(s.Description))
             Console.WriteLine($"  {s.Description}");
         Console.WriteLine($"  Kind:        {s.Kind}");
-        if (!string.IsNullOrEmpty(s.Summary))
-            Console.WriteLine($"  Scope:       {s.Summary}");
         Console.WriteLine($"  Connection:  {s.ConnectionId}");
         Console.WriteLine($"  Enabled:     {(s.Enabled == false ? "no" : "yes")}");
         Console.WriteLine($"  Documents:   {s.DocumentCount ?? 0} ({s.ProcessingDocumentCount ?? 0} processing, {s.FailedDocumentCount ?? 0} failed)");

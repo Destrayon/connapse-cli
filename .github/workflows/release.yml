@@ -127,6 +127,10 @@ jobs:
     needs: [build-cli, publish-nuget]
 
     steps:
+      - name: Extract version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
@@ -144,7 +148,7 @@ jobs:
 
             ### NuGet global tool (requires .NET 10 SDK)
             ```bash
-            dotnet tool install -g Connapse.CLI --version ${{ github.ref_name }}
+            dotnet tool install -g Connapse.CLI --version ${{ steps.version.outputs.VERSION }}
             ```
 
             ### Self-contained binary (no .NET required)

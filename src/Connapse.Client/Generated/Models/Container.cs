@@ -14,6 +14,8 @@ namespace Connapse.Client.Models
     {
         /// <summary>Stores additional data not described in the OpenAPI description found when deserializing. Can be used for serialization as well.</summary>
         public IDictionary<string, object> AdditionalData { get; set; }
+        /// <summary>The audience property</summary>
+        public global::Connapse.Client.Models.MemoryScope? Audience { get; set; }
         /// <summary>The createdAt property</summary>
         public DateTimeOffset? CreatedAt { get; set; }
         /// <summary>The description property</summary>
@@ -34,6 +36,8 @@ namespace Connapse.Client.Models
 #else
         public string Id { get; set; }
 #endif
+        /// <summary>The kind property</summary>
+        public global::Connapse.Client.Models.ContainerKind? Kind { get; set; }
         /// <summary>The name property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -50,24 +54,6 @@ namespace Connapse.Client.Models
 #else
         public global::Connapse.Client.Models.ContainerSettingsOverrides SettingsOverrides { get; set; }
 #endif
-        /// <summary>The summary property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public string? Summary { get; set; }
-#nullable restore
-#else
-        public string Summary { get; set; }
-#endif
-        /// <summary>The summaryDocSetHash property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public string? SummaryDocSetHash { get; set; }
-#nullable restore
-#else
-        public string SummaryDocSetHash { get; set; }
-#endif
-        /// <summary>The summaryGeneratedAt property</summary>
-        public DateTimeOffset? SummaryGeneratedAt { get; set; }
         /// <summary>The updatedAt property</summary>
         public DateTimeOffset? UpdatedAt { get; set; }
         /// <summary>
@@ -76,7 +62,9 @@ namespace Connapse.Client.Models
         public Container()
         {
             AdditionalData = new Dictionary<string, object>();
+            Audience = global::Connapse.Client.Models.MemoryScope.Team;
             DocumentCount = 0;
+            Kind = global::Connapse.Client.Models.ContainerKind.Documents;
         }
         /// <summary>
         /// Creates a new instance of the appropriate class based on discriminator value
@@ -96,15 +84,14 @@ namespace Connapse.Client.Models
         {
             return new Dictionary<string, Action<IParseNode>>
             {
+                { "audience", n => { Audience = n.GetEnumValue<global::Connapse.Client.Models.MemoryScope>(); } },
                 { "createdAt", n => { CreatedAt = n.GetDateTimeOffsetValue(); } },
                 { "description", n => { Description = n.GetStringValue(); } },
                 { "documentCount", n => { DocumentCount = n.GetIntValue(); } },
                 { "id", n => { Id = n.GetStringValue(); } },
+                { "kind", n => { Kind = n.GetEnumValue<global::Connapse.Client.Models.ContainerKind>(); } },
                 { "name", n => { Name = n.GetStringValue(); } },
                 { "settingsOverrides", n => { SettingsOverrides = n.GetObjectValue<global::Connapse.Client.Models.ContainerSettingsOverrides>(global::Connapse.Client.Models.ContainerSettingsOverrides.CreateFromDiscriminatorValue); } },
-                { "summary", n => { Summary = n.GetStringValue(); } },
-                { "summaryDocSetHash", n => { SummaryDocSetHash = n.GetStringValue(); } },
-                { "summaryGeneratedAt", n => { SummaryGeneratedAt = n.GetDateTimeOffsetValue(); } },
                 { "updatedAt", n => { UpdatedAt = n.GetDateTimeOffsetValue(); } },
             };
         }
@@ -115,15 +102,14 @@ namespace Connapse.Client.Models
         public virtual void Serialize(ISerializationWriter writer)
         {
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
+            writer.WriteEnumValue<global::Connapse.Client.Models.MemoryScope>("audience", Audience);
             writer.WriteDateTimeOffsetValue("createdAt", CreatedAt);
             writer.WriteStringValue("description", Description);
             writer.WriteIntValue("documentCount", DocumentCount);
             writer.WriteStringValue("id", Id);
+            writer.WriteEnumValue<global::Connapse.Client.Models.ContainerKind>("kind", Kind);
             writer.WriteStringValue("name", Name);
             writer.WriteObjectValue<global::Connapse.Client.Models.ContainerSettingsOverrides>("settingsOverrides", SettingsOverrides);
-            writer.WriteStringValue("summary", Summary);
-            writer.WriteStringValue("summaryDocSetHash", SummaryDocSetHash);
-            writer.WriteDateTimeOffsetValue("summaryGeneratedAt", SummaryGeneratedAt);
             writer.WriteDateTimeOffsetValue("updatedAt", UpdatedAt);
             writer.WriteAdditionalData(AdditionalData);
         }

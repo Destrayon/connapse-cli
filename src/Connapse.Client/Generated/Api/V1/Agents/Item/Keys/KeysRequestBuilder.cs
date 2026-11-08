@@ -77,7 +77,7 @@ namespace Connapse.Client.Api.V1.Agents.Item.Keys
             return collectionResult?.AsList();
         }
         /// <summary>
-        /// Create an API key for an agent, with scopes from knowledge:read, knowledge:write and agent:ingest. Token is shown only once. (Admin only)
+        /// Create an API key for an agent, with scopes from knowledge:read and knowledge:write (the deprecated agent:ingest is accepted and dropped). Token is shown only once. (Admin only)
         /// </summary>
         /// <returns>A <see cref="global::Connapse.Client.Models.CreateAgentKeyResponse"/></returns>
         /// <param name="body">The request body</param>
@@ -129,7 +129,7 @@ namespace Connapse.Client.Api.V1.Agents.Item.Keys
             return requestInfo;
         }
         /// <summary>
-        /// Create an API key for an agent, with scopes from knowledge:read, knowledge:write and agent:ingest. Token is shown only once. (Admin only)
+        /// Create an API key for an agent, with scopes from knowledge:read and knowledge:write (the deprecated agent:ingest is accepted and dropped). Token is shown only once. (Admin only)
         /// </summary>
         /// <returns>A <see cref="RequestInformation"/></returns>
         /// <param name="body">The request body</param>

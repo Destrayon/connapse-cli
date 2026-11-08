@@ -78,26 +78,6 @@ namespace Connapse.Client.Models
         public long? SizeBytes { get; set; }
         /// <summary>The status property</summary>
         public global::Connapse.Client.Models.DocumentStatus? Status { get; set; }
-        /// <summary>The summary property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public string? Summary { get; set; }
-#nullable restore
-#else
-        public string Summary { get; set; }
-#endif
-        /// <summary>The summaryContentHash property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public string? SummaryContentHash { get; set; }
-#nullable restore
-#else
-        public string SummaryContentHash { get; set; }
-#endif
-        /// <summary>The summaryGeneratedAt property</summary>
-        public DateTimeOffset? SummaryGeneratedAt { get; set; }
-        /// <summary>The summaryStatus property</summary>
-        public global::Connapse.Client.Models.SummaryStatus? SummaryStatus { get; set; }
         /// <summary>
         /// Instantiates a new <see cref="global::Connapse.Client.Models.Document"/> and sets the default values.
         /// </summary>
@@ -105,7 +85,6 @@ namespace Connapse.Client.Models
         {
             AdditionalData = new Dictionary<string, object>();
             Status = global::Connapse.Client.Models.DocumentStatus.Queued;
-            SummaryStatus = global::Connapse.Client.Models.SummaryStatus.NotNeeded;
         }
         /// <summary>
         /// Creates a new instance of the appropriate class based on discriminator value
@@ -136,10 +115,6 @@ namespace Connapse.Client.Models
                 { "path", n => { Path = n.GetStringValue(); } },
                 { "sizeBytes", n => { SizeBytes = n.GetLongValue(); } },
                 { "status", n => { Status = n.GetEnumValue<global::Connapse.Client.Models.DocumentStatus>(); } },
-                { "summary", n => { Summary = n.GetStringValue(); } },
-                { "summaryContentHash", n => { SummaryContentHash = n.GetStringValue(); } },
-                { "summaryGeneratedAt", n => { SummaryGeneratedAt = n.GetDateTimeOffsetValue(); } },
-                { "summaryStatus", n => { SummaryStatus = n.GetEnumValue<global::Connapse.Client.Models.SummaryStatus>(); } },
             };
         }
         /// <summary>
@@ -160,10 +135,6 @@ namespace Connapse.Client.Models
             writer.WriteStringValue("path", Path);
             writer.WriteLongValue("sizeBytes", SizeBytes);
             writer.WriteEnumValue<global::Connapse.Client.Models.DocumentStatus>("status", Status);
-            writer.WriteStringValue("summary", Summary);
-            writer.WriteStringValue("summaryContentHash", SummaryContentHash);
-            writer.WriteDateTimeOffsetValue("summaryGeneratedAt", SummaryGeneratedAt);
-            writer.WriteEnumValue<global::Connapse.Client.Models.SummaryStatus>("summaryStatus", SummaryStatus);
             writer.WriteAdditionalData(AdditionalData);
         }
     }

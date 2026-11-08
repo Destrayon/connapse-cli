@@ -50,6 +50,7 @@ namespace Connapse.Client.Api.Containers.Item.Search
         /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 403 status code</exception>
         /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 404 status code</exception>
         /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 429 status code</exception>
+        /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 503 status code</exception>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
         public async Task<global::Connapse.Client.Models.SearchResult?> GetAsync(Action<RequestConfiguration<global::Connapse.Client.Api.Containers.Item.Search.SearchRequestBuilder.SearchRequestBuilderGetQueryParameters>>? requestConfiguration = default, CancellationToken cancellationToken = default)
@@ -67,6 +68,7 @@ namespace Connapse.Client.Api.Containers.Item.Search
                 { "403", global::Connapse.Client.Models.ProblemDetails.CreateFromDiscriminatorValue },
                 { "404", global::Connapse.Client.Models.ProblemDetails.CreateFromDiscriminatorValue },
                 { "429", global::Connapse.Client.Models.ProblemDetails.CreateFromDiscriminatorValue },
+                { "503", global::Connapse.Client.Models.ProblemDetails.CreateFromDiscriminatorValue },
             };
             return await RequestAdapter.SendAsync<global::Connapse.Client.Models.SearchResult>(requestInfo, global::Connapse.Client.Models.SearchResult.CreateFromDiscriminatorValue, errorMapping, cancellationToken).ConfigureAwait(false);
         }
@@ -82,6 +84,7 @@ namespace Connapse.Client.Api.Containers.Item.Search
         /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 403 status code</exception>
         /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 404 status code</exception>
         /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 429 status code</exception>
+        /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 503 status code</exception>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
         public async Task<global::Connapse.Client.Models.SearchResult?> PostAsync(global::Connapse.Client.Models.SearchApiRequest body, Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = default, CancellationToken cancellationToken = default)
@@ -100,6 +103,7 @@ namespace Connapse.Client.Api.Containers.Item.Search
                 { "403", global::Connapse.Client.Models.ProblemDetails.CreateFromDiscriminatorValue },
                 { "404", global::Connapse.Client.Models.ProblemDetails.CreateFromDiscriminatorValue },
                 { "429", global::Connapse.Client.Models.ProblemDetails.CreateFromDiscriminatorValue },
+                { "503", global::Connapse.Client.Models.ProblemDetails.CreateFromDiscriminatorValue },
             };
             return await RequestAdapter.SendAsync<global::Connapse.Client.Models.SearchResult>(requestInfo, global::Connapse.Client.Models.SearchResult.CreateFromDiscriminatorValue, errorMapping, cancellationToken).ConfigureAwait(false);
         }

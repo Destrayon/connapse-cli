@@ -36,7 +36,7 @@ public sealed class ConnectionCommandTests : IDisposable
         var result = await _host.RunAsync("connection", "list", "--provider", "dropbox");
 
         Assert.Equal(1, result.ExitCode);
-        Assert.Contains("--provider must be one of: Filesystem, S3, AzureBlob, Sftp, GitHub, Atlassian, Custom", result.Error);
+        Assert.Contains("--provider must be one of: S3, AzureBlob, Sftp, GitHub, Atlassian, Custom", result.Error);
         Assert.Empty(_host.Sent);
     }
 

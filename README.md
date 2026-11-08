@@ -149,7 +149,6 @@ These need the Owner or Admin role. A personal access token also needs the match
 | `connapse settings test <embedding\|llm\|crossencoder\|minio> [--settings <json>]` | Check the server can reach the service; exits 1 if not. |
 | `connapse settings reindex [--force] [--container <name>]` and `settings reindex-status` | Re-embed documents in the background and follow progress. |
 | `connapse settings embedding-models` | List the embedding models with vectors stored. |
-| `connapse settings clear-summaries` | Clear container and document summaries so they are written again. |
 | `connapse agent list` | List agents: non-human callers that use API keys. |
 | `connapse agent get\|create\|enable\|disable <agent>` | Show, create, enable or disable an agent. |
 | `connapse agent delete <agent> --yes` | Delete an agent and revoke its keys. |

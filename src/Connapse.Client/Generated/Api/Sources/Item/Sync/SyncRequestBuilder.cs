@@ -34,7 +34,7 @@ namespace Connapse.Client.Api.Sources.Item.Sync
         {
         }
         /// <summary>
-        /// Run one sync cycle for a source immediately, rather than waiting for the next scheduled poll.
+        /// Run one sync cycle for a source immediately, rather than waiting for the next scheduled poll. Administrator only; a token needs admin:sources.
         /// </summary>
         /// <returns>A <see cref="global::Connapse.Client.Models.SourceSyncResponse"/></returns>
         /// <param name="cancellationToken">Cancellation token to use when cancelling requests</param>
@@ -67,7 +67,7 @@ namespace Connapse.Client.Api.Sources.Item.Sync
             return await RequestAdapter.SendAsync<global::Connapse.Client.Models.SourceSyncResponse>(requestInfo, global::Connapse.Client.Models.SourceSyncResponse.CreateFromDiscriminatorValue, errorMapping, cancellationToken).ConfigureAwait(false);
         }
         /// <summary>
-        /// Run one sync cycle for a source immediately, rather than waiting for the next scheduled poll.
+        /// Run one sync cycle for a source immediately, rather than waiting for the next scheduled poll. Administrator only; a token needs admin:sources.
         /// </summary>
         /// <returns>A <see cref="RequestInformation"/></returns>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
@@ -95,7 +95,7 @@ namespace Connapse.Client.Api.Sources.Item.Sync
             return new global::Connapse.Client.Api.Sources.Item.Sync.SyncRequestBuilder(rawUrl, RequestAdapter);
         }
         /// <summary>
-        /// Run one sync cycle for a source immediately, rather than waiting for the next scheduled poll.
+        /// Run one sync cycle for a source immediately, rather than waiting for the next scheduled poll. Administrator only; a token needs admin:sources.
         /// </summary>
         [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
         public partial class SyncRequestBuilderPostQueryParameters 
