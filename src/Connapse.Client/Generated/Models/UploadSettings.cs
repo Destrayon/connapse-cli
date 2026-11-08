@@ -36,7 +36,8 @@ namespace Connapse.Client.Models
         public int? MaxZipEntries { get; set; }
         /// <summary>The minCharactersForQualityCheck property</summary>
         public int? MinCharactersForQualityCheck { get; set; }
-        /// <summary>The parallelWorkers property</summary>
+        /// <summary>Deprecated and ignored: set the ingestion worker count with Hangfire:IngestionWorkerCount (environment variable Hangfire__IngestionWorkerCount), which takes effect on restart.</summary>
+        [Obsolete("")]
         public int? ParallelWorkers { get; set; }
         /// <summary>The parserFilesPerProcess property</summary>
         public int? ParserFilesPerProcess { get; set; }

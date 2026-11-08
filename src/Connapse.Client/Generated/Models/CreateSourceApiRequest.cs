@@ -114,7 +114,7 @@ namespace Connapse.Client.Models
             writer.WriteAdditionalData(AdditionalData);
         }
         /// <summary>
-        /// Composed type wrapper for classes <see cref="global::Connapse.Client.Models.CreateSourceApiRequest_scopeMember1"/>, <see cref="global::Connapse.Client.Models.SourceScopeAzureBlobContainerScope"/>, <see cref="global::Connapse.Client.Models.SourceScopeConfluenceSpaceScope"/>, <see cref="global::Connapse.Client.Models.SourceScopeCustomSourceScope"/>, <see cref="global::Connapse.Client.Models.SourceScopeFilesystemFolderScope"/>, <see cref="global::Connapse.Client.Models.SourceScopeGitHubRepositoryScope"/>, <see cref="global::Connapse.Client.Models.SourceScopeJiraProjectScope"/>, <see cref="global::Connapse.Client.Models.SourceScopeS3BucketScope"/>, <see cref="global::Connapse.Client.Models.SourceScopeSftpFolderScope"/>
+        /// Composed type wrapper for classes <see cref="global::Connapse.Client.Models.CreateSourceApiRequest_scopeMember1"/>, <see cref="global::Connapse.Client.Models.SourceScopeAzureBlobContainerScope"/>, <see cref="global::Connapse.Client.Models.SourceScopeConfluenceSpaceScope"/>, <see cref="global::Connapse.Client.Models.SourceScopeCustomSourceScope"/>, <see cref="global::Connapse.Client.Models.SourceScopeGitHubRepositoryScope"/>, <see cref="global::Connapse.Client.Models.SourceScopeJiraProjectScope"/>, <see cref="global::Connapse.Client.Models.SourceScopeS3BucketScope"/>, <see cref="global::Connapse.Client.Models.SourceScopeSftpFolderScope"/>
         /// </summary>
         [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
         public partial class CreateSourceApiRequest_scope : IComposedTypeWrapper, IParsable
@@ -150,14 +150,6 @@ namespace Connapse.Client.Models
 #nullable restore
 #else
             public global::Connapse.Client.Models.SourceScopeCustomSourceScope SourceScopeCustomSourceScope { get; set; }
-#endif
-            /// <summary>Composed type representation for type <see cref="global::Connapse.Client.Models.SourceScopeFilesystemFolderScope"/></summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-            public global::Connapse.Client.Models.SourceScopeFilesystemFolderScope? SourceScopeFilesystemFolderScope { get; set; }
-#nullable restore
-#else
-            public global::Connapse.Client.Models.SourceScopeFilesystemFolderScope SourceScopeFilesystemFolderScope { get; set; }
 #endif
             /// <summary>Composed type representation for type <see cref="global::Connapse.Client.Models.SourceScopeGitHubRepositoryScope"/></summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
@@ -213,10 +205,6 @@ namespace Connapse.Client.Models
                 {
                     result.SourceScopeCustomSourceScope = new global::Connapse.Client.Models.SourceScopeCustomSourceScope();
                 }
-                else if("filesystem".Equals(mappingValue, StringComparison.OrdinalIgnoreCase))
-                {
-                    result.SourceScopeFilesystemFolderScope = new global::Connapse.Client.Models.SourceScopeFilesystemFolderScope();
-                }
                 else if("github".Equals(mappingValue, StringComparison.OrdinalIgnoreCase))
                 {
                     result.SourceScopeGitHubRepositoryScope = new global::Connapse.Client.Models.SourceScopeGitHubRepositoryScope();
@@ -256,10 +244,6 @@ namespace Connapse.Client.Models
                 else if(SourceScopeCustomSourceScope != null)
                 {
                     return SourceScopeCustomSourceScope.GetFieldDeserializers();
-                }
-                else if(SourceScopeFilesystemFolderScope != null)
-                {
-                    return SourceScopeFilesystemFolderScope.GetFieldDeserializers();
                 }
                 else if(SourceScopeGitHubRepositoryScope != null)
                 {
@@ -301,10 +285,6 @@ namespace Connapse.Client.Models
                 else if(SourceScopeCustomSourceScope != null)
                 {
                     writer.WriteObjectValue<global::Connapse.Client.Models.SourceScopeCustomSourceScope>(null, SourceScopeCustomSourceScope);
-                }
-                else if(SourceScopeFilesystemFolderScope != null)
-                {
-                    writer.WriteObjectValue<global::Connapse.Client.Models.SourceScopeFilesystemFolderScope>(null, SourceScopeFilesystemFolderScope);
                 }
                 else if(SourceScopeGitHubRepositoryScope != null)
                 {

@@ -110,6 +110,8 @@ namespace Connapse.Client.Models
 #else
         public string QueryPrefix { get; set; }
 #endif
+        /// <summary>The sendDimensions property</summary>
+        public bool? SendDimensions { get; set; }
         /// <summary>The timeoutSeconds property</summary>
         public int? TimeoutSeconds { get; set; }
         /// <summary>The useModelPrefixes property</summary>
@@ -154,6 +156,7 @@ namespace Connapse.Client.Models
                 { "openAiBaseUrl", n => { OpenAiBaseUrl = n.GetStringValue(); } },
                 { "provider", n => { Provider = n.GetStringValue(); } },
                 { "queryPrefix", n => { QueryPrefix = n.GetStringValue(); } },
+                { "sendDimensions", n => { SendDimensions = n.GetBoolValue(); } },
                 { "timeoutSeconds", n => { TimeoutSeconds = n.GetIntValue(); } },
                 { "useModelPrefixes", n => { UseModelPrefixes = n.GetBoolValue(); } },
             };
@@ -180,6 +183,7 @@ namespace Connapse.Client.Models
             writer.WriteStringValue("openAiBaseUrl", OpenAiBaseUrl);
             writer.WriteStringValue("provider", Provider);
             writer.WriteStringValue("queryPrefix", QueryPrefix);
+            writer.WriteBoolValue("sendDimensions", SendDimensions);
             writer.WriteIntValue("timeoutSeconds", TimeoutSeconds);
             writer.WriteBoolValue("useModelPrefixes", UseModelPrefixes);
             writer.WriteAdditionalData(AdditionalData);

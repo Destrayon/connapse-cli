@@ -75,7 +75,7 @@ namespace Connapse.Client.Api.V1.Auth.Pats
             return collectionResult?.AsList();
         }
         /// <summary>
-        /// Create a personal access token; its value is returned only here. The name is required (at most 256 characters), scopes are from knowledge:read, knowledge:write, agent:ingest, admin:users, admin:audit, admin:oauth-clients, admin:settings and admin:sources, and an expiry must be in the future. Only a person signed in themselves may: not a personal access token or agent key.
+        /// Create a personal access token; its value is returned only here. The name is required (at most 256 characters), scopes are from knowledge:read, knowledge:write, admin:users, admin:audit, admin:oauth-clients, admin:settings and admin:sources (the deprecated agent:ingest is accepted and dropped), and an expiry must be in the future. Only a person signed in themselves may: not a personal access token or agent key.
         /// </summary>
         /// <returns>A <see cref="global::Connapse.Client.Models.PatCreateResponse"/></returns>
         /// <param name="body">The request body</param>
@@ -125,7 +125,7 @@ namespace Connapse.Client.Api.V1.Auth.Pats
             return requestInfo;
         }
         /// <summary>
-        /// Create a personal access token; its value is returned only here. The name is required (at most 256 characters), scopes are from knowledge:read, knowledge:write, agent:ingest, admin:users, admin:audit, admin:oauth-clients, admin:settings and admin:sources, and an expiry must be in the future. Only a person signed in themselves may: not a personal access token or agent key.
+        /// Create a personal access token; its value is returned only here. The name is required (at most 256 characters), scopes are from knowledge:read, knowledge:write, admin:users, admin:audit, admin:oauth-clients, admin:settings and admin:sources (the deprecated agent:ingest is accepted and dropped), and an expiry must be in the future. Only a person signed in themselves may: not a personal access token or agent key.
         /// </summary>
         /// <returns>A <see cref="RequestInformation"/></returns>
         /// <param name="body">The request body</param>

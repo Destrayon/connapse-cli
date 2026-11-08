@@ -17,6 +17,36 @@
         }
       }
     },
+    "/health/ready": {
+      "get": {
+        "tags": [
+          "Connapse.Web"
+        ],
+        "operationId": "health.ready",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadinessReport"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/info": {
       "get": {
         "tags": [
@@ -431,6 +461,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "links.list",
+          "scope": "knowledge:read",
+          "risk": "Read",
+          "mcp": "Generic"
         }
       }
     },
@@ -485,13 +521,19 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "pats.list",
+          "scope": "pats:manage",
+          "risk": "Read",
+          "mcp": "Off"
         }
       },
       "post": {
         "tags": [
           "Auth"
         ],
-        "description": "Create a personal access token; its value is returned only here. The name is required (at most 256 characters), scopes are from knowledge:read, knowledge:write, agent:ingest, admin:users, admin:audit, admin:oauth-clients, admin:settings and admin:sources, and an expiry must be in the future. Only a person signed in themselves may: not a personal access token or agent key.",
+        "description": "Create a personal access token; its value is returned only here. The name is required (at most 256 characters), scopes are from knowledge:read, knowledge:write, admin:users, admin:audit, admin:oauth-clients, admin:settings and admin:sources (the deprecated agent:ingest is accepted and dropped), and an expiry must be in the future. Only a person signed in themselves may: not a personal access token or agent key.",
         "operationId": "pats.create",
         "requestBody": {
           "content": {
@@ -554,6 +596,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "pats.create",
+          "scope": "pats:manage",
+          "risk": "Credential",
+          "mcp": "Off"
         }
       }
     },
@@ -619,6 +667,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "pats.revoke",
+          "scope": "pats:manage",
+          "risk": "Destructive",
+          "mcp": "Off"
         }
       }
     },
@@ -706,6 +760,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "users.list",
+          "scope": "admin:users",
+          "risk": "Read",
+          "mcp": "Generic"
         }
       }
     },
@@ -791,6 +851,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "users.setRoles",
+          "scope": "admin:users",
+          "risk": "Write",
+          "mcp": "Generic"
         }
       }
     },
@@ -866,6 +932,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "users.delete",
+          "scope": "admin:users",
+          "risk": "Destructive",
+          "mcp": "Generic"
         }
       }
     },
@@ -953,6 +1025,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "invites.list",
+          "scope": "admin:users",
+          "risk": "Read",
+          "mcp": "Generic"
         }
       },
       "post": {
@@ -1032,6 +1110,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "invites.create",
+          "scope": "admin:users",
+          "risk": "Write",
+          "mcp": "Generic"
         }
       }
     },
@@ -1097,6 +1181,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "invites.revoke",
+          "scope": "admin:users",
+          "risk": "Destructive",
+          "mcp": "Generic"
         }
       }
     },
@@ -1615,6 +1705,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "links.unlink",
+          "scope": "knowledge:write",
+          "risk": "Destructive",
+          "mcp": "Generic"
         }
       }
     },
@@ -1791,6 +1887,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "links.unlink",
+          "scope": "knowledge:write",
+          "risk": "Destructive",
+          "mcp": "Generic"
         }
       }
     },
@@ -1872,6 +1974,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "agents.create",
+          "scope": "admin:users",
+          "risk": "Write",
+          "mcp": "Generic"
         }
       },
       "get": {
@@ -1924,6 +2032,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "agents.list",
+          "scope": "admin:users",
+          "risk": "Read",
+          "mcp": "Generic"
         }
       }
     },
@@ -1996,6 +2110,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "agents.get",
+          "scope": "admin:users",
+          "risk": "Read",
+          "mcp": "Generic"
         }
       },
       "delete": {
@@ -2059,6 +2179,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "agents.delete",
+          "scope": "admin:users",
+          "risk": "Destructive",
+          "mcp": "Generic"
         }
       }
     },
@@ -2144,6 +2270,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "agents.setActive",
+          "scope": "admin:users",
+          "risk": "Write",
+          "mcp": "Generic"
         }
       }
     },
@@ -2219,13 +2351,19 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "agents.keys.list",
+          "scope": "admin:users",
+          "risk": "Read",
+          "mcp": "Generic"
         }
       },
       "post": {
         "tags": [
           "Agents"
         ],
-        "description": "Create an API key for an agent, with scopes from knowledge:read, knowledge:write and agent:ingest. Token is shown only once. (Admin only)",
+        "description": "Create an API key for an agent, with scopes from knowledge:read and knowledge:write (the deprecated agent:ingest is accepted and dropped). Token is shown only once. (Admin only)",
         "operationId": "agents.keys.create",
         "parameters": [
           {
@@ -2309,6 +2447,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "agents.keys.create",
+          "scope": "admin:users",
+          "risk": "Credential",
+          "mcp": "Generic"
         }
       }
     },
@@ -2383,6 +2527,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "agents.keys.revoke",
+          "scope": "admin:users",
+          "risk": "Destructive",
+          "mcp": "Generic"
         }
       }
     },
@@ -2464,6 +2614,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "containers.create",
+          "scope": "knowledge:write",
+          "risk": "Write",
+          "mcp": "Off"
         }
       },
       "get": {
@@ -2549,6 +2705,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "containers.list",
+          "scope": "knowledge:read",
+          "risk": "Read",
+          "mcp": "Off"
         }
       }
     },
@@ -2621,6 +2783,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "containers.get",
+          "scope": "knowledge:read",
+          "risk": "Read",
+          "mcp": "Off"
         }
       },
       "patch": {
@@ -2721,6 +2889,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "containers.rename",
+          "scope": "knowledge:write",
+          "risk": "Write",
+          "mcp": "Generic"
         }
       },
       "delete": {
@@ -2794,6 +2968,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "containers.delete",
+          "scope": "knowledge:write",
+          "risk": "Destructive",
+          "mcp": "Off"
         }
       }
     },
@@ -2865,6 +3045,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "containers.get",
+          "scope": "knowledge:read",
+          "risk": "Read",
+          "mcp": "Off"
         }
       }
     },
@@ -2937,6 +3123,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "containers.stats",
+          "scope": "knowledge:read",
+          "risk": "Read",
+          "mcp": "Off"
         }
       }
     },
@@ -3009,6 +3201,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "containers.settings.get",
+          "scope": "knowledge:read",
+          "risk": "Read",
+          "mcp": "Generic"
         }
       },
       "put": {
@@ -3099,6 +3297,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "containers.settings.update",
+          "scope": "knowledge:write",
+          "risk": "Credential",
+          "mcp": "Generic"
         }
       },
       "delete": {
@@ -3162,6 +3366,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "containers.settings.reset",
+          "scope": "knowledge:write",
+          "risk": "Write",
+          "mcp": "Generic"
         }
       }
     },
@@ -3260,6 +3470,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "containers.reindex",
+          "scope": "knowledge:write",
+          "risk": "Write",
+          "mcp": "Generic"
         }
       }
     },
@@ -3332,6 +3548,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "containers.retryFailed",
+          "scope": "knowledge:write",
+          "risk": "Write",
+          "mcp": "Generic"
         }
       }
     },
@@ -3404,24 +3626,68 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "containers.reconcile",
+          "scope": "knowledge:write",
+          "risk": "Write",
+          "mcp": "Generic"
         }
       }
     },
-    "/api/containers/{containerId}/summaries": {
-      "post": {
+    "/api/memory/spaces": {
+      "get": {
         "tags": [
-          "Containers"
+          "Memory"
         ],
-        "description": "Queue a rollup of the container's summary from its documents' summaries. Answers with the background job's id.",
-        "operationId": "containers.summaries.regenerate",
+        "description": "List the memory spaces you may see, starred first (?kind=personal|team&q=&starred=true&sort=updated|name|facts&limit=50&cursor=). Each row counts the current facts you may see in it; the counts cover every kind for the same q.",
+        "operationId": "memorySpaces.list",
         "parameters": [
           {
-            "name": "containerId",
-            "in": "path",
-            "required": true,
+            "name": "kind",
+            "in": "query",
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "type": "string"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "starred",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -3446,18 +3712,28 @@
               }
             }
           },
-          "202": {
-            "description": "Accepted",
+          "200": {
+            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/SummaryRegeneration"
+                  "$ref": "#/components/schemas/MemorySpacePage"
                 }
               }
             }
           },
-          "404": {
-            "description": "Not Found",
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3476,17 +3752,321 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "memorySpaces.list",
+          "scope": "knowledge:read",
+          "risk": "Read",
+          "mcp": "Off"
+        }
+      },
+      "post": {
+        "tags": [
+          "Memory"
+        ],
+        "description": "Make a memory space. kind is personal (yours alone) or team (everyone with access).",
+        "operationId": "memorySpaces.create",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewMemorySpace"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemorySpaceView"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests: the rate limit for this caller is used up. Retry-After, when present, says when to try again.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "x-connapse-operation": {
+          "id": "memorySpaces.create",
+          "scope": "knowledge:write",
+          "risk": "Write",
+          "mcp": "Off"
+        }
+      }
+    },
+    "/api/memory/spaces/{spaceId}": {
+      "patch": {
+        "tags": [
+          "Memory"
+        ],
+        "description": "Rename a memory space or change its description. Facts saved in it stay with it.",
+        "operationId": "memorySpaces.update",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemorySpaceChanges"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemorySpaceView"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests: the rate limit for this caller is used up. Retry-After, when present, says when to try again.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "x-connapse-operation": {
+          "id": "memorySpaces.update",
+          "scope": "knowledge:write",
+          "risk": "Write",
+          "mcp": "Off"
         }
       },
       "delete": {
         "tags": [
-          "Containers"
+          "Memory"
         ],
-        "description": "Clear the container's summary and every document summary in it. The next sweep writes them again.",
-        "operationId": "containers.summaries.clear",
+        "description": "Delete a memory space and every fact in it, whoever wrote them, and report how many of the facts you may read went, with their versions and authors. Needs knowledge:read as well as knowledge:write. ?dryRun=true reports the same counts without deleting.",
+        "operationId": "memorySpaces.delete",
         "parameters": [
           {
-            "name": "containerId",
+            "name": "spaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "dryRun",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemorySpaceDeletion"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests: the rate limit for this caller is used up. Retry-After, when present, says when to try again.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "x-connapse-operation": {
+          "id": "memorySpaces.delete",
+          "scope": "knowledge:write",
+          "risk": "Destructive",
+          "mcp": "Off"
+        }
+      }
+    },
+    "/api/memory/spaces/{spaceId}/star": {
+      "put": {
+        "tags": [
+          "Memory"
+        ],
+        "description": "Star a memory space for yourself, so it lists first. Starring it again changes nothing.",
+        "operationId": "memorySpaces.star",
+        "parameters": [
+          {
+            "name": "spaceId",
             "in": "path",
             "required": true,
             "schema": {
@@ -3529,6 +4109,16 @@
               }
             }
           },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
           "429": {
             "description": "Too Many Requests: the rate limit for this caller is used up. Retry-After, when present, says when to try again.",
             "content": {
@@ -3539,6 +4129,91 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "memorySpaces.star",
+          "scope": "knowledge:read",
+          "risk": "Write",
+          "mcp": "Off"
+        }
+      },
+      "delete": {
+        "tags": [
+          "Memory"
+        ],
+        "description": "Remove your star from a memory space. Removing one that isn't there changes nothing.",
+        "operationId": "memorySpaces.unstar",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests: the rate limit for this caller is used up. Retry-After, when present, says when to try again.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "x-connapse-operation": {
+          "id": "memorySpaces.unstar",
+          "scope": "knowledge:read",
+          "risk": "Write",
+          "mcp": "Off"
         }
       }
     },
@@ -3626,13 +4301,19 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "sources.list",
+          "scope": "knowledge:read",
+          "risk": "Read",
+          "mcp": "Off"
         }
       },
       "post": {
         "tags": [
           "Sources"
         ],
-        "description": "Create a source inside an existing connection. Administrator only — a source chooses what external data is indexed.",
+        "description": "Create a source inside an existing connection. Administrator only, and a token needs admin:sources: a source chooses what external data is indexed.",
         "operationId": "CreateSource",
         "requestBody": {
           "content": {
@@ -3715,6 +4396,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "sources.create",
+          "scope": "admin:sources",
+          "risk": "Write",
+          "mcp": "Generic"
         }
       }
     },
@@ -3787,13 +4474,19 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "sources.get",
+          "scope": "knowledge:read",
+          "risk": "Read",
+          "mcp": "Generic"
         }
       },
       "patch": {
         "tags": [
           "Sources"
         ],
-        "description": "Update a source's name, description, scope, sync interval, or enabled state.",
+        "description": "Update a source's name, description, scope, sync interval, or enabled state. Administrator only; a token needs admin:sources.",
         "operationId": "UpdateSource",
         "parameters": [
           {
@@ -3887,13 +4580,19 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "sources.update",
+          "scope": "admin:sources",
+          "risk": "Write",
+          "mcp": "Generic"
         }
       },
       "delete": {
         "tags": [
           "Sources"
         ],
-        "description": "Delete a source and its indexed documents. confirmName must be the source's name. The external data itself is untouched.",
+        "description": "Delete a source and its indexed documents. confirmName must be the source's name. The external data itself is untouched. Administrator only; a token needs admin:sources.",
         "operationId": "DeleteSource",
         "parameters": [
           {
@@ -3967,6 +4666,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "sources.delete",
+          "scope": "admin:sources",
+          "risk": "Destructive",
+          "mcp": "Generic"
         }
       }
     },
@@ -4039,6 +4744,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "sources.stats",
+          "scope": "knowledge:read",
+          "risk": "Read",
+          "mcp": "Off"
         }
       }
     },
@@ -4047,7 +4758,7 @@
         "tags": [
           "Sources"
         ],
-        "description": "Run one sync cycle for a source immediately, rather than waiting for the next scheduled poll.",
+        "description": "Run one sync cycle for a source immediately, rather than waiting for the next scheduled poll. Administrator only; a token needs admin:sources.",
         "operationId": "SyncSource",
         "parameters": [
           {
@@ -4139,6 +4850,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "sources.sync",
+          "scope": "admin:sources",
+          "risk": "Write",
+          "mcp": "Generic"
         }
       }
     },
@@ -4147,7 +4864,7 @@
         "tags": [
           "Sources"
         ],
-        "description": "Re-enqueue every document of a source whose ingestion failed, with a fresh attempt budget, rather than waiting for the retry cooldown or a change to the file.",
+        "description": "Re-enqueue every document of a source whose ingestion failed, with a fresh attempt budget, rather than waiting for the retry cooldown or a change to the file. Administrator only; a token needs admin:sources.",
         "operationId": "RetryFailedSourceDocuments",
         "parameters": [
           {
@@ -4211,6 +4928,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "sources.retryFailed",
+          "scope": "admin:sources",
+          "risk": "Write",
+          "mcp": "Generic"
         }
       }
     },
@@ -4282,6 +5005,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "sources.scopeSchema",
+          "scope": "knowledge:read",
+          "risk": "Read",
+          "mcp": "Generic"
         }
       }
     },
@@ -4376,13 +5105,19 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "connections.list",
+          "scope": "admin:sources",
+          "risk": "Read",
+          "mcp": "Generic"
         }
       },
       "post": {
         "tags": [
           "Connections"
         ],
-        "description": "Create a filesystem, SFTP, S3, Azure Blob, GitHub or custom connection. Its settings are checked as the Connections page checks them: a GitHub installation the App still has, an S3 bucket's region, a custom source server that accepts its token. Never returns the secret.",
+        "description": "Create an SFTP, S3, Azure Blob, GitHub or custom connection. Its settings are checked as the Connections page checks them: a GitHub installation the App still has, an S3 bucket's region, a custom source server that accepts its token. Never returns the secret.",
         "operationId": "connections.create",
         "requestBody": {
           "content": {
@@ -4465,6 +5200,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "connections.create",
+          "scope": "admin:sources",
+          "risk": "Credential",
+          "mcp": "Generic"
         }
       }
     },
@@ -4537,6 +5278,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "connections.get",
+          "scope": "admin:sources",
+          "risk": "Read",
+          "mcp": "Generic"
         }
       },
       "patch": {
@@ -4647,6 +5394,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "connections.update",
+          "scope": "admin:sources",
+          "risk": "Credential",
+          "mcp": "Generic"
         }
       },
       "delete": {
@@ -4737,6 +5490,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "connections.delete",
+          "scope": "admin:sources",
+          "risk": "Destructive",
+          "mcp": "Generic"
         }
       }
     },
@@ -4819,6 +5578,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "connections.pause",
+          "scope": "admin:sources",
+          "risk": "Write",
+          "mcp": "Generic"
         }
       }
     },
@@ -4927,6 +5692,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "connections.resume",
+          "scope": "admin:sources",
+          "risk": "Write",
+          "mcp": "Generic"
         }
       }
     },
@@ -5045,6 +5816,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "connections.test",
+          "scope": "admin:sources",
+          "risk": "Write",
+          "mcp": "Generic"
         }
       }
     },
@@ -5134,6 +5911,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "connections.discover",
+          "scope": "admin:sources",
+          "risk": "Read",
+          "mcp": "Generic"
         }
       }
     },
@@ -5226,6 +6009,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "connections.forgetHostKey",
+          "scope": "admin:sources",
+          "risk": "Write",
+          "mcp": "Generic"
         }
       }
     },
@@ -5338,6 +6127,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "connections.replaceSecret",
+          "scope": "admin:sources",
+          "risk": "Credential",
+          "mcp": "Generic"
         }
       }
     },
@@ -5420,6 +6215,16 @@
               }
             }
           },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
           "429": {
             "description": "Too Many Requests: the rate limit for this caller is used up. Retry-After, when present, says when to try again.",
             "content": {
@@ -5430,6 +6235,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "search.source",
+          "scope": "knowledge:read",
+          "risk": "Read",
+          "mcp": "Off"
         }
       }
     },
@@ -5557,6 +6368,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "audit.list",
+          "scope": "admin:audit",
+          "risk": "Read",
+          "mcp": "Generic"
         }
       }
     },
@@ -5611,6 +6428,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "oauthClients.list",
+          "scope": "admin:oauth-clients",
+          "risk": "Read",
+          "mcp": "Generic"
         }
       }
     },
@@ -5682,6 +6505,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "oauthClients.revoke",
+          "scope": "admin:oauth-clients",
+          "risk": "Destructive",
+          "mcp": "Generic"
         }
       }
     },
@@ -5690,7 +6519,7 @@
         "tags": [
           "Files"
         ],
-        "description": "Upload one or more files to a container",
+        "description": "Upload one or more files to a container. Send `paths`, one folder per file in the order of `files`, to put each file in its own folder; `path` then goes unused.",
         "operationId": "UploadFiles",
         "parameters": [
           {
@@ -5717,6 +6546,12 @@
                   },
                   "path": {
                     "type": "string"
+                  },
+                  "paths": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
                   },
                   "strategy": {
                     "$ref": "#/components/schemas/ChunkingStrategy"
@@ -5770,6 +6605,16 @@
           },
           "404": {
             "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Payload Too Large",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -5899,6 +6744,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "files.list",
+          "scope": "knowledge:read",
+          "risk": "Read",
+          "mcp": "Off"
         }
       }
     },
@@ -5979,6 +6830,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "files.get",
+          "scope": "knowledge:read",
+          "risk": "Read",
+          "mcp": "Generic"
         }
       },
       "delete": {
@@ -6050,6 +6907,108 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "files.delete",
+          "scope": "knowledge:write",
+          "risk": "Destructive",
+          "mcp": "Off"
+        }
+      }
+    },
+    "/api/containers/{containerId}/files/{fileId}/links": {
+      "get": {
+        "tags": [
+          "Files"
+        ],
+        "description": "The files of the same container a file links to and the ones that link to it, each with the kinds of link (calls, imports, inherits). Files the caller can't read are left out.",
+        "operationId": "files.links",
+        "parameters": [
+          {
+            "name": "containerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "fileId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentLinkSet"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests: the rate limit for this caller is used up. Retry-After, when present, says when to try again.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "x-connapse-operation": {
+          "id": "files.links",
+          "scope": "knowledge:read",
+          "risk": "Read",
+          "mcp": "Generic"
         }
       }
     },
@@ -6142,6 +7101,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "files.bulkDelete",
+          "scope": "knowledge:write",
+          "risk": "Destructive",
+          "mcp": "Off"
         }
       }
     },
@@ -6237,6 +7202,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "files.content",
+          "scope": "knowledge:read",
+          "risk": "Read",
+          "mcp": "Off"
         }
       }
     },
@@ -6317,6 +7288,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "files.reindexCheck",
+          "scope": "knowledge:read",
+          "risk": "Read",
+          "mcp": "Generic"
         }
       }
     },
@@ -6397,6 +7374,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "files.retry",
+          "scope": "knowledge:write",
+          "risk": "Write",
+          "mcp": "Generic"
         }
       }
     },
@@ -6499,6 +7482,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "folders.create",
+          "scope": "knowledge:write",
+          "risk": "Write",
+          "mcp": "Generic"
         }
       },
       "delete": {
@@ -6588,6 +7577,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "folders.delete",
+          "scope": "knowledge:write",
+          "risk": "Destructive",
+          "mcp": "Generic"
         }
       }
     },
@@ -6705,6 +7700,16 @@
               }
             }
           },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
           "429": {
             "description": "Too Many Requests: the rate limit for this caller is used up. Retry-After, when present, says when to try again.",
             "content": {
@@ -6715,6 +7720,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "search.container",
+          "scope": "knowledge:read",
+          "risk": "Read",
+          "mcp": "Off"
         }
       },
       "post": {
@@ -6795,6 +7806,16 @@
               }
             }
           },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
           "429": {
             "description": "Too Many Requests: the rate limit for this caller is used up. Retry-After, when present, says when to try again.",
             "content": {
@@ -6805,6 +7826,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "search.container",
+          "scope": "knowledge:read",
+          "risk": "Read",
+          "mcp": "Off"
         }
       }
     },
@@ -6880,6 +7907,687 @@
         }
       }
     },
+    "/api/memory/spaces/{id}/facts": {
+      "get": {
+        "tags": [
+          "Memory"
+        ],
+        "description": "One page of the facts in a memory space the caller can see, filtered and sorted, with the cursor for the next page",
+        "operationId": "memory.list",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "subject",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "author",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cites",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemoryFactsListed"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests: the rate limit for this caller is used up. Retry-After, when present, says when to try again.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "x-connapse-operation": {
+          "id": "memory.list",
+          "scope": "knowledge:read",
+          "risk": "Read",
+          "mcp": "Off"
+        }
+      }
+    },
+    "/api/memory/spaces/{id}/facts/count": {
+      "get": {
+        "tags": [
+          "Memory"
+        ],
+        "description": "How many facts in a memory space the caller can see, with the same filters as listing; capped when counting stopped early",
+        "operationId": "memory.count",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "subject",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "author",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cites",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemoryFactCountResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests: the rate limit for this caller is used up. Retry-After, when present, says when to try again.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "x-connapse-operation": {
+          "id": "memory.count",
+          "scope": "knowledge:read",
+          "risk": "Read",
+          "mcp": "Off"
+        }
+      }
+    },
+    "/api/memory/spaces/{id}/subjects": {
+      "get": {
+        "tags": [
+          "Memory"
+        ],
+        "description": "One page of a memory space's subjects, A to Z, each with how many facts the caller can see under it",
+        "operationId": "memory.subjects",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemorySubjectsListed"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests: the rate limit for this caller is used up. Retry-After, when present, says when to try again.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "x-connapse-operation": {
+          "id": "memory.subjects",
+          "scope": "knowledge:read",
+          "risk": "Read",
+          "mcp": "Off"
+        }
+      }
+    },
+    "/api/memory/facts/{id}/history": {
+      "get": {
+        "tags": [
+          "Memory"
+        ],
+        "description": "One page of a fact's versions the caller can see, newest first, with how many there are in all",
+        "operationId": "memory.history",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemoryVersionsListed"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests: the rate limit for this caller is used up. Retry-After, when present, says when to try again.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "x-connapse-operation": {
+          "id": "memory.history",
+          "scope": "knowledge:read",
+          "risk": "Read",
+          "mcp": "Off"
+        }
+      }
+    },
+    "/api/memory/facts/{id}/copy": {
+      "post": {
+        "tags": [
+          "Memory"
+        ],
+        "description": "Copies the current version of a fact in your own personal space to a team space, as a new fact you wrote; the personal fact is unchanged. Needs knowledge:read as well as knowledge:write",
+        "operationId": "memory.copy",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CopyMemoryFactRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemoryCopyResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests: the rate limit for this caller is used up. Retry-After, when present, says when to try again.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "x-connapse-operation": {
+          "id": "memory.copy",
+          "scope": "knowledge:write",
+          "risk": "Write",
+          "mcp": "Off"
+        }
+      }
+    },
     "/api/batches/{id}/status": {
       "get": {
         "tags": [
@@ -6948,6 +8656,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "batches.status",
+          "scope": "knowledge:read",
+          "risk": "Read",
+          "mcp": "Generic"
         }
       }
     },
@@ -6956,7 +8670,7 @@
         "tags": [
           "Settings"
         ],
-        "description": "Get settings for a specific category. API keys are never returned.",
+        "description": "Get settings for a specific category. API keys are never returned. The ETag header identifies these settings; send it in If-Match on PUT to save only if nobody changed them since.",
         "operationId": "GetSettings",
         "parameters": [
           {
@@ -7009,12 +8723,9 @@
                     },
                     {
                       "$ref": "#/components/schemas/UploadSettings"
-                    },
-                    {
-                      "$ref": "#/components/schemas/SummarySettings"
                     }
                   ],
-                  "description": "The category's settings: embedding: EmbeddingSettings, chunking: ChunkingSettings, search: SearchSettings, llm: LlmSettings, upload: UploadSettings, summary: SummarySettings."
+                  "description": "The category's settings: embedding: EmbeddingSettings, chunking: ChunkingSettings, search: SearchSettings, llm: LlmSettings, upload: UploadSettings."
                 }
               }
             }
@@ -7039,19 +8750,33 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "settings.get",
+          "scope": "admin:settings",
+          "risk": "Read",
+          "mcp": "Generic"
         }
       },
       "put": {
         "tags": [
           "Settings"
         ],
-        "description": "Update settings for a specific category. An API key left out or null keeps its value; an empty one clears it.",
+        "description": "Update settings for a specific category. An API key left out or null keeps its value; an empty one clears it. Send the ETag from GET in If-Match to have the save refused with 412 if the settings changed since.",
         "operationId": "UpdateSettings",
         "parameters": [
           {
             "name": "category",
             "in": "path",
             "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "description": "The ETag from GET: the save is refused with 412 if the settings changed since. Without it the save replaces them.",
             "schema": {
               "type": "string"
             }
@@ -7076,12 +8801,9 @@
                   },
                   {
                     "$ref": "#/components/schemas/UploadSettings"
-                  },
-                  {
-                    "$ref": "#/components/schemas/SummarySettings"
                   }
                 ],
-                "description": "The category's settings: embedding: EmbeddingSettings, chunking: ChunkingSettings, search: SearchSettings, llm: LlmSettings, upload: UploadSettings, summary: SummarySettings."
+                "description": "The category's settings: embedding: EmbeddingSettings, chunking: ChunkingSettings, search: SearchSettings, llm: LlmSettings, upload: UploadSettings."
               }
             }
           },
@@ -7148,6 +8870,16 @@
               }
             }
           },
+          "412": {
+            "description": "Precondition Failed",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
           "500": {
             "description": "Internal Server Error",
             "content": {
@@ -7168,6 +8900,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "settings.update",
+          "scope": "admin:settings",
+          "risk": "Credential",
+          "mcp": "Generic"
         }
       }
     },
@@ -7249,6 +8987,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "settings.testConnection",
+          "scope": "admin:settings",
+          "risk": "Write",
+          "mcp": "Generic"
         }
       }
     },
@@ -7300,6 +9044,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "settings.embeddingModels",
+          "scope": "admin:settings",
+          "risk": "Read",
+          "mcp": "Generic"
         }
       }
     },
@@ -7377,6 +9127,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "settings.reindex",
+          "scope": "admin:settings",
+          "risk": "Write",
+          "mcp": "Generic"
         }
       }
     },
@@ -7428,6 +9184,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "settings.reindexStatus",
+          "scope": "admin:settings",
+          "risk": "Read",
+          "mcp": "Generic"
         }
       }
     },
@@ -7502,57 +9264,12 @@
               }
             }
           }
-        }
-      }
-    },
-    "/api/v1/settings/summaries/clear": {
-      "post": {
-        "tags": [
-          "Settings"
-        ],
-        "description": "Clear every container's summary and every document summary; the next sweep writes them again. Embeddings, chunks and documents are kept.",
-        "operationId": "settings.summaries.clear",
-        "responses": {
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Forbidden",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          },
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SummariesCleared"
-                }
-              }
-            }
-          },
-          "429": {
-            "description": "Too Many Requests: the rate limit for this caller is used up. Retry-After, when present, says when to try again.",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          }
+        },
+        "x-connapse-operation": {
+          "id": "settings.reset",
+          "scope": "admin:settings",
+          "risk": "Destructive",
+          "mcp": "Generic"
         }
       }
     },
@@ -7607,6 +9324,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "providers.status",
+          "scope": "admin:settings",
+          "risk": "Read",
+          "mcp": "Generic"
         }
       }
     },
@@ -7658,6 +9381,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "providers.aws.access.get",
+          "scope": "admin:settings",
+          "risk": "Read",
+          "mcp": "Generic"
         }
       },
       "put": {
@@ -7737,6 +9466,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "providers.aws.access",
+          "scope": "admin:settings",
+          "risk": "Credential",
+          "mcp": "Generic"
         }
       },
       "delete": {
@@ -7796,6 +9531,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "providers.aws.access.reset",
+          "scope": "admin:settings",
+          "risk": "Destructive",
+          "mcp": "Generic"
         }
       }
     },
@@ -7867,6 +9608,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "providers.aws.identityCenter",
+          "scope": "admin:settings",
+          "risk": "Write",
+          "mcp": "Generic"
         }
       },
       "delete": {
@@ -7916,6 +9663,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "providers.aws.identityCenter.reset",
+          "scope": "admin:settings",
+          "risk": "Destructive",
+          "mcp": "Generic"
         }
       }
     },
@@ -7997,6 +9750,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "providers.aws.permissions",
+          "scope": "admin:settings",
+          "risk": "Destructive",
+          "mcp": "Generic"
         }
       },
       "delete": {
@@ -8046,6 +9805,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "providers.aws.permissions.reset",
+          "scope": "admin:settings",
+          "risk": "Destructive",
+          "mcp": "Generic"
         }
       }
     },
@@ -8117,6 +9882,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "providers.azure.access",
+          "scope": "admin:settings",
+          "risk": "Credential",
+          "mcp": "Generic"
         }
       },
       "delete": {
@@ -8166,6 +9937,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "providers.azure.access.reset",
+          "scope": "admin:settings",
+          "risk": "Destructive",
+          "mcp": "Generic"
         }
       }
     },
@@ -8247,6 +10024,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "providers.azure.permissions",
+          "scope": "admin:settings",
+          "risk": "Destructive",
+          "mcp": "Generic"
         }
       },
       "delete": {
@@ -8296,6 +10079,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "providers.azure.permissions.reset",
+          "scope": "admin:settings",
+          "risk": "Destructive",
+          "mcp": "Generic"
         }
       }
     },
@@ -8350,6 +10139,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "providers.custom.list",
+          "scope": "admin:settings",
+          "risk": "Read",
+          "mcp": "Generic"
         }
       },
       "post": {
@@ -8429,6 +10224,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "providers.custom.create",
+          "scope": "admin:settings",
+          "risk": "Credential",
+          "mcp": "Generic"
         }
       }
     },
@@ -8531,6 +10332,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "providers.custom.update",
+          "scope": "admin:settings",
+          "risk": "Credential",
+          "mcp": "Generic"
         }
       },
       "delete": {
@@ -8604,6 +10411,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "providers.custom.delete",
+          "scope": "admin:settings",
+          "risk": "Destructive",
+          "mcp": "Generic"
         }
       }
     },
@@ -8692,6 +10505,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "providers.custom.check",
+          "scope": "admin:settings",
+          "risk": "Write",
+          "mcp": "Generic"
         }
       }
     },
@@ -8764,6 +10583,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "providers.custom.linkSecret",
+          "scope": "admin:settings",
+          "risk": "Credential",
+          "mcp": "Generic"
         }
       }
     },
@@ -8815,6 +10640,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "providers.github.app.get",
+          "scope": "admin:settings",
+          "risk": "Read",
+          "mcp": "Generic"
         }
       },
       "put": {
@@ -8904,6 +10735,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "providers.github.app",
+          "scope": "admin:settings",
+          "risk": "Credential",
+          "mcp": "Generic"
         }
       },
       "delete": {
@@ -8953,6 +10790,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "providers.github.app.remove",
+          "scope": "admin:settings",
+          "risk": "Destructive",
+          "mcp": "Generic"
         }
       }
     },
@@ -9050,6 +10893,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "providers.github.createApp",
+          "scope": "admin:settings",
+          "risk": "Write",
+          "mcp": "Off"
         }
       }
     },
@@ -9109,6 +10958,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "providers.github.createApp.callback",
+          "scope": "admin:settings",
+          "risk": "Credential",
+          "mcp": "Off"
         }
       }
     },
@@ -9173,6 +11028,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "providers.github.installed",
+          "scope": "admin:settings",
+          "risk": "Read",
+          "mcp": "Generic"
         }
       }
     },
@@ -9252,6 +11113,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "atlassian.sites.resolve",
+          "scope": "admin:sources",
+          "risk": "Write",
+          "mcp": "Generic"
         }
       }
     },
@@ -9391,6 +11258,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "atlassian.sites.list",
+          "scope": "admin:sources",
+          "risk": "Read",
+          "mcp": "Generic"
         }
       }
     },
@@ -9461,6 +11334,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "atlassian.sites.get",
+          "scope": "admin:sources",
+          "risk": "Read",
+          "mcp": "Generic"
         }
       },
       "patch": {
@@ -9559,6 +11438,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "atlassian.sites.update",
+          "scope": "admin:sources",
+          "risk": "Write",
+          "mcp": "Generic"
         }
       },
       "delete": {
@@ -9647,6 +11532,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "atlassian.sites.delete",
+          "scope": "admin:sources",
+          "risk": "Destructive",
+          "mcp": "Generic"
         }
       }
     },
@@ -9727,6 +11618,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "atlassian.sites.pause",
+          "scope": "admin:sources",
+          "risk": "Write",
+          "mcp": "Generic"
         }
       }
     },
@@ -9833,6 +11730,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "atlassian.sites.resume",
+          "scope": "admin:sources",
+          "risk": "Write",
+          "mcp": "Generic"
         }
       }
     },
@@ -9913,6 +11816,12 @@
               }
             }
           }
+        },
+        "x-connapse-operation": {
+          "id": "atlassian.sites.test",
+          "scope": "admin:sources",
+          "risk": "Write",
+          "mcp": "Generic"
         }
       }
     },
@@ -10598,6 +12507,26 @@
           "required": true
         },
         "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
           "200": {
             "description": "OK"
           },
@@ -10656,12 +12585,32 @@
           "required": true
         },
         "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
           "200": {
             "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AccessTokenResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized: the email or password is wrong, a two-factor code is missing or wrong, or the account is locked out.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             }
@@ -10695,12 +12644,32 @@
           "required": true
         },
         "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
           "200": {
             "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AccessTokenResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized: the refresh token is invalid or expired, or the user's password or security stamp changed since it was issued.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             }
@@ -10752,6 +12721,16 @@
         "responses": {
           "200": {
             "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized: no user has this id, or the confirmation code is wrong.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests: the rate limit for this caller is used up. Retry-After, when present, says when to try again.",
@@ -12991,7 +14970,6 @@
       },
       "ConnectionProvider": {
         "enum": [
-          "Filesystem",
           "S3",
           "AzureBlob",
           "Sftp",
@@ -13202,24 +15180,11 @@
               }
             ]
           },
-          "summary": {
-            "type": [
-              "null",
-              "string"
-            ]
+          "kind": {
+            "$ref": "#/components/schemas/ContainerKind"
           },
-          "summaryGeneratedAt": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "format": "date-time"
-          },
-          "summaryDocSetHash": {
-            "type": [
-              "null",
-              "string"
-            ]
+          "audience": {
+            "$ref": "#/components/schemas/MemoryScope"
           }
         }
       },
@@ -13283,6 +15248,13 @@
             }
           }
         }
+      },
+      "ContainerKind": {
+        "enum": [
+          "Documents",
+          "Memory"
+        ],
+        "default": "Documents"
       },
       "ContainerReindexRequest": {
         "type": "object",
@@ -13466,16 +15438,6 @@
                 "$ref": "#/components/schemas/UploadSettings"
               }
             ]
-          },
-          "summary": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/SummarySettings"
-              }
-            ]
           }
         }
       },
@@ -13575,6 +15537,24 @@
           },
           "message": {
             "type": "string"
+          }
+        }
+      },
+      "CopyMemoryFactRequest": {
+        "required": [
+          "destination"
+        ],
+        "type": "object",
+        "properties": {
+          "destination": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "anyway": {
+            "type": "boolean",
+            "default": false
           }
         }
       },
@@ -13764,6 +15744,16 @@
               "null",
               "string"
             ]
+          },
+          "kind": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ContainerKind"
+              }
+            ]
           }
         }
       },
@@ -13943,9 +15933,6 @@
                 "$ref": "#/components/schemas/SourceScopeAzureBlobContainerScope"
               },
               {
-                "$ref": "#/components/schemas/SourceScopeFilesystemFolderScope"
-              },
-              {
                 "$ref": "#/components/schemas/SourceScopeSftpFolderScope"
               },
               {
@@ -13966,7 +15953,6 @@
               "mapping": {
                 "s3": "#/components/schemas/SourceScopeS3BucketScope",
                 "azureBlob": "#/components/schemas/SourceScopeAzureBlobContainerScope",
-                "filesystem": "#/components/schemas/SourceScopeFilesystemFolderScope",
                 "sftp": "#/components/schemas/SourceScopeSftpFolderScope",
                 "github": "#/components/schemas/SourceScopeGitHubRepositoryScope",
                 "jira": "#/components/schemas/SourceScopeJiraProjectScope",
@@ -14300,30 +16286,8 @@
               "type": "string"
             }
           },
-          "summary": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "summaryGeneratedAt": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "format": "date-time"
-          },
-          "summaryContentHash": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
           "status": {
             "$ref": "#/components/schemas/DocumentStatus"
-          },
-          "summaryStatus": {
-            "$ref": "#/components/schemas/SummaryStatus"
           },
           "owner": {
             "oneOf": [
@@ -14342,6 +16306,31 @@
               "string"
             ],
             "format": "int32"
+          }
+        }
+      },
+      "DocumentLinkSet": {
+        "required": [
+          "linksTo",
+          "linkedFrom"
+        ],
+        "type": "object",
+        "properties": {
+          "linksTo": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LinkedDocument"
+            }
+          },
+          "linkedFrom": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LinkedDocument"
+            }
+          },
+          "denied": {
+            "type": "boolean",
+            "default": false
           }
         }
       },
@@ -14433,6 +16422,9 @@
               "string"
             ],
             "format": "int32"
+          },
+          "sendDimensions": {
+            "type": "boolean"
           },
           "baseUrl": {
             "type": [
@@ -15130,6 +17122,32 @@
           }
         }
       },
+      "LinkedDocument": {
+        "required": [
+          "id",
+          "fileName",
+          "path",
+          "types"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "fileName": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "types": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
       "LlmSettings": {
         "type": "object",
         "properties": {
@@ -15242,6 +17260,487 @@
           }
         }
       },
+      "MemoryCaller": {
+        "required": [
+          "userId",
+          "agentId",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "agentId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "name": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "MemoryCopyResponse": {
+        "required": [
+          "fact",
+          "copiedFrom",
+          "spaceId"
+        ],
+        "type": "object",
+        "properties": {
+          "fact": {
+            "$ref": "#/components/schemas/MemoryFact"
+          },
+          "copiedFrom": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "spaceId": {
+            "type": "string"
+          }
+        }
+      },
+      "MemoryFact": {
+        "required": [
+          "id",
+          "chainId",
+          "containerId",
+          "subject",
+          "attribute",
+          "value",
+          "validFrom",
+          "validTo",
+          "recordedAt",
+          "supersededAt",
+          "replacesId",
+          "reason",
+          "author",
+          "sources"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "chainId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "containerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "attribute": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          },
+          "validFrom": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "validTo": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "recordedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "supersededAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "replacesId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "reason": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "author": {
+            "$ref": "#/components/schemas/MemoryCaller"
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MemorySource"
+            }
+          },
+          "scope": {
+            "$ref": "#/components/schemas/MemoryScope"
+          }
+        }
+      },
+      "MemoryFactCountResponse": {
+        "required": [
+          "count",
+          "capped"
+        ],
+        "type": "object",
+        "properties": {
+          "count": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "capped": {
+            "type": "boolean"
+          }
+        }
+      },
+      "MemoryFactsListed": {
+        "required": [
+          "facts",
+          "nextCursor"
+        ],
+        "type": "object",
+        "properties": {
+          "facts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RecalledFact"
+            }
+          },
+          "nextCursor": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "MemoryScope": {
+        "enum": [
+          "Personal",
+          "Team"
+        ],
+        "default": "Team"
+      },
+      "MemorySource": {
+        "required": [
+          "kind",
+          "ref"
+        ],
+        "type": "object",
+        "properties": {
+          "kind": {
+            "$ref": "#/components/schemas/MemorySourceKind"
+          },
+          "ref": {
+            "type": "string"
+          }
+        }
+      },
+      "MemorySourceKind": {
+        "enum": [
+          "Document",
+          "Node"
+        ]
+      },
+      "MemorySpaceChanges": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "description": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "MemorySpaceCounts": {
+        "required": [
+          "all",
+          "starred",
+          "personal",
+          "team"
+        ],
+        "type": "object",
+        "properties": {
+          "all": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "starred": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "personal": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "team": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        }
+      },
+      "MemorySpaceDeletion": {
+        "required": [
+          "id",
+          "name",
+          "kind",
+          "facts",
+          "versions",
+          "authors",
+          "deleted"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/MemorySpaceKind"
+          },
+          "facts": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "versions": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "authors": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "deleted": {
+            "type": "boolean"
+          }
+        }
+      },
+      "MemorySpaceKind": {
+        "enum": [
+          "Personal",
+          "Team"
+        ]
+      },
+      "MemorySpacePage": {
+        "required": [
+          "items",
+          "nextCursor",
+          "total",
+          "counts"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MemorySpaceView"
+            }
+          },
+          "nextCursor": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "total": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "counts": {
+            "$ref": "#/components/schemas/MemorySpaceCounts"
+          }
+        }
+      },
+      "MemorySpaceView": {
+        "required": [
+          "id",
+          "name",
+          "description",
+          "kind",
+          "facts",
+          "createdAt",
+          "updatedAt",
+          "starred"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "kind": {
+            "$ref": "#/components/schemas/MemorySpaceKind"
+          },
+          "facts": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "starred": {
+            "type": "boolean"
+          }
+        }
+      },
+      "MemorySubject": {
+        "required": [
+          "subject",
+          "facts"
+        ],
+        "type": "object",
+        "properties": {
+          "subject": {
+            "type": "string"
+          },
+          "facts": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          }
+        }
+      },
+      "MemorySubjectsListed": {
+        "required": [
+          "subjects",
+          "nextCursor"
+        ],
+        "type": "object",
+        "properties": {
+          "subjects": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MemorySubject"
+            }
+          },
+          "nextCursor": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "MemoryVersionsListed": {
+        "required": [
+          "versions",
+          "total",
+          "nextCursor"
+        ],
+        "type": "object",
+        "properties": {
+          "versions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RecalledFact"
+            }
+          },
+          "total": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "nextCursor": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
       "MeResponse": {
         "required": [
           "id",
@@ -15274,6 +17773,38 @@
           "createdAt": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "NewMemorySpace": {
+        "required": [
+          "name",
+          "description",
+          "kind"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "description": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "kind": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/MemorySpaceKind"
+              }
+            ]
           }
         }
       },
@@ -15950,6 +18481,35 @@
           }
         }
       },
+      "ReadinessReport": {
+        "required": [
+          "state"
+        ],
+        "type": "object",
+        "properties": {
+          "state": {
+            "type": "string"
+          }
+        }
+      },
+      "RecalledFact": {
+        "required": [
+          "fact",
+          "sources"
+        ],
+        "type": "object",
+        "properties": {
+          "fact": {
+            "$ref": "#/components/schemas/MemoryFact"
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ShownMemorySource"
+            }
+          }
+        }
+      },
       "RefreshRequest": {
         "required": [
           "refreshToken"
@@ -16612,6 +19172,45 @@
           },
           "sentenceWindowSubstituteOnSearch": {
             "type": "boolean"
+          },
+          "enableLinkSearch": {
+            "type": "boolean"
+          },
+          "linkWeight": {
+            "maximum": 1,
+            "minimum": 0,
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "float"
+          },
+          "linkMaxHops": {
+            "maximum": 2,
+            "minimum": 1,
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "linkSeeds": {
+            "maximum": 50,
+            "minimum": 1,
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "useVectorSearch": {
+            "type": "boolean"
+          },
+          "useKeywordSearch": {
+            "type": "boolean"
           }
         }
       },
@@ -16701,6 +19300,28 @@
           }
         }
       },
+      "ShownMemorySource": {
+        "required": [
+          "kind",
+          "ref",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "kind": {
+            "$ref": "#/components/schemas/MemorySourceKind"
+          },
+          "ref": {
+            "type": "string"
+          },
+          "title": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
       "SourceLink": {
         "required": [
           "id",
@@ -16732,7 +19353,6 @@
           "lastSyncedAt",
           "syncIntervalSeconds",
           "documentCount",
-          "summary",
           "createdAt",
           "updatedAt",
           "withheldDeletions",
@@ -16789,12 +19409,6 @@
               "string"
             ],
             "format": "int32"
-          },
-          "summary": {
-            "type": [
-              "null",
-              "string"
-            ]
           },
           "createdAt": {
             "type": "string",
@@ -16885,7 +19499,6 @@
             "enum": [
               "s3",
               "azureBlob",
-              "filesystem",
               "sftp",
               "github",
               "jira",
@@ -16900,7 +19513,6 @@
           "mapping": {
             "s3": "#/components/schemas/SourceScopeS3BucketScope",
             "azureBlob": "#/components/schemas/SourceScopeAzureBlobContainerScope",
-            "filesystem": "#/components/schemas/SourceScopeFilesystemFolderScope",
             "sftp": "#/components/schemas/SourceScopeSftpFolderScope",
             "github": "#/components/schemas/SourceScopeGitHubRepositoryScope",
             "jira": "#/components/schemas/SourceScopeJiraProjectScope",
@@ -17010,47 +19622,6 @@
               },
               "scopeId": {
                 "type": "string"
-              }
-            }
-          }
-        ]
-      },
-      "SourceScopeFilesystemFolderScope": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/SourceScope"
-          },
-          {
-            "properties": {
-              "type": {
-                "enum": [
-                  "filesystem"
-                ],
-                "type": "string"
-              },
-              "subPath": {
-                "type": [
-                  "null",
-                  "string"
-                ]
-              },
-              "includePatterns": {
-                "type": [
-                  "null",
-                  "array"
-                ],
-                "items": {
-                  "type": "string"
-                }
-              },
-              "excludePatterns": {
-                "type": [
-                  "null",
-                  "array"
-                ],
-                "items": {
-                  "type": "string"
-                }
               }
             }
           }
@@ -17356,95 +19927,6 @@
             "format": "int32"
           }
         }
-      },
-      "SummariesCleared": {
-        "required": [
-          "containers",
-          "documents"
-        ],
-        "type": "object",
-        "properties": {
-          "containers": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ],
-            "format": "int32"
-          },
-          "documents": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ],
-            "format": "int32"
-          }
-        }
-      },
-      "SummaryRegeneration": {
-        "required": [
-          "jobId"
-        ],
-        "type": "object",
-        "properties": {
-          "jobId": {
-            "type": "string"
-          }
-        }
-      },
-      "SummarySettings": {
-        "type": "object",
-        "properties": {
-          "enabled": {
-            "type": "boolean"
-          },
-          "containerSummaryMethod": {
-            "type": "string"
-          },
-          "llmProvider": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "llmModel": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "perDocSystemPrompt": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "containerRollupSystemPrompt": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "maxInputTokens": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "null",
-              "integer",
-              "string"
-            ],
-            "format": "int32"
-          }
-        }
-      },
-      "SummaryStatus": {
-        "enum": [
-          "NotNeeded",
-          "Pending",
-          "Done",
-          "Failed"
-        ],
-        "default": "NotNeeded"
       },
       "SyncStatus": {
         "enum": [
@@ -17757,7 +20239,9 @@
               "integer",
               "string"
             ],
-            "format": "int32"
+            "description": "Deprecated and ignored: set the ingestion worker count with Hangfire:IngestionWorkerCount (environment variable Hangfire__IngestionWorkerCount), which takes effect on restart.",
+            "format": "int32",
+            "deprecated": true
           },
           "parseTimeoutSeconds": {
             "pattern": "^-?(?:0|[1-9]\\d*)$",
@@ -17973,6 +20457,9 @@
     },
     {
       "name": "Containers"
+    },
+    {
+      "name": "Memory"
     },
     {
       "name": "Sources"

@@ -76,7 +76,7 @@ namespace Connapse.Client.Api.V1.Connections
             return await RequestAdapter.SendAsync<global::Connapse.Client.Models.PagedResponseOfConnectionResponse>(requestInfo, global::Connapse.Client.Models.PagedResponseOfConnectionResponse.CreateFromDiscriminatorValue, errorMapping, cancellationToken).ConfigureAwait(false);
         }
         /// <summary>
-        /// Create a filesystem, SFTP, S3, Azure Blob, GitHub or custom connection. Its settings are checked as the Connections page checks them: a GitHub installation the App still has, an S3 bucket&apos;s region, a custom source server that accepts its token. Never returns the secret.
+        /// Create an SFTP, S3, Azure Blob, GitHub or custom connection. Its settings are checked as the Connections page checks them: a GitHub installation the App still has, an S3 bucket&apos;s region, a custom source server that accepts its token. Never returns the secret.
         /// </summary>
         /// <returns>A <see cref="global::Connapse.Client.Models.CreatedConnectionResponse"/></returns>
         /// <param name="body">The request body</param>
@@ -130,7 +130,7 @@ namespace Connapse.Client.Api.V1.Connections
             return requestInfo;
         }
         /// <summary>
-        /// Create a filesystem, SFTP, S3, Azure Blob, GitHub or custom connection. Its settings are checked as the Connections page checks them: a GitHub installation the App still has, an S3 bucket&apos;s region, a custom source server that accepts its token. Never returns the secret.
+        /// Create an SFTP, S3, Azure Blob, GitHub or custom connection. Its settings are checked as the Connections page checks them: a GitHub installation the App still has, an S3 bucket&apos;s region, a custom source server that accepts its token. Never returns the secret.
         /// </summary>
         /// <returns>A <see cref="RequestInformation"/></returns>
         /// <param name="body">The request body</param>

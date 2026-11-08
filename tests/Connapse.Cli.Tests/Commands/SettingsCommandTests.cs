@@ -266,13 +266,12 @@ public sealed class SettingsCommandTests : IDisposable
     }
 
     [Fact]
-    public async Task ClearSummaries_PrintsTheCounts()
+    public async Task ClearSummaries_IsGoneBecauseConnapse040DroppedSummaries()
     {
-        _host.Routes(("POST /api/v1/settings/summaries/clear", CommandHost.Json("""{"containers":3,"documents":120}""")));
-
         var result = await _host.RunAsync("settings", "clear-summaries");
 
-        Assert.Equal(0, result.ExitCode);
-        Assert.Contains("Cleared 3 container and 120 document summaries.", result.Output);
+        Assert.NotEqual(0, result.ExitCode);
+        Assert.Contains("clear-summaries", result.Error);
+        Assert.Empty(_host.Sent);
     }
 }

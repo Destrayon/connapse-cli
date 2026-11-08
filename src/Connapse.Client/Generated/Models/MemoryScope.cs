@@ -5,24 +5,16 @@ namespace Connapse.Client.Models
 {
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
     #pragma warning disable CS1591
-    public enum SummaryStatus
+    public enum MemoryScope
     #pragma warning restore CS1591
     {
-        [EnumMember(Value = "NotNeeded")]
+        [EnumMember(Value = "Personal")]
         #pragma warning disable CS1591
-        NotNeeded,
+        Personal,
         #pragma warning restore CS1591
-        [EnumMember(Value = "Pending")]
+        [EnumMember(Value = "Team")]
         #pragma warning disable CS1591
-        Pending,
-        #pragma warning restore CS1591
-        [EnumMember(Value = "Done")]
-        #pragma warning disable CS1591
-        Done,
-        #pragma warning restore CS1591
-        [EnumMember(Value = "Failed")]
-        #pragma warning disable CS1591
-        Failed,
+        Team,
         #pragma warning restore CS1591
     }
 }

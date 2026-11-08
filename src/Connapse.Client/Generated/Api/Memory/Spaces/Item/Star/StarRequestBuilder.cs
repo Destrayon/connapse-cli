@@ -9,38 +9,39 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Threading;
 using System;
-namespace Connapse.Client.Api.Containers.Item.Summaries
+namespace Connapse.Client.Api.Memory.Spaces.Item.Star
 {
     /// <summary>
-    /// Builds and executes requests for operations under \api\containers\{containerId}\summaries
+    /// Builds and executes requests for operations under \api\memory\spaces\{-id}\star
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
-    public partial class SummariesRequestBuilder : BaseRequestBuilder
+    public partial class StarRequestBuilder : BaseRequestBuilder
     {
         /// <summary>
-        /// Instantiates a new <see cref="global::Connapse.Client.Api.Containers.Item.Summaries.SummariesRequestBuilder"/> and sets the default values.
+        /// Instantiates a new <see cref="global::Connapse.Client.Api.Memory.Spaces.Item.Star.StarRequestBuilder"/> and sets the default values.
         /// </summary>
         /// <param name="pathParameters">Path parameters for the request</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
-        public SummariesRequestBuilder(Dictionary<string, object> pathParameters, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/containers/{containerId}/summaries", pathParameters)
+        public StarRequestBuilder(Dictionary<string, object> pathParameters, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/memory/spaces/{%2Did}/star", pathParameters)
         {
         }
         /// <summary>
-        /// Instantiates a new <see cref="global::Connapse.Client.Api.Containers.Item.Summaries.SummariesRequestBuilder"/> and sets the default values.
+        /// Instantiates a new <see cref="global::Connapse.Client.Api.Memory.Spaces.Item.Star.StarRequestBuilder"/> and sets the default values.
         /// </summary>
         /// <param name="rawUrl">The raw URL to use for the request builder.</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
-        public SummariesRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/containers/{containerId}/summaries", rawUrl)
+        public StarRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/memory/spaces/{%2Did}/star", rawUrl)
         {
         }
         /// <summary>
-        /// Clear the container&apos;s summary and every document summary in it. The next sweep writes them again.
+        /// Remove your star from a memory space. Removing one that isn&apos;t there changes nothing.
         /// </summary>
         /// <param name="cancellationToken">Cancellation token to use when cancelling requests</param>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
         /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 401 status code</exception>
         /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 403 status code</exception>
         /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 404 status code</exception>
+        /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 409 status code</exception>
         /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 429 status code</exception>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -57,41 +58,43 @@ namespace Connapse.Client.Api.Containers.Item.Summaries
                 { "401", global::Connapse.Client.Models.ProblemDetails.CreateFromDiscriminatorValue },
                 { "403", global::Connapse.Client.Models.ProblemDetails.CreateFromDiscriminatorValue },
                 { "404", global::Connapse.Client.Models.ProblemDetails.CreateFromDiscriminatorValue },
+                { "409", global::Connapse.Client.Models.ProblemDetails.CreateFromDiscriminatorValue },
                 { "429", global::Connapse.Client.Models.ProblemDetails.CreateFromDiscriminatorValue },
             };
             await RequestAdapter.SendNoContentAsync(requestInfo, errorMapping, cancellationToken).ConfigureAwait(false);
         }
         /// <summary>
-        /// Queue a rollup of the container&apos;s summary from its documents&apos; summaries. Answers with the background job&apos;s id.
+        /// Star a memory space for yourself, so it lists first. Starring it again changes nothing.
         /// </summary>
-        /// <returns>A <see cref="global::Connapse.Client.Models.SummaryRegeneration"/></returns>
         /// <param name="cancellationToken">Cancellation token to use when cancelling requests</param>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
         /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 401 status code</exception>
         /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 403 status code</exception>
         /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 404 status code</exception>
+        /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 409 status code</exception>
         /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 429 status code</exception>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public async Task<global::Connapse.Client.Models.SummaryRegeneration?> PostAsync(Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = default, CancellationToken cancellationToken = default)
+        public async Task PutAsync(Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = default, CancellationToken cancellationToken = default)
         {
 #nullable restore
 #else
-        public async Task<global::Connapse.Client.Models.SummaryRegeneration> PostAsync(Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
+        public async Task PutAsync(Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
         {
 #endif
-            var requestInfo = ToPostRequestInformation(requestConfiguration);
+            var requestInfo = ToPutRequestInformation(requestConfiguration);
             var errorMapping = new Dictionary<string, ParsableFactory<IParsable>>
             {
                 { "401", global::Connapse.Client.Models.ProblemDetails.CreateFromDiscriminatorValue },
                 { "403", global::Connapse.Client.Models.ProblemDetails.CreateFromDiscriminatorValue },
                 { "404", global::Connapse.Client.Models.ProblemDetails.CreateFromDiscriminatorValue },
+                { "409", global::Connapse.Client.Models.ProblemDetails.CreateFromDiscriminatorValue },
                 { "429", global::Connapse.Client.Models.ProblemDetails.CreateFromDiscriminatorValue },
             };
-            return await RequestAdapter.SendAsync<global::Connapse.Client.Models.SummaryRegeneration>(requestInfo, global::Connapse.Client.Models.SummaryRegeneration.CreateFromDiscriminatorValue, errorMapping, cancellationToken).ConfigureAwait(false);
+            await RequestAdapter.SendNoContentAsync(requestInfo, errorMapping, cancellationToken).ConfigureAwait(false);
         }
         /// <summary>
-        /// Clear the container&apos;s summary and every document summary in it. The next sweep writes them again.
+        /// Remove your star from a memory space. Removing one that isn&apos;t there changes nothing.
         /// </summary>
         /// <returns>A <see cref="RequestInformation"/></returns>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
@@ -110,32 +113,32 @@ namespace Connapse.Client.Api.Containers.Item.Summaries
             return requestInfo;
         }
         /// <summary>
-        /// Queue a rollup of the container&apos;s summary from its documents&apos; summaries. Answers with the background job&apos;s id.
+        /// Star a memory space for yourself, so it lists first. Starring it again changes nothing.
         /// </summary>
         /// <returns>A <see cref="RequestInformation"/></returns>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public RequestInformation ToPostRequestInformation(Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = default)
+        public RequestInformation ToPutRequestInformation(Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = default)
         {
 #nullable restore
 #else
-        public RequestInformation ToPostRequestInformation(Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default)
+        public RequestInformation ToPutRequestInformation(Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default)
         {
 #endif
-            var requestInfo = new RequestInformation(Method.POST, UrlTemplate, PathParameters);
+            var requestInfo = new RequestInformation(Method.PUT, UrlTemplate, PathParameters);
             requestInfo.Configure(requestConfiguration);
-            requestInfo.Headers.TryAdd("Accept", "application/json");
+            requestInfo.Headers.TryAdd("Accept", "application/problem+json");
             return requestInfo;
         }
         /// <summary>
         /// Returns a request builder with the provided arbitrary URL. Using this method means any other path or query parameters are ignored.
         /// </summary>
-        /// <returns>A <see cref="global::Connapse.Client.Api.Containers.Item.Summaries.SummariesRequestBuilder"/></returns>
+        /// <returns>A <see cref="global::Connapse.Client.Api.Memory.Spaces.Item.Star.StarRequestBuilder"/></returns>
         /// <param name="rawUrl">The raw URL to use for the request builder.</param>
-        public global::Connapse.Client.Api.Containers.Item.Summaries.SummariesRequestBuilder WithUrl(string rawUrl)
+        public global::Connapse.Client.Api.Memory.Spaces.Item.Star.StarRequestBuilder WithUrl(string rawUrl)
         {
-            return new global::Connapse.Client.Api.Containers.Item.Summaries.SummariesRequestBuilder(rawUrl, RequestAdapter);
+            return new global::Connapse.Client.Api.Memory.Spaces.Item.Star.StarRequestBuilder(rawUrl, RequestAdapter);
         }
     }
 }

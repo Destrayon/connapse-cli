@@ -9,35 +9,45 @@ namespace Connapse.Client.Models
 {
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
     #pragma warning disable CS1591
-    public partial class SummaryRegeneration : IAdditionalDataHolder, IParsable
+    public partial class MemoryVersionsListed : IAdditionalDataHolder, IParsable
     #pragma warning restore CS1591
     {
         /// <summary>Stores additional data not described in the OpenAPI description found when deserializing. Can be used for serialization as well.</summary>
         public IDictionary<string, object> AdditionalData { get; set; }
-        /// <summary>The jobId property</summary>
+        /// <summary>The nextCursor property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public string? JobId { get; set; }
+        public string? NextCursor { get; set; }
 #nullable restore
 #else
-        public string JobId { get; set; }
+        public string NextCursor { get; set; }
+#endif
+        /// <summary>The total property</summary>
+        public long? Total { get; set; }
+        /// <summary>The versions property</summary>
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+        public List<global::Connapse.Client.Models.RecalledFact>? Versions { get; set; }
+#nullable restore
+#else
+        public List<global::Connapse.Client.Models.RecalledFact> Versions { get; set; }
 #endif
         /// <summary>
-        /// Instantiates a new <see cref="global::Connapse.Client.Models.SummaryRegeneration"/> and sets the default values.
+        /// Instantiates a new <see cref="global::Connapse.Client.Models.MemoryVersionsListed"/> and sets the default values.
         /// </summary>
-        public SummaryRegeneration()
+        public MemoryVersionsListed()
         {
             AdditionalData = new Dictionary<string, object>();
         }
         /// <summary>
         /// Creates a new instance of the appropriate class based on discriminator value
         /// </summary>
-        /// <returns>A <see cref="global::Connapse.Client.Models.SummaryRegeneration"/></returns>
+        /// <returns>A <see cref="global::Connapse.Client.Models.MemoryVersionsListed"/></returns>
         /// <param name="parseNode">The parse node to use to read the discriminator value and create the object</param>
-        public static global::Connapse.Client.Models.SummaryRegeneration CreateFromDiscriminatorValue(IParseNode parseNode)
+        public static global::Connapse.Client.Models.MemoryVersionsListed CreateFromDiscriminatorValue(IParseNode parseNode)
         {
             if(ReferenceEquals(parseNode, null)) throw new ArgumentNullException(nameof(parseNode));
-            return new global::Connapse.Client.Models.SummaryRegeneration();
+            return new global::Connapse.Client.Models.MemoryVersionsListed();
         }
         /// <summary>
         /// The deserialization information for the current model
@@ -47,7 +57,9 @@ namespace Connapse.Client.Models
         {
             return new Dictionary<string, Action<IParseNode>>
             {
-                { "jobId", n => { JobId = n.GetStringValue(); } },
+                { "nextCursor", n => { NextCursor = n.GetStringValue(); } },
+                { "total", n => { Total = n.GetLongValue(); } },
+                { "versions", n => { Versions = n.GetCollectionOfObjectValues<global::Connapse.Client.Models.RecalledFact>(global::Connapse.Client.Models.RecalledFact.CreateFromDiscriminatorValue)?.AsList(); } },
             };
         }
         /// <summary>
@@ -57,7 +69,9 @@ namespace Connapse.Client.Models
         public virtual void Serialize(ISerializationWriter writer)
         {
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
-            writer.WriteStringValue("jobId", JobId);
+            writer.WriteStringValue("nextCursor", NextCursor);
+            writer.WriteLongValue("total", Total);
+            writer.WriteCollectionOfObjectValues<global::Connapse.Client.Models.RecalledFact>("versions", Versions);
             writer.WriteAdditionalData(AdditionalData);
         }
     }

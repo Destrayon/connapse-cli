@@ -16,10 +16,6 @@ namespace Connapse.Client.Models
         #pragma warning disable CS1591
         AzureBlob,
         #pragma warning restore CS1591
-        [EnumMember(Value = "filesystem")]
-        #pragma warning disable CS1591
-        Filesystem,
-        #pragma warning restore CS1591
         [EnumMember(Value = "sftp")]
         #pragma warning disable CS1591
         Sftp,

@@ -20,12 +20,11 @@ public static class SettingsCommand
         settings.Subcommands.Add(SettingsReindexCommand.Create(services, orgOption));
         settings.Subcommands.Add(SettingsReindexCommand.CreateStatus(services, orgOption));
         settings.Subcommands.Add(SettingsReindexCommand.CreateEmbeddingModels(services, orgOption));
-        settings.Subcommands.Add(SettingsReindexCommand.CreateClearSummaries(services, orgOption));
 
         settings.SetAction((_, _) =>
         {
             Console.Out.WriteLine(
-                "Usage: connapse settings <get|set|reset|test|reindex|reindex-status|embedding-models|clear-summaries> [options]");
+                "Usage: connapse settings <get|set|reset|test|reindex|reindex-status|embedding-models> [options]");
             return Task.FromResult(0);
         });
 

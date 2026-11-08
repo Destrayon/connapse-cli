@@ -58,7 +58,7 @@ namespace Connapse.Client.Api.Sources.Item
         {
         }
         /// <summary>
-        /// Delete a source and its indexed documents. confirmName must be the source&apos;s name. The external data itself is untouched.
+        /// Delete a source and its indexed documents. confirmName must be the source&apos;s name. The external data itself is untouched. Administrator only; a token needs admin:sources.
         /// </summary>
         /// <param name="cancellationToken">Cancellation token to use when cancelling requests</param>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
@@ -117,7 +117,7 @@ namespace Connapse.Client.Api.Sources.Item
             return await RequestAdapter.SendAsync<global::Connapse.Client.Models.SourceResponse>(requestInfo, global::Connapse.Client.Models.SourceResponse.CreateFromDiscriminatorValue, errorMapping, cancellationToken).ConfigureAwait(false);
         }
         /// <summary>
-        /// Update a source&apos;s name, description, scope, sync interval, or enabled state.
+        /// Update a source&apos;s name, description, scope, sync interval, or enabled state. Administrator only; a token needs admin:sources.
         /// </summary>
         /// <returns>A <see cref="global::Connapse.Client.Models.SourceResponse"/></returns>
         /// <param name="body">The request body</param>
@@ -152,7 +152,7 @@ namespace Connapse.Client.Api.Sources.Item
             return await RequestAdapter.SendAsync<global::Connapse.Client.Models.SourceResponse>(requestInfo, global::Connapse.Client.Models.SourceResponse.CreateFromDiscriminatorValue, errorMapping, cancellationToken).ConfigureAwait(false);
         }
         /// <summary>
-        /// Delete a source and its indexed documents. confirmName must be the source&apos;s name. The external data itself is untouched.
+        /// Delete a source and its indexed documents. confirmName must be the source&apos;s name. The external data itself is untouched. Administrator only; a token needs admin:sources.
         /// </summary>
         /// <returns>A <see cref="RequestInformation"/></returns>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
@@ -190,7 +190,7 @@ namespace Connapse.Client.Api.Sources.Item
             return requestInfo;
         }
         /// <summary>
-        /// Update a source&apos;s name, description, scope, sync interval, or enabled state.
+        /// Update a source&apos;s name, description, scope, sync interval, or enabled state. Administrator only; a token needs admin:sources.
         /// </summary>
         /// <returns>A <see cref="RequestInformation"/></returns>
         /// <param name="body">The request body</param>
@@ -221,7 +221,7 @@ namespace Connapse.Client.Api.Sources.Item
             return new global::Connapse.Client.Api.Sources.Item.WithSourceItemRequestBuilder(rawUrl, RequestAdapter);
         }
         /// <summary>
-        /// Delete a source and its indexed documents. confirmName must be the source&apos;s name. The external data itself is untouched.
+        /// Delete a source and its indexed documents. confirmName must be the source&apos;s name. The external data itself is untouched. Administrator only; a token needs admin:sources.
         /// </summary>
         [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
         public partial class WithSourceItemRequestBuilderDeleteQueryParameters 

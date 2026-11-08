@@ -84,7 +84,7 @@ namespace Connapse.Client.Api.Containers.Item.Files
             return await RequestAdapter.SendAsync<global::Connapse.Client.Models.PagedResponseOfBrowseEntry>(requestInfo, global::Connapse.Client.Models.PagedResponseOfBrowseEntry.CreateFromDiscriminatorValue, errorMapping, cancellationToken).ConfigureAwait(false);
         }
         /// <summary>
-        /// Upload one or more files to a container
+        /// Upload one or more files to a container. Send `paths`, one folder per file in the order of `files`, to put each file in its own folder; `path` then goes unused.
         /// </summary>
         /// <returns>A <see cref="global::Connapse.Client.Models.UploadResponse"/></returns>
         /// <param name="body">The request body</param>
@@ -94,6 +94,7 @@ namespace Connapse.Client.Api.Containers.Item.Files
         /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 401 status code</exception>
         /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 403 status code</exception>
         /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 404 status code</exception>
+        /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 413 status code</exception>
         /// <exception cref="global::Connapse.Client.Models.ProblemDetails">When receiving a 429 status code</exception>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -112,6 +113,7 @@ namespace Connapse.Client.Api.Containers.Item.Files
                 { "401", global::Connapse.Client.Models.ProblemDetails.CreateFromDiscriminatorValue },
                 { "403", global::Connapse.Client.Models.ProblemDetails.CreateFromDiscriminatorValue },
                 { "404", global::Connapse.Client.Models.ProblemDetails.CreateFromDiscriminatorValue },
+                { "413", global::Connapse.Client.Models.ProblemDetails.CreateFromDiscriminatorValue },
                 { "429", global::Connapse.Client.Models.ProblemDetails.CreateFromDiscriminatorValue },
             };
             return await RequestAdapter.SendAsync<global::Connapse.Client.Models.UploadResponse>(requestInfo, global::Connapse.Client.Models.UploadResponse.CreateFromDiscriminatorValue, errorMapping, cancellationToken).ConfigureAwait(false);
@@ -136,7 +138,7 @@ namespace Connapse.Client.Api.Containers.Item.Files
             return requestInfo;
         }
         /// <summary>
-        /// Upload one or more files to a container
+        /// Upload one or more files to a container. Send `paths`, one folder per file in the order of `files`, to put each file in its own folder; `path` then goes unused.
         /// </summary>
         /// <returns>A <see cref="RequestInformation"/></returns>
         /// <param name="body">The request body</param>

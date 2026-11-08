@@ -8,10 +8,6 @@ namespace Connapse.Client.Models
     public enum ConnectionProvider
     #pragma warning restore CS1591
     {
-        [EnumMember(Value = "Filesystem")]
-        #pragma warning disable CS1591
-        Filesystem,
-        #pragma warning restore CS1591
         [EnumMember(Value = "S3")]
         #pragma warning disable CS1591
         S3,

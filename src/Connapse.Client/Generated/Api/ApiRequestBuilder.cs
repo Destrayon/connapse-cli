@@ -2,6 +2,7 @@
 #pragma warning disable CS0618
 using Connapse.Client.Api.Batches;
 using Connapse.Client.Api.Containers;
+using Connapse.Client.Api.Memory;
 using Connapse.Client.Api.Settings;
 using Connapse.Client.Api.Sources;
 using Connapse.Client.Api.V1;
@@ -28,6 +29,11 @@ namespace Connapse.Client.Api
         public global::Connapse.Client.Api.Containers.ContainersRequestBuilder Containers
         {
             get => new global::Connapse.Client.Api.Containers.ContainersRequestBuilder(PathParameters, RequestAdapter);
+        }
+        /// <summary>The memory property</summary>
+        public global::Connapse.Client.Api.Memory.MemoryRequestBuilder Memory
+        {
+            get => new global::Connapse.Client.Api.Memory.MemoryRequestBuilder(PathParameters, RequestAdapter);
         }
         /// <summary>The settings property</summary>
         public global::Connapse.Client.Api.Settings.SettingsRequestBuilder Settings
