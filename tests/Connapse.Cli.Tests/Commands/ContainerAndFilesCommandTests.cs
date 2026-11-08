@@ -88,6 +88,40 @@ public sealed class ContainerAndFilesCommandTests : IDisposable
     }
 
     [Fact]
+    public async Task FilesList_MoreThanOnePage_PrintsEveryEntry()
+    {
+        var root = Enumerable.Range(1, 3).Select(i => Folder($"/dir-{i}/")).ToList();
+        root.AddRange(Enumerable.Range(1, 308).Select(i => File($"/f-{i:D3}.txt", Guid.NewGuid().ToString())));
+        ServeFiles(new() { ["/"] = root });
+
+        var result = await _host.RunAsync("files", "list", "--container", "docs");
+
+        Assert.Equal(0, result.ExitCode);
+        Assert.Contains("dir-3/", result.Output);
+        Assert.Contains("f-001.txt", result.Output);
+        Assert.Contains("f-250.txt", result.Output);
+        Assert.Contains("f-308.txt", result.Output);
+        Assert.Equal(
+            [
+                "GET /api/containers/by-name/docs",
+                $"GET /api/containers/{ContainerId}/files?path=%2F&skip=0&take=200",
+                $"GET /api/containers/{ContainerId}/files?path=%2F&skip=200&take=200",
+            ],
+            _host.Sent);
+    }
+
+    [Fact]
+    public async Task FilesList_EmptyFolder_SaysSo()
+    {
+        ServeFiles(new() { ["/"] = [] });
+
+        var result = await _host.RunAsync("files", "list", "--container", "docs");
+
+        Assert.Equal(0, result.ExitCode);
+        Assert.Contains("No files or folders found at this path.", result.Output);
+    }
+
+    [Fact]
     public async Task FilesGet_APathInASubfolder_ListsThatFolderAndPrintsTheFile()
     {
         ServeFiles(new()

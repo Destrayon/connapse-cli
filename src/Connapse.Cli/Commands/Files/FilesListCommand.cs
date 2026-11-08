@@ -38,11 +38,18 @@ public static class FilesListCommand
             if (containerId is null)
                 throw new CliValidationError($"Container '{containerName}' not found.");
 
-            var result = await client.Api.Containers[containerId.Value].Files.GetAsync(r => r.QueryParameters.Path = path, ct);
-            if (result is null)
-                throw new CliServerError("Unexpected response from server.");
+            var items = await Paging.ReadAllAsync<BrowseEntry>(async (skip, take) =>
+            {
+                var page = await client.Api.Containers[containerId.Value].Files.GetAsync(r =>
+                {
+                    r.QueryParameters.Path = path;
+                    r.QueryParameters.Skip = skip;
+                    r.QueryParameters.Take = take;
+                }, ct) ?? throw new CliServerError("Unexpected response from server.");
+                return (page.Items ?? [], page.HasMore ?? false);
+            });
 
-            if (result.Items is not { Count: > 0 } items)
+            if (items.Count == 0)
             {
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine("No files or folders found at this path.");
