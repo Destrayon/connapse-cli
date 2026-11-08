@@ -11,7 +11,8 @@ namespace Connapse.Cli.Services;
 ///   1. Authorization header injection from CredentialStore
 ///   2. X-Connapse-Org header injection (Cloud only, when slug resolved)
 ///   3. 401 → refresh token → retry once
-///   4. Typed helpers (GetAsync, PostAsync, DeleteAsync, SendAsync)
+///   4. 429 → wait as the server asks → retry (see <see cref="RateLimitRetry"/>)
+///   5. Typed helpers (GetAsync, PostAsync, DeleteAsync, SendAsync)
 ///
 /// ApiClient does NOT construct its own HttpClient. The HttpClient is
 /// injected with the correct BaseAddress so test and runtime paths can
@@ -32,19 +33,22 @@ public sealed class ApiClient
     private readonly IOrgContextProvider _orgContext;
     private readonly IEditionProvider _editionProvider;
     private readonly ServerFeatures _serverFeatures;
+    private readonly RateLimitRetry _rateLimitRetry;
 
     public ApiClient(
         IHttpClientFactory httpClientFactory,
         CredentialStore credStore,
         IOrgContextProvider orgContext,
         IEditionProvider editionProvider,
-        ServerFeatures? serverFeatures = null)
+        ServerFeatures? serverFeatures = null,
+        RateLimitRetry? rateLimitRetry = null)
     {
         _httpClientFactory = httpClientFactory;
         _credStore = credStore;
         _orgContext = orgContext;
         _editionProvider = editionProvider;
         _serverFeatures = serverFeatures ?? new ServerFeatures(httpClientFactory);
+        _rateLimitRetry = rateLimitRetry ?? new RateLimitRetry();
     }
 
     /// <summary>Whether a sign-in is saved; without one, requests go to the default server unauthenticated.</summary>
@@ -106,7 +110,7 @@ public sealed class ApiClient
         CancellationToken ct,
         HttpRequestHeaders? headers = null)
     {
-        var response = await SendOnceAsync(method, path, content, ct, headers);
+        var response = await SendRetryingAsync(method, path, content, ct, headers);
 
         if (response.StatusCode == HttpStatusCode.Unauthorized)
         {
@@ -115,7 +119,7 @@ public sealed class ApiClient
             if (!refreshed)
                 throw new ApiUnauthorizedException("Token expired or invalid. Run 'connapse auth login' to re-authenticate.");
 
-            response = await SendOnceAsync(method, path, content, ct, headers);
+            response = await SendRetryingAsync(method, path, content, ct, headers);
             if (response.StatusCode == HttpStatusCode.Unauthorized)
             {
                 response.Dispose();
@@ -138,6 +142,14 @@ public sealed class ApiClient
 
         return response;
     }
+
+    /// <summary>
+    /// <see cref="SendOnceAsync"/>, waiting and sending again while the server answers that it's too busy.
+    /// The same content goes each time, as it does for the retry after a refresh.
+    /// </summary>
+    private Task<HttpResponseMessage> SendRetryingAsync(
+        HttpMethod method, string path, HttpContent? content, CancellationToken ct, HttpRequestHeaders? headers) =>
+        _rateLimitRetry.SendAsync(c => SendOnceAsync(method, path, content, c, headers), ct);
 
     private async Task<HttpResponseMessage> SendOnceAsync(
         HttpMethod method,
