@@ -14,11 +14,13 @@ public static class RootCommandBuilder
     public static RootCommand Build(
         IServiceProvider services,
         Option<string?> orgOption,
-        Option<bool> verboseOption)
+        Option<bool> verboseOption,
+        Option<string?>? profileOption = null)
     {
         var root = new RootCommand("Connapse CLI — knowledge management from the terminal.");
         root.Options.Add(orgOption);
         root.Options.Add(verboseOption);
+        root.Options.Add(profileOption ?? CreateProfileOption());
 
         // Default action: print help when invoked with no subcommand.
         root.SetAction((_, _) =>
@@ -45,4 +47,13 @@ public static class RootCommandBuilder
 
         return root;
     }
+
+    /// <summary>The global --profile option: which saved login a command uses.</summary>
+    public static Option<string?> CreateProfileOption() => new("--profile")
+    {
+        Description = "Saved login to use for this command, e.g. 'home'. " +
+                      "Overrides CONNAPSE_PROFILE and the profile 'connapse auth switch' chose. " +
+                      "Log in to a new one with 'connapse auth login --profile <name> --server <url>'.",
+        Recursive = true,
+    };
 }

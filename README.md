@@ -65,7 +65,8 @@ dotnet run --project src/Connapse.Cli -- --help
 
 ```bash
 # 1. Log in to your Connapse server. A browser opens for OAuth; on completion
-#    the CLI stores credentials in ~/.connapse/credentials.json.
+#    the CLI stores credentials in ~/.connapse/credentials.json. To keep more than
+#    one login, see "More than one login" below.
 connapse auth login --server https://www.connapse.com
 
 # 2. (Cloud only) Pick an organization as the default for subsequent commands.
@@ -84,7 +85,7 @@ connapse search "how do I configure X" --container my-docs --top 5
 
 ## Commands
 
-All commands accept the global options `--org <slug>` and `--verbose`. Commands that require authentication will exit with status code 2 and ask you to run `connapse auth login` if credentials are missing or invalid.
+All commands accept the global options `--org <slug>`, `--profile <name>` and `--verbose`. Commands that require authentication will exit with status code 2 and ask you to run `connapse auth login` if credentials are missing or invalid.
 
 ### Authentication
 
@@ -93,10 +94,30 @@ All commands accept the global options `--org <slug>` and `--verbose`. Commands 
 | `connapse auth login --server <url>` | Open a browser for OAuth login. |
 | `connapse auth login --server <url> --with-token` | Read a pre-generated token from stdin (CI-friendly). |
 | `connapse auth logout` | Clear stored credentials. |
-| `connapse auth whoami` | Show the current identity and server. |
+| `connapse auth whoami` | Show the current identity, server and profile. |
+| `connapse auth list` | List saved logins (profiles); `*` marks the one commands use now. |
+| `connapse auth switch <profile>` | Make a saved login the one commands use by default (`default` switches back). |
 | `connapse auth pat create <name> [--expires yyyy-MM-dd]` | Create a personal access token. |
 | `connapse auth pat list` | List all personal access tokens. |
 | `connapse auth pat revoke <id>` | Revoke a personal access token by ID. |
+
+#### More than one login
+
+Each profile keeps its own login and default organization, so a Connapse Cloud login and a home server
+login can live side by side. Your first login is the `default` profile, in `~/.connapse/`; a named profile
+lives in `~/.connapse/profiles/<name>/`.
+
+```bash
+connapse auth login --server https://www.connapse.com                     # default profile
+connapse auth login --profile home --server https://connapse.home.lan     # a second login
+connapse container list --profile home                                    # one command against home
+connapse auth switch home                                                 # home from now on
+connapse auth list
+```
+
+A command uses the profile named by `--profile`, else the `CONNAPSE_PROFILE` environment variable, else the
+one `connapse auth switch` chose, else `default`. Set `CONNAPSE_HOME` to keep everything in another
+directory instead of `~/.connapse`, e.g. for a CI job or a throwaway session.
 
 ### Organizations (Cloud only)
 

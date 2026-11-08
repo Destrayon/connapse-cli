@@ -13,13 +13,16 @@ public static class CliRuntime
     /// the exception is not a <see cref="CliUserError"/>, the full stack
     /// trace is also printed.
     /// </summary>
-    public static int HandleException(Exception ex, bool verbose)
+    /// <param name="profile">The named profile the command used, if not the default, so the hint logs in to it.</param>
+    public static int HandleException(Exception ex, bool verbose, string? profile = null)
     {
         switch (ex)
         {
             case CliAuthError auth:
                 WriteError(auth.Message);
-                WriteHint("Run 'connapse auth login' to authenticate.");
+                WriteHint(profile is null
+                    ? "Run 'connapse auth login' to authenticate."
+                    : $"Run 'connapse auth login --profile {profile}' to authenticate.");
                 return CliExitCodes.AuthError;
 
             case CliUserError user:

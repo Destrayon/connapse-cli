@@ -21,9 +21,20 @@ public sealed class ConfigStore
     private readonly string _filePath;
 
     public ConfigStore(string baseDirectory)
+        : this(Path.Combine(baseDirectory, ".connapse"), "config.json")
     {
-        _filePath = Path.Combine(baseDirectory, ".connapse", "config.json");
     }
+
+    private ConfigStore(string directory, string fileName)
+    {
+        _filePath = Path.Combine(directory, fileName);
+    }
+
+    /// <summary>The store for <paramref name="profile"/>: its config.json, in the profile's own directory.</summary>
+    public static ConfigStore ForProfile(CliProfile profile) =>
+        new(profile.Directory, "config.json");
+
+    public string FilePath => _filePath;
 
     public CliConfig Load()
     {

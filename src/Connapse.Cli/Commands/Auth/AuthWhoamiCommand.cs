@@ -40,6 +40,7 @@ public static class AuthWhoamiCommand
             var config = configStore.Load();
 
             Console.WriteLine();
+            PrintRow("Profile", services.GetRequiredService<ProfileContext>().Current.Name);
             PrintRow("Server", creds.ApiBaseUrl);
             PrintRow("Edition", edition switch
             {

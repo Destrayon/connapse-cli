@@ -21,12 +21,16 @@ public sealed class CommandHost : IDisposable
 
     public MockHttpMessageHandler Handler { get; } = new();
 
+    /// <summary>The profiles in this host's home; the signed-in login is the default profile.</summary>
+    public ProfileStore Profiles { get; }
+
     /// <summary>Request bodies, read as they're sent; the client disposes them afterwards.</summary>
     public List<string> Bodies { get; } = new();
 
     public CommandHost()
     {
         _tempDir = Path.Combine(Path.GetTempPath(), "connapse-cli-tests-" + Guid.NewGuid().ToString("N"));
+        Profiles = new ProfileStore(Path.Combine(_tempDir, ".connapse"));
         var credStore = new CredentialStore(_tempDir);
         credStore.Save(new CliCredentials(
             ApiKey: "access-abc",
@@ -36,6 +40,7 @@ public sealed class CommandHost : IDisposable
             ExpiresAt: DateTime.UtcNow.AddHours(1)));
 
         var collection = new ServiceCollection();
+        collection.AddSingleton(new ProfileContext(Profiles, () => null));
         collection.AddSingleton(credStore);
         collection.AddSingleton(new ConfigStore(_tempDir));
         collection.AddSingleton<IClock, SystemClock>();

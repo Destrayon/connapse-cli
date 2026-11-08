@@ -60,7 +60,7 @@ public static class AuthLoginCommand
             ExpiresAt: result.ExpiresAt));
 
         Console.ForegroundColor = ConsoleColor.DarkGray;
-        Console.WriteLine($"  Credentials stored in {CredentialPath()}");
+        Console.WriteLine($"  Credentials stored in {credStore.FilePath}");
         Console.ResetColor();
 
         var editionDetector = services.GetRequiredService<EditionDetector>();
@@ -99,7 +99,7 @@ public static class AuthLoginCommand
             ExpiresAt: null));
 
         Console.ForegroundColor = ConsoleColor.DarkGray;
-        Console.WriteLine($"  Credentials stored in {CredentialPath()}");
+        Console.WriteLine($"  Credentials stored in {credStore.FilePath}");
         Console.ResetColor();
 
         var editionDetector = services.GetRequiredService<EditionDetector>();
@@ -180,7 +180,4 @@ public static class AuthLoginCommand
         ServerEdition.SelfHosted => "Self-hosted",
         _ => "Unknown",
     };
-
-    private static string CredentialPath() =>
-        Path.Combine(HomeDirectoryResolver.GetHomeDirectory(), ".connapse", "credentials.json");
 }

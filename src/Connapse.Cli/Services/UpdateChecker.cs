@@ -84,7 +84,7 @@ public sealed class UpdateChecker
     {
         try
         {
-            var checkFile = Path.Combine(HomeDirectoryResolver.GetHomeDirectory(), ".connapse", "last-update-check");
+            var checkFile = Path.Combine(ProfileStore.FromEnvironment().HomeDirectory, "last-update-check");
 
             if (File.Exists(checkFile) &&
                 DateTime.TryParse(File.ReadAllText(checkFile).Trim(), out var lastCheck) &&
