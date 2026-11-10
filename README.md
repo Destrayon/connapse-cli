@@ -135,7 +135,7 @@ Organization commands are no-ops on self-hosted servers and exit 0 with a friend
 |---|---|
 | `connapse container create <name> [--description ...]` | Create a knowledge container. |
 | `connapse container list` | List all containers in the current organization. |
-| `connapse container delete <name>` | Delete a container (accepts name or ID). |
+| `connapse container delete <name>` | Delete an empty container (accepts name or ID). Waits for the owner's approval; see [Deletes wait for approval](#deletes-wait-for-approval). |
 | `connapse container stats <name>` | Show document counts, chunks, size, and embedding info. |
 
 ### Files
@@ -144,7 +144,7 @@ Organization commands are no-ops on self-hosted servers and exit 0 with a friend
 |---|---|
 | `connapse files list --container <name> [--path /folder]` | List files and folders in a container. |
 | `connapse files get --container <name> --file <id-or-path>` | Print a file's text content. |
-| `connapse files delete --container <name> --file <guid>` | Delete a file by ID. |
+| `connapse files delete --container <name> --file <guid>` | Delete a file by ID. Waits for the owner's approval. |
 
 ### Content
 
@@ -156,14 +156,14 @@ Organization commands are no-ops on self-hosted servers and exit 0 with a friend
 
 ### Memory
 
-A fact is a subject, an attribute and a value, saved to a memory space. `--space` takes a space's name or ID, such as `team-notes`. `save` and `list` require it; if it is missing, they fail and list the spaces you can see. `recall` without `--space` searches every space you can read. Saving and forgetting need the Editor role, and a token also needs `knowledge:write`. Every command takes `--json`.
+A fact is a subject, an attribute and a value, saved to a memory space. `--space` takes a space's name or ID, such as `team-notes`. `save` and `list` require it; if it is missing, they fail and list the spaces you can see. `recall` without `--space` searches every space you can read. Saving and forgetting need the Editor role, and a token also needs `knowledge:write`. With an Owner, Admin or agent sign-in, `forget` goes through the server's approval route and waits for the owner's approval; an Editor's `forget` goes through the REST route instead and is not held (see [Deletes wait for approval](#deletes-wait-for-approval)). Every command takes `--json`.
 
 | Command | Description |
 |---|---|
 | `connapse memory save <subject> <attribute> <value> --space <name> [--valid-from] [--valid-to] [--source <doc-id>]... [--reason]` | Save a fact. |
 | `connapse memory recall [query] [--space] [--subject] [--attribute] [--as-of] [--history] [--limit] [--cursor]` | Recall facts from every space you can read, or one. |
 | `connapse memory list --space <name> [--query] [--subject] [--status] [--sort] [--limit] [--cursor]` | List the facts in a space. |
-| `connapse memory forget <fact-id>` | Delete a fact and every corrected version of it. |
+| `connapse memory forget <fact-id>` | Delete a fact and every corrected version of it. Waits for the owner's approval. |
 
 ### Administration
 
@@ -210,6 +210,39 @@ These need the Owner or Admin role. A personal access token also needs the match
 | `connapse api <method> <path> [--data <json\|@file\|->] [--content-type <type>] [--paginate]` | Call any route on the signed-in server, for routes the CLI has no command for yet. It prints the response body byte for byte as sent, and exits 1 on a non-2xx status. Redirects are reported, not followed. `--paginate` follows `skip`/`take` pages of a GET and prints all items as one array. |
 
 For example, `connapse api GET "/api/sources?take=50" --paginate`, or `connapse api POST /api/containers --data '{"name":"docs"}'`. In Git Bash, set `MSYS_NO_PATHCONV=1`: otherwise Git Bash rewrites `/api/...` into a Windows path.
+
+### Deletes wait for approval
+
+`files delete`, `container delete` and `memory forget` go through the server's approval gate (its MCP route), so when your sign-in asks for approval the server holds the delete instead of running it. Sign-in tokens always ask; a personal access token asks unless it was made with approval turned off. A held delete changes nothing, prints the request ID and exits with code 3:
+
+```
+Held for approval (request 0aae0f35-ddd6-457c-a031-aae9f8c11db6).
+Nothing is deleted until the server's owner approves it.
+Approve or deny it at http://my-server:5001/approvals, then run this same command again to delete.
+To wait for the decision: connapse approval status 0aae0f35-ddd6-457c-a031-aae9f8c11db6 --wait 50
+```
+
+Once it is approved, run the same command again and it deletes, once. The approval route only admits Owner, Admin and agent sign-ins; an Editor's delete goes through the REST route instead, which the server does not hold.
+
+| Command | Description |
+|---|---|
+| `connapse approval status <request-id> [--wait <0-50>] [--json]` | Show whether a held delete was approved. Exits 0 when approved, 3 while pending, 1 when denied or expired. |
+
+`connapse api DELETE ...` calls the REST route directly and is never held.
+
+### Agents in Claude Code auto mode
+
+Claude Code's auto mode classifier doesn't know your Connapse server, so it can take a container create or an upload by an agent for a change to shared infrastructure and deny it, especially when another agent handed over the task. `connapse setup claude-code` prints auto mode settings that describe the signed-in server as your own service and `connapse` as your own CLI:
+
+```
+connapse setup claude-code
+```
+
+Merge the printed `autoMode` block into `~/.claude/settings.json`; Claude Code ignores `autoMode` in a project's settings. The rule trusts CLI deletes only because the server holds them for your approval, so use it with a sign-in that asks for approval. `tests/agent-auto-mode/run.sh` runs everyday agent tasks in auto mode and counts denials.
+
+| Command | Description |
+|---|---|
+| `connapse setup claude-code` | Print Claude Code auto mode settings for the signed-in server. |
 
 ### Housekeeping
 
@@ -261,6 +294,7 @@ On Windows these live under `%USERPROFILE%\.connapse\`.
 | `0` | Success. |
 | `1` | User error (bad input, server-rejected request, partial failure). |
 | `2` | Authentication failure — run `connapse auth login` to fix. |
+| `3` | Held for the server owner's approval; nothing changed yet. See [Deletes wait for approval](#deletes-wait-for-approval). |
 | `99` | Unexpected error. Re-run with `--verbose` to see the stack trace. |
 
 ## Contributing
