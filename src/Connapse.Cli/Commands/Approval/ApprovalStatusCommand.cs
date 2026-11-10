@@ -53,8 +53,19 @@ public static class ApprovalStatusCommand
                     $"No approval request {requestId} for this sign-in. A request can only be read with the sign-in that made it.");
             }
 
-            var status = JsonSerializer.Deserialize<ApprovalStatus>(body, JsonOptions)
-                ?? throw new CliServerError("The server returned no approval status.");
+            ApprovalStatus? status;
+            try
+            {
+                status = JsonSerializer.Deserialize<ApprovalStatus>(body, JsonOptions);
+            }
+            catch (JsonException ex)
+            {
+                throw new CliServerError($"The server's approval status could not be read: {ex.Message}");
+            }
+            if (status is null)
+                throw new CliServerError("The server returned no approval status.");
+            if (status.State == ApprovalState.Unknown)
+                throw new CliServerError("The server's approval status has no state.");
 
             if (parseResult.GetValue(jsonOption))
                 Console.WriteLine(body);
@@ -91,10 +102,11 @@ public static class ApprovalStatusCommand
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         PropertyNameCaseInsensitive = true,
-        Converters = { new JsonStringEnumConverter() },
+        Converters = { new JsonStringEnumConverter(allowIntegerValues: false) },
     };
 
-    internal enum ApprovalState { Pending, Approved, Denied, Expired, Used }
+    /// <summary><see cref="Unknown"/> is what a status without a state reads as, so it can't pass for Pending.</summary>
+    internal enum ApprovalState { Unknown, Pending, Approved, Denied, Expired, Used }
 
     internal sealed record ApprovalStatus(Guid Id, string ToolName, ApprovalState State, string? Reason, string? Message);
 }

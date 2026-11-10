@@ -156,7 +156,7 @@ Organization commands are no-ops on self-hosted servers and exit 0 with a friend
 
 ### Memory
 
-A fact is a subject, an attribute and a value, saved to a memory space. `--space` takes a space's name or ID, such as `team-notes`. `save` and `list` require it; if it is missing, they fail and list the spaces you can see. `recall` without `--space` searches every space you can read. Saving and forgetting need the Editor role, and a token also needs `knowledge:write`. Every command takes `--json`.
+A fact is a subject, an attribute and a value, saved to a memory space. `--space` takes a space's name or ID, such as `team-notes`. `save` and `list` require it; if it is missing, they fail and list the spaces you can see. `recall` without `--space` searches every space you can read. Saving and forgetting need the Editor role, and a token also needs `knowledge:write`. With an Owner, Admin or agent sign-in, `forget` goes through the server's approval route and waits for the owner's approval; an Editor's `forget` goes through the REST route instead and is not held (see [Deletes wait for approval](#deletes-wait-for-approval)). Every command takes `--json`.
 
 | Command | Description |
 |---|---|

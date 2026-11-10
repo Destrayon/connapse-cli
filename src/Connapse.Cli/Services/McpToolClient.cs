@@ -81,8 +81,13 @@ public sealed partial class McpToolClient(ApiClient api)
         if (result?["isError"]?.GetValue<bool>() == true || text.StartsWith("Error:", StringComparison.Ordinal))
             throw new CliValidationError(text.StartsWith("Error:", StringComparison.Ordinal) ? text["Error:".Length..].Trim() : text);
 
-        if (text.Contains("pending approval", StringComparison.Ordinal) && HeldRequest().Match(text) is { Success: true } held)
+        if (text.Contains("pending approval", StringComparison.Ordinal))
+        {
+            // A held call that names no request can't be followed up, and it must never read as done.
+            if (HeldRequest().Match(text) is not { Success: true } held)
+                throw new CliServerError($"The server held the call for approval but named no request to follow up: {Shorten(text)}");
             return new McpToolResult(text, Guid.Parse(held.Groups[1].Value));
+        }
 
         return new McpToolResult(text, null);
     }

@@ -73,5 +73,8 @@ for command, text in denied:
 if final:
     print(f"session: {final.get('subtype')}, {final.get('num_turns')} turns")
     print(f"permission denials reported by Claude Code: {len(final.get('permission_denials') or [])}")
-sys.exit(1 if denied or (final and final.get("permission_denials")) else 0)
+if final is None:
+    print("no result event in transcript; the run did not complete")
+    sys.exit(1)
+sys.exit(1 if denied or final.get("permission_denials") else 0)
 EOF

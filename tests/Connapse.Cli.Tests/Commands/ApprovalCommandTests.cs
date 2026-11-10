@@ -53,6 +53,18 @@ public sealed class ApprovalCommandTests : IDisposable
     }
 
     [Fact]
+    public async Task FilesDelete_HeldWithoutARequestId_FailsInsteadOfSayingDeleted()
+    {
+        _mcp.ToolText = (tool, _) => $"'{tool}' is pending approval: ask the person to approve it at /approvals.";
+
+        var result = await _host.RunAsync("files", "delete", "--container", "notes", "--file", FileId);
+
+        Assert.Equal(1, result.ExitCode);
+        Assert.Contains("named no request", result.Error);
+        Assert.DoesNotContain("Deleted", result.Output);
+    }
+
+    [Fact]
     public async Task FilesDelete_ToolError_IsAUserError()
     {
         _mcp.ToolText = (_, _) => $"Error: File '{FileId}' not found in this container.";
@@ -293,6 +305,22 @@ public sealed class ApprovalCommandTests : IDisposable
         Assert.Equal(3, result.ExitCode);
         using var doc = JsonDocument.Parse(result.Output);
         Assert.Equal("Pending", doc.RootElement.GetProperty("state").GetString());
+    }
+
+    [Theory]
+    [InlineData("""{"id":"0aae0f35-ddd6-457c-a031-aae9f8c11db6","toolName":"container_delete","state":"Paused"}""", "could not be read")]
+    [InlineData("""{"id":"0aae0f35-ddd6-457c-a031-aae9f8c11db6","toolName":"container_delete","state":2}""", "could not be read")]
+    [InlineData("""{"id":"0aae0f35-ddd6-457c-a031-aae9f8c11db6","toolName":"container_delete"}""", "has no state")]
+    [InlineData("<html>Bad gateway</html>", "could not be read")]
+    public async Task ApprovalStatus_UnreadableStatus_IsAnErrorNotPending(string body, string error)
+    {
+        _host.Routes(($"GET /api/approvals/{RequestId}", CommandHost.Json(body)));
+
+        var result = await _host.RunAsync("approval", "status", RequestId.ToString());
+
+        Assert.Equal(1, result.ExitCode);
+        Assert.Contains(error, result.Error);
+        Assert.Empty(result.Output);
     }
 
     [Fact]
