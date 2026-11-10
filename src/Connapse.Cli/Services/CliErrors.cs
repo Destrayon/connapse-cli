@@ -52,5 +52,8 @@ public static class CliExitCodes
     public const int Success = 0;
     public const int UserError = 1;
     public const int AuthError = 2;
+
+    /// <summary>The server held the call until its owner approves it; nothing has changed yet.</summary>
+    public const int PendingApproval = 3;
     public const int Unexpected = 99;
 }

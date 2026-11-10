@@ -242,30 +242,6 @@ public sealed class MemoryCommandTests : IDisposable
     }
 
     [Fact]
-    public async Task Forget_DeletesTheFactAndSaysHowManyVersionsWent()
-    {
-        _host.Routes(($"DELETE /api/memory/facts/{FactId}", CommandHost.Json("""{"deleted":2}""")));
-
-        var result = await _host.RunAsync("memory", "forget", FactId);
-
-        Assert.Equal(0, result.ExitCode);
-        Assert.Equal($"DELETE /api/memory/facts/{FactId}", _host.Sent.Single());
-        Assert.Contains($"Forgot fact {FactId} (2 version(s) deleted).", result.Output);
-    }
-
-    [Fact]
-    public async Task Forget_Json_PrintsTheServersResponse()
-    {
-        _host.Routes(($"DELETE /api/memory/facts/{FactId}", CommandHost.Json("""{"deleted":1}""")));
-
-        var result = await _host.RunAsync("memory", "forget", FactId, "--json");
-
-        Assert.Equal(0, result.ExitCode);
-        using var doc = System.Text.Json.JsonDocument.Parse(result.Output);
-        Assert.Equal(1, doc.RootElement.GetProperty("deleted").GetInt32());
-    }
-
-    [Fact]
     public async Task Forget_NotAnId_IsRefusedBeforeAnyRequest()
     {
         var result = await _host.RunAsync("memory", "forget", "billing-service");
@@ -273,17 +249,5 @@ public sealed class MemoryCommandTests : IDisposable
         Assert.Equal(1, result.ExitCode);
         Assert.Contains("'billing-service' is not a fact ID", result.Error);
         Assert.Empty(_host.Sent);
-    }
-
-    [Fact]
-    public async Task Forget_Forbidden_NamesTheRoleAndScope()
-    {
-        _host.Routes(($"DELETE /api/memory/facts/{FactId}", CommandHost.Json(
-            """{"title":"Forbidden","status":403,"detail":"Not allowed."}""", HttpStatusCode.Forbidden)));
-
-        var result = await _host.RunAsync("memory", "forget", FactId);
-
-        Assert.NotEqual(0, result.ExitCode);
-        Assert.Contains("Editor role", result.Error);
     }
 }

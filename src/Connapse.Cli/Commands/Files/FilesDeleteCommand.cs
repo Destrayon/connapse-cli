@@ -1,9 +1,6 @@
 using System.CommandLine;
-using System.Net;
-using Connapse.Cli.Commands.Container;
+using Connapse.Cli.Commands.Approval;
 using Connapse.Cli.Services;
-using Connapse.Client;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Connapse.Cli.Commands.Files;
 
@@ -23,7 +20,7 @@ public static class FilesDeleteCommand
             Required = true,
         };
 
-        var cmd = new Command("delete", "Delete a file from a container.");
+        var cmd = new Command("delete", "Delete a file from a container. When the server asks for approval, the delete waits for its owner (exit code 3).");
         cmd.Options.Add(containerOption);
         cmd.Options.Add(fileOption);
 
@@ -35,28 +32,14 @@ public static class FilesDeleteCommand
             if (!Guid.TryParse(fileId, out _))
                 throw new CliValidationError($"'{fileId}' is not a valid file ID (expected GUID format).");
 
-            var client = services.GetRequiredService<ConnapseApiClient>();
-
-            var containerId = await ContainerHelpers.ResolveIdAsync(client, containerName, ct);
-            if (containerId is null)
-                throw new CliValidationError($"Container '{containerName}' not found.");
-
-            Console.Write($"Deleting file {fileId}... ");
-
-            try
-            {
-                await client.Api.Containers[containerId.Value].Files[fileId].DeleteAsync(cancellationToken: ct);
-            }
-            catch (ApiRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Not found.");
-                Console.ResetColor();
-                return CliExitCodes.UserError;
-            }
+            // The container goes as the user named it, so running the same command again after approval matches.
+            var result = await ApprovalHelpers.CallToolAsync(services, "delete_file",
+                new Dictionary<string, string> { ["containerId"] = containerName, ["fileId"] = fileId }, ct);
+            if (result.HeldRequestId is { } held)
+                return ApprovalHelpers.WriteHeld(services, held, json: false);
 
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Deleted");
+            Console.WriteLine($"Deleted file {fileId}.");
             Console.ResetColor();
 
             return CliExitCodes.Success;

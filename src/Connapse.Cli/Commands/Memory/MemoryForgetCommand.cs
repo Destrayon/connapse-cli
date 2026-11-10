@@ -1,12 +1,13 @@
 using System.CommandLine;
+using System.Text.Json;
+using System.Text.RegularExpressions;
 using Connapse.Cli.Commands.Admin;
+using Connapse.Cli.Commands.Approval;
 using Connapse.Cli.Services;
-using Connapse.Client;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Connapse.Cli.Commands.Memory;
 
-/// <summary><c>connapse memory forget</c>: DELETE /api/memory/facts/{id} (memory.forget).</summary>
+/// <summary><c>connapse memory forget</c>: the memory_forget tool on /mcp, so the server can hold it for the owner's approval.</summary>
 public static class MemoryForgetCommand
 {
     public static Command Create(IServiceProvider services, Option<string?> orgOption)
@@ -25,18 +26,22 @@ public static class MemoryForgetCommand
             if (!Guid.TryParse(id, out _))
                 throw new CliValidationError($"'{id}' is not a fact ID; 'connapse memory list' or 'recall' shows them.");
 
-            var client = services.GetRequiredService<ConnapseApiClient>();
-            var forgotten = await MemoryHelpers.WriteAsync(() =>
-                client.Api.Memory.Facts[id].DeleteAsync(cancellationToken: ct))
-                ?? throw new CliServerError("The server returned no result.");
+            bool json = parseResult.GetValue(jsonOption);
+            var result = await ApprovalHelpers.CallToolAsync(services, "memory_forget",
+                new Dictionary<string, string> { ["factId"] = id }, ct);
+            if (result.HeldRequestId is { } held)
+                return ApprovalHelpers.WriteHeld(services, held, json);
 
-            if (parseResult.GetValue(jsonOption))
+            // The tool says "Forgot fact '<id>' (<n> version(s) deleted)."; --json keeps the REST route's {"deleted": n}.
+            var count = Regex.Match(result.Text, @"\((\d+) version");
+            int deleted = count.Success ? int.Parse(count.Groups[1].Value) : 0;
+            if (json)
             {
-                Console.WriteLine(AdminHelpers.ToJson(forgotten));
+                Console.WriteLine(JsonSerializer.Serialize(new { deleted }));
                 return CliExitCodes.Success;
             }
 
-            AdminHelpers.WriteSuccess($"Forgot fact {id} ({forgotten.Deleted ?? 0} version(s) deleted).");
+            AdminHelpers.WriteSuccess($"Forgot fact {id} ({deleted} version(s) deleted).");
             return CliExitCodes.Success;
         }));
 
