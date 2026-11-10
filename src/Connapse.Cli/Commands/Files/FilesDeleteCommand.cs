@@ -1,6 +1,10 @@
 using System.CommandLine;
+using System.Net;
 using Connapse.Cli.Commands.Approval;
+using Connapse.Cli.Commands.Container;
 using Connapse.Cli.Services;
+using Connapse.Client;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Connapse.Cli.Commands.Files;
 
@@ -35,7 +39,22 @@ public static class FilesDeleteCommand
             // The container goes as the user named it, so running the same command again after approval matches.
             var result = await ApprovalHelpers.CallToolAsync(services, "delete_file",
                 new Dictionary<string, string> { ["containerId"] = containerName, ["fileId"] = fileId }, ct);
-            if (result.HeldRequestId is { } held)
+            if (result is null)
+            {
+                // An Editor's sign-in: the approval route refuses it, so the delete goes through REST, unheld.
+                var client = services.GetRequiredService<ConnapseApiClient>();
+                var containerId = await ContainerHelpers.ResolveIdAsync(client, containerName, ct)
+                    ?? throw new CliValidationError($"Container '{containerName}' not found.");
+                try
+                {
+                    await client.Api.Containers[containerId].Files[fileId].DeleteAsync(cancellationToken: ct);
+                }
+                catch (ApiRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
+                {
+                    throw new CliValidationError($"File '{fileId}' not found in container '{containerName}'.");
+                }
+            }
+            else if (result.HeldRequestId is { } held)
                 return ApprovalHelpers.WriteHeld(services, held, json: false);
 
             Console.ForegroundColor = ConsoleColor.Green;

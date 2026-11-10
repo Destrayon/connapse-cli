@@ -16,6 +16,12 @@ public sealed record McpToolResult(string Text, Guid? HeldRequestId)
 }
 
 /// <summary>
+/// The server's MCP route refused this sign-in (403). The route only admits Owner, Admin and agent sign-ins, so an
+/// Editor gets this; the caller can fall back to the REST route.
+/// </summary>
+public sealed class McpRouteForbiddenException() : Exception("The server's MCP route refused this sign-in.");
+
+/// <summary>
 /// Calls one tool on the signed-in server's MCP route (<c>/mcp</c>), with the CLI's own sign-in. The CLI deletes
 /// through this route because it is where the server holds a destructive call until the owner approves it (CC-10);
 /// the REST delete routes never hold. Each call opens a session, calls the tool and closes the session.
@@ -98,9 +104,7 @@ public sealed partial class McpToolClient(ApiClient api)
         }
         catch (ApiRequestException ex) when (ex.StatusCode == HttpStatusCode.Forbidden)
         {
-            throw new CliValidationError(
-                "The server's approval route only admits Owner, Admin or agent sign-ins, so this account can't delete from the CLI. "
-                + "Delete it in the web UI instead.");
+            throw new McpRouteForbiddenException();
         }
     }
 

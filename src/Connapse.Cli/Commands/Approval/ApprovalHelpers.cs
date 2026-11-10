@@ -11,9 +11,22 @@ namespace Connapse.Cli.Commands.Approval;
 /// </summary>
 internal static class ApprovalHelpers
 {
-    public static Task<McpToolResult> CallToolAsync(
-        IServiceProvider services, string tool, IReadOnlyDictionary<string, string> arguments, CancellationToken ct) =>
-        new McpToolClient(services.GetRequiredService<ApiClient>()).CallAsync(tool, arguments, ct);
+    /// <summary>
+    /// Calls the delete tool. Gives null when the MCP route refuses the sign-in, as it does an Editor's; the caller
+    /// then deletes through the REST route, which the server does not hold.
+    /// </summary>
+    public static async Task<McpToolResult?> CallToolAsync(
+        IServiceProvider services, string tool, IReadOnlyDictionary<string, string> arguments, CancellationToken ct)
+    {
+        try
+        {
+            return await new McpToolClient(services.GetRequiredService<ApiClient>()).CallAsync(tool, arguments, ct);
+        }
+        catch (McpRouteForbiddenException)
+        {
+            return null;
+        }
+    }
 
     /// <summary>Says the call was held, where to approve it and how to wait for the decision, then gives the exit code.</summary>
     public static int WriteHeld(IServiceProvider services, Guid requestId, bool json)

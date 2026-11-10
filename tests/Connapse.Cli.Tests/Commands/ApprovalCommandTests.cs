@@ -122,15 +122,86 @@ public sealed class ApprovalCommandTests : IDisposable
         Assert.Contains("is not empty. Delete all files first.", result.Error);
     }
 
+    private const string ContainerId = "3f2a1b4c-0000-4000-8000-0000000000c1";
+
+    /// <summary>
+    /// The MCP route refuses the sign-in, as it does an Editor's; every other route answers from
+    /// <paramref name="routes"/>, and an unlisted one answers 404.
+    /// </summary>
+    private void McpForbidden(params (string Route, string Json)[] routes) =>
+        _host.Respond(request =>
+        {
+            if (request.RequestUri!.AbsolutePath == "/mcp")
+                return MockHttpMessageHandler.Json(HttpStatusCode.Forbidden, """{"title":"Forbidden","status":403}""");
+            string key = $"{request.Method} {request.RequestUri.AbsolutePath}";
+            foreach (var (route, json) in routes)
+            {
+                if (route == key)
+                    return MockHttpMessageHandler.Json(HttpStatusCode.OK, json);
+            }
+            return MockHttpMessageHandler.Json(HttpStatusCode.NotFound, """{"title":"Not found","status":404}""");
+        });
+
+    private static (string, string) ByName =>
+        ("GET /api/containers/by-name/notes", $$"""{"id":"{{ContainerId}}","name":"notes"}""");
+
     [Fact]
-    public async Task Delete_RouteForbidden_SaysWhichSignInsMayDelete()
+    public async Task FilesDelete_EditorSignIn_FallsBackToTheRestDelete()
     {
-        _host.Respond(_ => MockHttpMessageHandler.Json(HttpStatusCode.Forbidden, """{"title":"Forbidden","status":403}"""));
+        McpForbidden(ByName, ($"DELETE /api/containers/{ContainerId}/files/{FileId}", "{}"));
+
+        var result = await _host.RunAsync("files", "delete", "--container", "notes", "--file", FileId);
+
+        Assert.Equal(0, result.ExitCode);
+        Assert.Contains($"Deleted file {FileId}.", result.Output);
+        Assert.Equal(["POST /mcp", "GET /api/containers/by-name/notes", $"DELETE /api/containers/{ContainerId}/files/{FileId}"], _host.Sent);
+    }
+
+    [Fact]
+    public async Task FilesDelete_EditorSignIn_MissingFileIsAUserError()
+    {
+        McpForbidden(ByName);
+
+        var result = await _host.RunAsync("files", "delete", "--container", "notes", "--file", FileId);
+
+        Assert.Equal(1, result.ExitCode);
+        Assert.Contains($"File '{FileId}' not found in container 'notes'.", result.Error);
+    }
+
+    [Fact]
+    public async Task ContainerDelete_EditorSignIn_FallsBackToTheRestDelete()
+    {
+        McpForbidden(ByName, ($"DELETE /api/containers/{ContainerId}", "{}"));
+
+        var result = await _host.RunAsync("container", "delete", "notes");
+
+        Assert.Equal(0, result.ExitCode);
+        Assert.Contains("Deleted container 'notes'.", result.Output);
+        Assert.Contains($"DELETE /api/containers/{ContainerId}", _host.Sent);
+    }
+
+    [Fact]
+    public async Task ContainerDelete_EditorSignIn_UnknownContainerIsAUserError()
+    {
+        McpForbidden();
 
         var result = await _host.RunAsync("container", "delete", "notes");
 
         Assert.Equal(1, result.ExitCode);
-        Assert.Contains("Owner, Admin or agent", result.Error);
+        Assert.Contains("Container 'notes' not found.", result.Error);
+    }
+
+    [Fact]
+    public async Task MemoryForget_EditorSignIn_FallsBackToTheRestDelete()
+    {
+        McpForbidden(($"DELETE /api/memory/facts/{FactId}", """{"deleted":2}"""));
+
+        var result = await _host.RunAsync("memory", "forget", FactId, "--json");
+
+        Assert.Equal(0, result.ExitCode);
+        using var doc = JsonDocument.Parse(result.Output);
+        Assert.Equal(2, doc.RootElement.GetProperty("deleted").GetInt32());
+        Assert.Contains($"DELETE /api/memory/facts/{FactId}", _host.Sent);
     }
 
     [Fact]

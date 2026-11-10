@@ -4,6 +4,8 @@ using System.Text.RegularExpressions;
 using Connapse.Cli.Commands.Admin;
 using Connapse.Cli.Commands.Approval;
 using Connapse.Cli.Services;
+using Connapse.Client;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Connapse.Cli.Commands.Memory;
 
@@ -29,12 +31,24 @@ public static class MemoryForgetCommand
             bool json = parseResult.GetValue(jsonOption);
             var result = await ApprovalHelpers.CallToolAsync(services, "memory_forget",
                 new Dictionary<string, string> { ["factId"] = id }, ct);
-            if (result.HeldRequestId is { } held)
+            int deleted;
+            if (result is null)
+            {
+                // An Editor's sign-in: the approval route refuses it, so the fact goes through REST, unheld.
+                var client = services.GetRequiredService<ConnapseApiClient>();
+                var forgotten = await MemoryHelpers.WriteAsync(() =>
+                    client.Api.Memory.Facts[id].DeleteAsync(cancellationToken: ct))
+                    ?? throw new CliServerError("The server returned no result.");
+                deleted = forgotten.Deleted ?? 0;
+            }
+            else if (result.HeldRequestId is { } held)
                 return ApprovalHelpers.WriteHeld(services, held, json);
-
-            // The tool says "Forgot fact '<id>' (<n> version(s) deleted)."; --json keeps the REST route's {"deleted": n}.
-            var count = Regex.Match(result.Text, @"\((\d+) version");
-            int deleted = count.Success ? int.Parse(count.Groups[1].Value) : 0;
+            else
+            {
+                // The tool says "Forgot fact '<id>' (<n> version(s) deleted)."; --json keeps the REST route's {"deleted": n}.
+                var count = Regex.Match(result.Text, @"\((\d+) version");
+                deleted = count.Success ? int.Parse(count.Groups[1].Value) : 0;
+            }
             if (json)
             {
                 Console.WriteLine(JsonSerializer.Serialize(new { deleted }));

@@ -222,7 +222,7 @@ Approve or deny it at http://my-server:5001/approvals, then run this same comman
 To wait for the decision: connapse approval status 0aae0f35-ddd6-457c-a031-aae9f8c11db6 --wait 50
 ```
 
-Once it is approved, run the same command again and it deletes, once. Deleting needs the Owner or Admin role, or an agent key; an Editor deletes in the web UI.
+Once it is approved, run the same command again and it deletes, once. The approval route only admits Owner, Admin and agent sign-ins; an Editor's delete goes through the REST route instead, which the server does not hold.
 
 | Command | Description |
 |---|---|
