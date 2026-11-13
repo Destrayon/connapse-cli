@@ -77,6 +77,14 @@ public sealed class FakeMcpServer
         + "(waitSeconds up to 50 waits for the decision) to learn whether they approved; once approved, repeat this exact "
         + "call with the same arguments. The request expires at 2026-11-10 12:00:00Z.";
 
+    /// <summary>The text the approval gate answers with when it holds a delete of knowledge as a batch (CON-330).</summary>
+    public static string HeldBatch(string tool, Guid batchId) =>
+        $"'{tool}' is pending approval: it deletes data, so your owner must approve it first. "
+        + $"It became deletion batch {batchId}, which Connapse deletes itself once approved, so don't repeat this call. "
+        + $"Ask the person to approve it at /approvals, then call deletion_status with batchId {batchId} "
+        + "(waitSeconds up to 50 waits for the decision) to learn whether each item was deleted, skipped because it changed, or denied."
+        + $"\n{{\"id\":\"{batchId}\",\"state\":\"pending\",\"items\":[]}}";
+
     private HttpResponseMessage Reply(int id, JsonObject result)
     {
         string json = new JsonObject { ["jsonrpc"] = "2.0", ["id"] = id, ["result"] = result }.ToJsonString();

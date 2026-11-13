@@ -41,8 +41,8 @@ public static class MemoryForgetCommand
                     ?? throw new CliServerError("The server returned no result.");
                 deleted = forgotten.Deleted ?? 0;
             }
-            else if (result.HeldRequestId is { } held)
-                return ApprovalHelpers.WriteHeld(services, held, json);
+            else if (result.IsHeld)
+                return ApprovalHelpers.WriteHeld(services, result, json);
             else
             {
                 // The tool says "Forgot fact '<id>' (<n> version(s) deleted)."; --json keeps the REST route's {"deleted": n}.

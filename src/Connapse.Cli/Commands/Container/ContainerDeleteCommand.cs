@@ -31,8 +31,8 @@ public static class ContainerDeleteCommand
                     ?? throw new CliValidationError($"Container '{name}' not found.");
                 await client.Api.Containers[containerId].DeleteAsync(cancellationToken: ct);
             }
-            else if (result.HeldRequestId is { } held)
-                return ApprovalHelpers.WriteHeld(services, held, json: false);
+            else if (result.IsHeld)
+                return ApprovalHelpers.WriteHeld(services, result, json: false);
 
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine($"Deleted container '{name}'.");

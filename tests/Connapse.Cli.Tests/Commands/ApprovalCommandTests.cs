@@ -344,4 +344,193 @@ public sealed class ApprovalCommandTests : IDisposable
         Assert.Equal(1, result.ExitCode);
         Assert.Empty(_host.Sent);
     }
+
+    private const string OtherFileId = "7b1c9e2a-0000-4000-8000-0000000000f2";
+
+    [Fact]
+    public async Task FilesDelete_SeveralFiles_GoAsOneDeleteFileCallWithFileIds()
+    {
+        _mcp.ToolText = (_, _) => "Deleted 2 of 2 file(s).";
+
+        var result = await _host.RunAsync("files", "delete", "--container", "notes", "--file", FileId, "--file", OtherFileId);
+
+        Assert.Equal(0, result.ExitCode);
+        Assert.Contains("Deleted 2 of 2 file(s).", result.Output);
+        var (tool, args) = Assert.Single(_mcp.Calls);
+        Assert.Equal("delete_file", tool);
+        Assert.Equal("notes", args["containerId"]!.GetValue<string>());
+        Assert.Null(args["fileId"]);
+        Assert.Equal([FileId, OtherFileId], JsonSerializer.Deserialize<string[]>(args["fileIds"]!.GetValue<string>()));
+    }
+
+    [Fact]
+    public async Task FilesDelete_SeveralFiles_SomeFailing_ShowsTheFailuresAndExits1()
+    {
+        _mcp.ToolText = (_, _) => $"Deleted 1 of 2 file(s).\n\nFailures:\n- {OtherFileId}: not found";
+
+        var result = await _host.RunAsync("files", "delete", "--container", "notes", "--file", FileId, OtherFileId);
+
+        Assert.Equal(1, result.ExitCode);
+        Assert.Contains($"- {OtherFileId}: not found", result.Output);
+    }
+
+    [Fact]
+    public async Task FilesDelete_TheSameFileTwice_GoesOnceAsFileId()
+    {
+        _mcp.ToolText = (_, _) => $"File 'note.md' (ID: {FileId}) deleted.";
+
+        var result = await _host.RunAsync("files", "delete", "--container", "notes", "--file", FileId, "--file", FileId.ToUpperInvariant());
+
+        Assert.Equal(0, result.ExitCode);
+        var (_, args) = Assert.Single(_mcp.Calls);
+        Assert.Equal(FileId, args["fileId"]!.GetValue<string>());
+        Assert.Null(args["fileIds"]);
+    }
+
+    [Fact]
+    public async Task FilesDelete_MoreThanTheServerTakes_IsRefusedBeforeAnyRequest()
+    {
+        var args = new List<string> { "files", "delete", "--container", "notes" };
+        for (int i = 0; i <= 100; i++)
+            args.AddRange(["--file", Guid.NewGuid().ToString()]);
+
+        var result = await _host.RunAsync([.. args]);
+
+        Assert.Equal(1, result.ExitCode);
+        Assert.Contains("At most 100 files", result.Error);
+        Assert.Empty(_host.Sent);
+    }
+
+    [Fact]
+    public async Task FilesDelete_SeveralFiles_EditorSignIn_DeletesEachThroughRest()
+    {
+        McpForbidden(ByName,
+            ($"DELETE /api/containers/{ContainerId}/files/{FileId}", "{}"),
+            ($"DELETE /api/containers/{ContainerId}/files/{OtherFileId}", "{}"));
+
+        var result = await _host.RunAsync("files", "delete", "--container", "notes", "--file", FileId, "--file", OtherFileId);
+
+        Assert.Equal(0, result.ExitCode);
+        Assert.Contains($"Deleted file {FileId}.", result.Output);
+        Assert.Contains($"Deleted file {OtherFileId}.", result.Output);
+    }
+
+    [Fact]
+    public async Task FilesDelete_SeveralFiles_EditorSignIn_OneMissing_DeletesTheRestAndExits1()
+    {
+        McpForbidden(ByName, ($"DELETE /api/containers/{ContainerId}/files/{FileId}", "{}"));
+
+        var result = await _host.RunAsync("files", "delete", "--container", "notes", "--file", FileId, "--file", OtherFileId);
+
+        Assert.Equal(1, result.ExitCode);
+        Assert.Contains($"Deleted file {FileId}.", result.Output);
+        Assert.Contains($"File '{OtherFileId}' not found in container 'notes'.", result.Error);
+    }
+
+    private static readonly Guid BatchId = Guid.Parse("6c1f8e0a-5b2d-4e3f-9a7b-0c1d2e3f4a5b");
+
+    [Fact]
+    public async Task FilesDelete_HeldAsABatch_SaysTheServerDeletesItAndNotToRerun()
+    {
+        _mcp.ToolText = (tool, _) => FakeMcpServer.HeldBatch(tool, BatchId);
+
+        var result = await _host.RunAsync("files", "delete", "--container", "notes", "--file", FileId, "--file", OtherFileId);
+
+        Assert.Equal(3, result.ExitCode);
+        Assert.Contains($"Held for approval (deletion batch {BatchId})", result.Output);
+        Assert.Contains("don't run this command again", result.Output);
+        Assert.Contains($"connapse approval status {BatchId} --wait 50", result.Output);
+        Assert.DoesNotContain("Deleted", result.Output);
+    }
+
+    [Fact]
+    public async Task MemoryForget_Json_HeldAsABatch_PrintsTheBatch()
+    {
+        _mcp.ToolText = (tool, _) => FakeMcpServer.HeldBatch(tool, BatchId);
+
+        var result = await _host.RunAsync("memory", "forget", FactId, "--json");
+
+        Assert.Equal(3, result.ExitCode);
+        using var doc = JsonDocument.Parse(result.Output);
+        Assert.Equal("pending-approval", doc.RootElement.GetProperty("status").GetString());
+        Assert.Equal(BatchId, doc.RootElement.GetProperty("batchId").GetGuid());
+    }
+
+    private static string Batch(string state, params (string State, string? Outcome)[] items) =>
+        JsonSerializer.Serialize(new
+        {
+            id = BatchId,
+            state,
+            createdAt = "2026-11-12T02:15:40Z",
+            expiresAt = "2026-11-13T02:15:40Z",
+            items = items.Select((item, i) => new
+            {
+                id = Guid.NewGuid(),
+                position = i,
+                kind = "file",
+                containerId = ContainerId,
+                target = FileId,
+                label = $"note{i}.md",
+                reason = "Held from the agent's delete_file call.",
+                state = item.State,
+                outcome = item.Outcome,
+            }),
+            message = $"Batch {BatchId} is {state}.",
+            isYours = false,
+            tokenKey = "k",
+        });
+
+    [Theory]
+    [InlineData("pending", "pending", 3)]
+    [InlineData("running", "approved", 3)]
+    [InlineData("done", "deleted", 0)]
+    [InlineData("done", "skipped", 0)]
+    [InlineData("done", "failed", 1)]
+    [InlineData("done", "not_approved", 1)]
+    [InlineData("denied", "denied", 1)]
+    [InlineData("expired", "pending", 1)]
+    public async Task ApprovalStatus_ABatchId_ReadsTheBatch(string state, string itemState, int exit)
+    {
+        _host.Routes(($"GET /api/approvals/deletions/{BatchId}", CommandHost.Json(Batch(state, ("deleted", null), (itemState, null)))));
+
+        var result = await _host.RunAsync("approval", "status", BatchId.ToString(), "--wait", "5");
+
+        Assert.Equal(exit, result.ExitCode);
+        Assert.Equal([$"GET /api/approvals/{BatchId}?wait=5", $"GET /api/approvals/deletions/{BatchId}?wait=5"], _host.Sent);
+        Assert.Contains($"deletion batch {BatchId}", result.Output);
+        Assert.Contains("note1.md", result.Output);
+    }
+
+    [Fact]
+    public async Task ApprovalStatus_NeitherARequestNorABatch_ReadsNotFound()
+    {
+        _host.Routes();
+
+        var result = await _host.RunAsync("approval", "status", BatchId.ToString());
+
+        Assert.Equal(1, result.ExitCode);
+        Assert.Contains($"No approval request or deletion batch {BatchId}", result.Error);
+    }
+
+    /// <summary>
+    /// Connapse 0.4.2 folded get_documents, bulk_upload and bulk_delete into get_document, upload_file and
+    /// delete_file (CON-344) and drops the old names after 0.4.x, so the CLI must never call them.
+    /// </summary>
+    [Fact]
+    public void TheCliNeverNamesTheDeprecatedMultiFileTools()
+    {
+        var root = new DirectoryInfo(AppContext.BaseDirectory);
+        while (root is not null && !File.Exists(Path.Combine(root.FullName, "Connapse.Cli.slnx")))
+            root = root.Parent;
+        Assert.NotNull(root);
+
+        var sources = Directory.GetFiles(Path.Combine(root.FullName, "src", "Connapse.Cli"), "*.cs", SearchOption.AllDirectories)
+            .Where(f => !f.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}") && !f.Contains($"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}"));
+        var named = sources
+            .SelectMany(f => new[] { "get_documents", "bulk_upload", "bulk_delete" }
+                .Where(name => File.ReadAllText(f).Contains($"\"{name}\"", StringComparison.Ordinal))
+                .Select(name => $"{Path.GetFileName(f)}: {name}"))
+            .ToList();
+        Assert.Empty(named);
+    }
 }
