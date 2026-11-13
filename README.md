@@ -301,6 +301,14 @@ On Windows these live under `%USERPROFILE%\.connapse\`.
 
 Bug reports and pull requests are welcome at https://github.com/Destrayon/connapse-cli/issues.
 
+### Keeping up with the API
+
+CI fails when the server's API spec (`spec/openapi.json`, synced nightly) has a route the CLI doesn't account for. Each route goes in exactly one place under `tests/Connapse.Cli.Tests/ApiParity/`:
+
+- `cli-routes.json`, `commands`: the CLI command that calls it, such as `"GET /api/v1/agents": "agent list"`.
+- `cli-routes.json`, `notForCli`: why it is never a CLI job, such as a health probe or a browser redirect.
+- `known-cli-gaps.json`: why the command doesn't exist yet. Adding the command moves the route to `commands`.
+
 ### Releases
 
 Releases are published via a tag push to `main`:
