@@ -10,7 +10,11 @@ namespace Connapse.Cli.Services;
 /// <summary>What a tool call on the server's MCP route came back with.</summary>
 /// <param name="Text">The tool's text.</param>
 /// <param name="HeldRequestId">Set when the server held the call for a person's approval instead of running it.</param>
-public sealed record McpToolResult(string Text, Guid? HeldRequestId)
+/// <param name="HeldAsBatch">
+/// The held call became a batch of deletions (CON-330), which the server carries out itself once approved, so the
+/// call is not repeated; <paramref name="HeldRequestId"/> is then the batch's id.
+/// </param>
+public sealed record McpToolResult(string Text, Guid? HeldRequestId, bool HeldAsBatch = false)
 {
     public bool IsHeld => HeldRequestId is not null;
 }
@@ -83,6 +87,10 @@ public sealed partial class McpToolClient(ApiClient api)
 
         if (text.Contains("pending approval", StringComparison.Ordinal))
         {
+            // A held delete of knowledge becomes a batch the server deletes once approved (Connapse 0.4.2, CON-330).
+            if (HeldBatch().Match(text) is { Success: true } batch)
+                return new McpToolResult(text, Guid.Parse(batch.Groups[1].Value), HeldAsBatch: true);
+
             // A held call that names no request can't be followed up, and it must never read as done.
             if (HeldRequest().Match(text) is not { Success: true } held)
                 throw new CliServerError($"The server held the call for approval but named no request to follow up: {Shorten(text)}");
@@ -179,4 +187,7 @@ public sealed partial class McpToolClient(ApiClient api)
 
     [GeneratedRegex(@"request ([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})")]
     private static partial Regex HeldRequest();
+
+    [GeneratedRegex(@"deletion batch ([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})")]
+    private static partial Regex HeldBatch();
 }

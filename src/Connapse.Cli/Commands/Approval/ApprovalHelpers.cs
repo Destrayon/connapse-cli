@@ -29,21 +29,33 @@ internal static class ApprovalHelpers
     }
 
     /// <summary>Says the call was held, where to approve it and how to wait for the decision, then gives the exit code.</summary>
-    public static int WriteHeld(IServiceProvider services, Guid requestId, bool json)
+    public static int WriteHeld(IServiceProvider services, McpToolResult held, bool json)
     {
+        Guid id = held.HeldRequestId!.Value;
         string approveAt = $"{ServerUrl(services)}/approvals";
         if (json)
         {
-            Console.WriteLine(JsonSerializer.Serialize(new { status = "pending-approval", requestId, approveAt }));
+            Console.WriteLine(held.HeldAsBatch
+                ? JsonSerializer.Serialize(new { status = "pending-approval", batchId = id, approveAt })
+                : JsonSerializer.Serialize(new { status = "pending-approval", requestId = id, approveAt }));
             return CliExitCodes.PendingApproval;
         }
 
         Console.ForegroundColor = ConsoleColor.Yellow;
-        Console.WriteLine($"Held for approval (request {requestId}).");
+        Console.WriteLine(held.HeldAsBatch ? $"Held for approval (deletion batch {id})." : $"Held for approval (request {id}).");
         Console.ResetColor();
         Console.WriteLine("Nothing is deleted until the server's owner approves it.");
-        Console.WriteLine($"Approve or deny it at {approveAt}, then run this same command again to delete.");
-        Console.WriteLine($"To wait for the decision: connapse approval status {requestId} --wait 50");
+        if (held.HeldAsBatch)
+        {
+            // The server deletes an approved batch itself; running the command again would ask a second time.
+            Console.WriteLine($"Approve or deny it at {approveAt}; the server then deletes what was approved, so don't run this command again.");
+            Console.WriteLine($"To wait for the outcome: connapse approval status {id} --wait 50");
+        }
+        else
+        {
+            Console.WriteLine($"Approve or deny it at {approveAt}, then run this same command again to delete.");
+            Console.WriteLine($"To wait for the decision: connapse approval status {id} --wait 50");
+        }
         return CliExitCodes.PendingApproval;
     }
 
