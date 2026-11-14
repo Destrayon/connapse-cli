@@ -42,6 +42,11 @@ jobs:
       - name: Build
         run: dotnet build Connapse.Cli.slnx --no-restore --configuration Release
 
+      # Every route in spec/openapi.json needs a CLI command or a listed reason (CC-13). Its own step, so
+      # a nightly spec sync that brings a new route fails here by name.
+      - name: Every API route has a CLI command or a listed reason
+        run: dotnet test Connapse.Cli.slnx --no-build --configuration Release --filter "FullyQualifiedName~Connapse.Cli.Tests.ApiParity"
+
       - name: Run tests
         run: dotnet test Connapse.Cli.slnx --no-build --configuration Release --verbosity normal --logger "trx;LogFileName=tests.trx"
 
