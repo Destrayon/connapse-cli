@@ -221,7 +221,7 @@ These need the Owner or Admin role. A personal access token also needs the match
 |---|---|
 | `connapse api <method> <path> [--data <json\|@file\|->] [--content-type <type>] [--paginate]` | Call any route on the signed-in server, for routes the CLI has no command for yet. It prints the response body byte for byte as sent, and exits 1 on a non-2xx status. Redirects are reported, not followed. `--paginate` follows `skip`/`take` pages of a GET and prints all items as one array. |
 
-For example, `connapse api GET "/api/sources?take=50" --paginate`, or `connapse api POST /api/containers --data '{"name":"docs"}'`. In Git Bash, set `MSYS_NO_PATHCONV=1`: otherwise Git Bash rewrites `/api/...` into a Windows path.
+For example, `connapse api GET "/api/sources?take=50" --paginate`, or `connapse api POST /api/containers --data '{"name":"docs"}'`. In Git Bash, set `MSYS_NO_PATHCONV=1`: otherwise Git Bash rewrites `/api/...` into a Windows path. The same goes for container folders such as `upload --destination /guides`; the CLI refuses a path Git Bash has rewritten and says so.
 
 ### Deletes wait for approval
 

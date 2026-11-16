@@ -59,6 +59,8 @@ public static class SearchCommand
             var mode = parseResult.GetValue(modeOption) ?? "Hybrid";
             var topK = parseResult.GetValue(topOption);
             var folderPath = parseResult.GetValue(pathOption);
+            if (folderPath is not null)
+                GitBashPaths.CheckFolder(folderPath, "--path");
             var minScore = parseResult.GetValue(minScoreOption);
 
             if (topK <= 0)

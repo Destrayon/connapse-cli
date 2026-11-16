@@ -147,7 +147,7 @@ public sealed class ProfileCommandTests : IDisposable
         int exit;
         try
         {
-            var parseResult = root.Parse(args);
+            var parseResult = RootCommandBuilder.Parse(root, args);
             profiles.Select(parseResult.GetValue(profileOption));
             exit = await parseResult.InvokeAsync(new InvocationConfiguration
             {

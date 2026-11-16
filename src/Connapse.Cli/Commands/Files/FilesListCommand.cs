@@ -30,7 +30,7 @@ public static class FilesListCommand
         cmd.SetAction(services.WithOrgContext(orgOption, async (parseResult, ct) =>
         {
             var containerName = parseResult.GetRequiredValue(containerOption);
-            var path = parseResult.GetValue(pathOption) ?? "/";
+            var path = GitBashPaths.CheckFolder(parseResult.GetValue(pathOption) ?? "/", "--path");
 
             var client = services.GetRequiredService<ConnapseApiClient>();
 

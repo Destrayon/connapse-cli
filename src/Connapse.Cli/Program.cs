@@ -31,7 +31,7 @@ internal static class Program
         await using var services = BuildServiceProvider(profiles);
 
         var root = RootCommandBuilder.Build(services, OrgOption, VerboseOption, ProfileOption);
-        var parseResult = root.Parse(args);
+        var parseResult = RootCommandBuilder.Parse(root, args);
         profiles.Select(parseResult.GetValue(ProfileOption));
 
         var config = new InvocationConfiguration
