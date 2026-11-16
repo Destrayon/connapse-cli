@@ -69,8 +69,8 @@ public sealed class ApiPassthrough(ApiClient api, bool stdoutIsTerminal = false)
         if (p.Contains('\\') || p.StartsWith("//", StringComparison.Ordinal) || (!p.StartsWith('/') && p.Contains("://", StringComparison.Ordinal)))
             throw new CliValidationError($"'{path}' isn't a path on the signed-in server. Give one like /api/containers, not a URL.");
         // Git Bash rewrites an argument like /api/containers into C:/Program Files/Git/api/containers.
-        if (p.Length > 2 && char.IsAsciiLetter(p[0]) && p[1] == ':' && p[2] == '/')
-            throw new CliValidationError($"'{path}' is a Windows path. Git Bash rewrites /api/... arguments; run with MSYS_NO_PATHCONV=1 set.");
+        if (GitBashPaths.LooksRewritten(p))
+            throw new CliValidationError($"'{path}' is a Windows path. Git Bash rewrites /api/... arguments; {GitBashPaths.Fix}.");
         return p.StartsWith('/') ? p : "/" + p;
     }
 

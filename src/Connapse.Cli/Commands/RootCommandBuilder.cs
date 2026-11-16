@@ -52,6 +52,14 @@ public static class RootCommandBuilder
         return root;
     }
 
+    /// <summary>
+    /// Parses a command line the way the CLI does. Response files are off: System.CommandLine would
+    /// otherwise read an argument like <c>@body.json</c> as a file of more arguments, so
+    /// <c>connapse api POST /x -d @body.json</c> would never get the file as one body.
+    /// </summary>
+    public static ParseResult Parse(RootCommand root, IReadOnlyList<string> args) =>
+        root.Parse(args, new ParserConfiguration { ResponseFileTokenReplacer = null });
+
     /// <summary>The global --profile option: which saved login a command uses.</summary>
     public static Option<string?> CreateProfileOption() => new("--profile")
     {

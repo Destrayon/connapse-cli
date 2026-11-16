@@ -45,7 +45,7 @@ public static class UploadCommand
             var sourcePath = parseResult.GetRequiredValue(pathArg);
             var containerName = parseResult.GetRequiredValue(containerOption);
             var strategy = parseResult.GetValue(strategyOption) ?? "Semantic";
-            var destination = parseResult.GetValue(destinationOption) ?? "/";
+            var destination = GitBashPaths.CheckFolder(parseResult.GetValue(destinationOption) ?? "/", "--destination");
 
             if (!File.Exists(sourcePath) && !Directory.Exists(sourcePath))
                 throw new CliValidationError($"Path '{sourcePath}' does not exist.");

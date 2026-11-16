@@ -123,7 +123,7 @@ public sealed class CommandHost : IDisposable
         int exit;
         try
         {
-            exit = await root.Parse(args).InvokeAsync(new InvocationConfiguration
+            exit = await RootCommandBuilder.Parse(root, args).InvokeAsync(new InvocationConfiguration
             {
                 EnableDefaultExceptionHandler = false,
                 Output = output,
