@@ -14,6 +14,14 @@ namespace Connapse.Client.Models
     {
         /// <summary>Stores additional data not described in the OpenAPI description found when deserializing. Can be used for serialization as well.</summary>
         public IDictionary<string, object> AdditionalData { get; set; }
+        /// <summary>The existing property</summary>
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+        public List<global::Connapse.Client.Models.MemoryExistingFact>? Existing { get; set; }
+#nullable restore
+#else
+        public List<global::Connapse.Client.Models.MemoryExistingFact> Existing { get; set; }
+#endif
         /// <summary>The fact property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -55,6 +63,7 @@ namespace Connapse.Client.Models
         {
             return new Dictionary<string, Action<IParseNode>>
             {
+                { "existing", n => { Existing = n.GetCollectionOfObjectValues<global::Connapse.Client.Models.MemoryExistingFact>(global::Connapse.Client.Models.MemoryExistingFact.CreateFromDiscriminatorValue)?.AsList(); } },
                 { "fact", n => { Fact = n.GetObjectValue<global::Connapse.Client.Models.MemoryFact>(global::Connapse.Client.Models.MemoryFact.CreateFromDiscriminatorValue); } },
                 { "savedTo", n => { SavedTo = n.GetObjectValue<global::Connapse.Client.Models.MemorySpaceRef>(global::Connapse.Client.Models.MemorySpaceRef.CreateFromDiscriminatorValue); } },
             };
@@ -66,6 +75,7 @@ namespace Connapse.Client.Models
         public virtual void Serialize(ISerializationWriter writer)
         {
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
+            writer.WriteCollectionOfObjectValues<global::Connapse.Client.Models.MemoryExistingFact>("existing", Existing);
             writer.WriteObjectValue<global::Connapse.Client.Models.MemoryFact>("fact", Fact);
             writer.WriteObjectValue<global::Connapse.Client.Models.MemorySpaceRef>("savedTo", SavedTo);
             writer.WriteAdditionalData(AdditionalData);

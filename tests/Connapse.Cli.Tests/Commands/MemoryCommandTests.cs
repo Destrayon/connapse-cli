@@ -127,6 +127,46 @@ public sealed class MemoryCommandTests : IDisposable
         Assert.Contains($"Sources: oncall.md ({DocId})", result.Output);
     }
 
+    [Fact]
+    public async Task Timeline_SendsTheWindowAndPrintsFactsAndTheNextPage()
+    {
+        _host.Routes(("GET /api/memory/timeline", CommandHost.Json($$"""
+            {"facts":[{"fact":{{Fact}},"sources":[]}],"spaces":[{{Space}}],"skippedSpaces":0,"nextCursor":"c2"}
+            """)));
+
+        var result = await _host.RunAsync("memory", "timeline", "payments", "--space", "team-notes",
+            "--subject", "billing-service", "--attribute", "owner", "--from", "2026-10-01", "--to", "2026-11-30",
+            "--limit", "20", "--cursor", "c1");
+
+        Assert.Equal(0, result.ExitCode);
+        var sent = _host.Sent.Single();
+        Assert.StartsWith("GET /api/memory/timeline?", sent);
+        Assert.Contains("q=payments", sent);
+        Assert.Contains("space=team-notes", sent);
+        Assert.Contains("subject=billing-service", sent);
+        Assert.Contains("attribute=owner", sent);
+        Assert.Contains("from=2026-10-01", sent);
+        Assert.Contains("to=2026-11-30", sent);
+        Assert.Contains("limit=20", sent);
+        Assert.Contains("cursor=c1", sent);
+        Assert.Contains("billing-service / owner = team-payments", result.Output);
+        Assert.Contains("team-notes", result.Output);
+        Assert.Contains("More facts: pass --cursor c2", result.Output);
+    }
+
+    [Fact]
+    public async Task Timeline_WithNoFacts_SaysSo()
+    {
+        _host.Routes(("GET /api/memory/timeline", CommandHost.Json(
+            """{"facts":[],"spaces":[],"skippedSpaces":0,"nextCursor":null}""")));
+
+        var result = await _host.RunAsync("memory", "timeline");
+
+        Assert.Equal(0, result.ExitCode);
+        Assert.Equal("GET /api/memory/timeline", _host.Sent.Single());
+        Assert.Contains("No facts found.", result.Output);
+    }
+
     [Theory]
     [InlineData("save", "a", "b", "c")]
     [InlineData("list")]

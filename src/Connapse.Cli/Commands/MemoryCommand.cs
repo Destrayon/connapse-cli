@@ -16,11 +16,12 @@ public static class MemoryCommand
         memory.Subcommands.Add(MemorySaveCommand.Create(services, orgOption));
         memory.Subcommands.Add(MemoryRecallCommand.Create(services, orgOption));
         memory.Subcommands.Add(MemoryListCommand.Create(services, orgOption));
+        memory.Subcommands.Add(MemoryTimelineCommand.Create(services, orgOption));
         memory.Subcommands.Add(MemoryForgetCommand.Create(services, orgOption));
 
         memory.SetAction((_, _) =>
         {
-            Console.Out.WriteLine("Usage: connapse memory <save|recall|list|forget> [options]");
+            Console.Out.WriteLine("Usage: connapse memory <save|recall|list|timeline|forget> [options]");
             return Task.FromResult(0);
         });
 

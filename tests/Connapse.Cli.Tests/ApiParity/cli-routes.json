@@ -32,6 +32,16 @@
     "POST /api/memory/spaces/{id}/facts": "memory save",
     "GET /api/memory/facts": "memory recall",
     "DELETE /api/memory/facts/{id}": "memory forget",
+    "GET /api/memory/timeline": "memory timeline",
+
+    "GET /api/approvals/{id}": "approval status",
+    "GET /api/approvals/deletions/{id}": "approval status",
+    "POST /api/approvals/deletions": "approval request",
+
+    "GET /api/code/symbols": "code symbols",
+    "GET /api/code/references": "code references",
+    "GET /api/code/impact": "code impact",
+    "GET /api/code/map": "code map",
 
     "GET /api/sources": "source list",
     "POST /api/sources": "source create",

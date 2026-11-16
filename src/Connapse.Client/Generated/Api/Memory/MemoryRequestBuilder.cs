@@ -2,6 +2,7 @@
 #pragma warning disable CS0618
 using Connapse.Client.Api.Memory.Facts;
 using Connapse.Client.Api.Memory.Spaces;
+using Connapse.Client.Api.Memory.Timeline;
 using Microsoft.Kiota.Abstractions.Extensions;
 using Microsoft.Kiota.Abstractions;
 using System.Collections.Generic;
@@ -25,6 +26,11 @@ namespace Connapse.Client.Api.Memory
         public global::Connapse.Client.Api.Memory.Spaces.SpacesRequestBuilder Spaces
         {
             get => new global::Connapse.Client.Api.Memory.Spaces.SpacesRequestBuilder(PathParameters, RequestAdapter);
+        }
+        /// <summary>The timeline property</summary>
+        public global::Connapse.Client.Api.Memory.Timeline.TimelineRequestBuilder Timeline
+        {
+            get => new global::Connapse.Client.Api.Memory.Timeline.TimelineRequestBuilder(PathParameters, RequestAdapter);
         }
         /// <summary>
         /// Instantiates a new <see cref="global::Connapse.Client.Api.Memory.MemoryRequestBuilder"/> and sets the default values.

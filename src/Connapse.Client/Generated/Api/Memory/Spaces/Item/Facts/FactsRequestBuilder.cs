@@ -73,7 +73,7 @@ namespace Connapse.Client.Api.Memory.Spaces.Item.Facts
             return await RequestAdapter.SendAsync<global::Connapse.Client.Models.MemoryFactsListed>(requestInfo, global::Connapse.Client.Models.MemoryFactsListed.CreateFromDiscriminatorValue, errorMapping, cancellationToken).ConfigureAwait(false);
         }
         /// <summary>
-        /// Stores one fact in a memory space, by id or name; &quot;my-memory&quot; is your own personal space, made on first use. A personal space&apos;s facts only you see; a team space&apos;s everyone sees, except that a fact citing documents is shown only to people who can read all of them
+        /// Stores one fact in a memory space, by id or name. The space must exist: none is made by saving to it. A personal space&apos;s facts only you see; a team space&apos;s everyone sees, except that a fact citing documents is shown only to people who can read all of them. The save always adds a fact; when other current facts with the same subject and attribute that you can see are in the space, `existing` lists them (id, value, dates). If you meant to replace one, correct it instead of leaving both
         /// </summary>
         /// <returns>A <see cref="global::Connapse.Client.Models.MemoryRememberedResponse"/></returns>
         /// <param name="body">The request body</param>
@@ -127,7 +127,7 @@ namespace Connapse.Client.Api.Memory.Spaces.Item.Facts
             return requestInfo;
         }
         /// <summary>
-        /// Stores one fact in a memory space, by id or name; &quot;my-memory&quot; is your own personal space, made on first use. A personal space&apos;s facts only you see; a team space&apos;s everyone sees, except that a fact citing documents is shown only to people who can read all of them
+        /// Stores one fact in a memory space, by id or name. The space must exist: none is made by saving to it. A personal space&apos;s facts only you see; a team space&apos;s everyone sees, except that a fact citing documents is shown only to people who can read all of them. The save always adds a fact; when other current facts with the same subject and attribute that you can see are in the space, `existing` lists them (id, value, dates). If you meant to replace one, correct it instead of leaving both
         /// </summary>
         /// <returns>A <see cref="RequestInformation"/></returns>
         /// <param name="body">The request body</param>
