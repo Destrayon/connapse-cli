@@ -59,6 +59,6 @@ internal static class ApprovalHelpers
         return CliExitCodes.PendingApproval;
     }
 
-    private static string ServerUrl(IServiceProvider services) =>
+    public static string ServerUrl(IServiceProvider services) =>
         (services.GetRequiredService<CredentialStore>().Load()?.ApiBaseUrl ?? "").TrimEnd('/');
 }

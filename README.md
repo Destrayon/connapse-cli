@@ -154,6 +154,17 @@ Organization commands are no-ops on self-hosted servers and exit 0 with a friend
 | `connapse search "<query>" --container <name> [--mode Hybrid] [--top 10] [--path /x] [--min-score 0.5]` | Search inside a container. |
 | `connapse reindex --container <name> [--force] [--no-detect-changes]` | Re-process all documents. |
 
+### Code
+
+Questions about code the server has indexed (C#, Python and TypeScript files), in the container or source `--container` names by name or ID. Only files you can read are shown. Every command takes `--json`.
+
+| Command | Description |
+|---|---|
+| `connapse code symbols <query> --container <name> [--match exact\|words\|meaning] [--follow] [--limit 1-100]` | Find where a symbol is defined. `--follow` also shows what the first definition calls, constructs or inherits. |
+| `connapse code references <symbol> --container <name> [--kind calls\|inherits\|all] [--limit 1-200]` | List the files that use a symbol, best evidence first. |
+| `connapse code impact <symbol> --container <name> [--depth 1-3] [--limit 1-200]` | Show what calls or inherits a symbol, directly or through others, and the tests among them. |
+| `connapse code map --container <name> [--path /src] [--max-files 1-200]` | The files the rest of the code refers to most, with their main definitions. |
+
 ### Memory
 
 A fact is a subject, an attribute and a value, saved to a memory space. `--space` takes a space's name or ID, such as `team-notes`. `save` and `list` require it; if it is missing, they fail and list the spaces you can see. `recall` without `--space` searches every space you can read. Saving and forgetting need the Editor role, and a token also needs `knowledge:write`. With an Owner, Admin or agent sign-in, `forget` goes through the server's approval route and waits for the owner's approval; an Editor's `forget` goes through the REST route instead and is not held (see [Deletes wait for approval](#deletes-wait-for-approval)). Every command takes `--json`.
@@ -163,6 +174,7 @@ A fact is a subject, an attribute and a value, saved to a memory space. `--space
 | `connapse memory save <subject> <attribute> <value> --space <name> [--valid-from] [--valid-to] [--source <doc-id>]... [--reason]` | Save a fact. |
 | `connapse memory recall [query] [--space] [--subject] [--attribute] [--as-of] [--history] [--limit] [--cursor]` | Recall facts from every space you can read, or one. |
 | `connapse memory list --space <name> [--query] [--subject] [--status] [--sort] [--limit] [--cursor]` | List the facts in a space. |
+| `connapse memory timeline [query] [--space] [--subject] [--attribute] [--from] [--to] [--limit] [--cursor]` | List facts in date order, ended and corrected ones included. With `--from`/`--to`, only facts that started or ended in that window. |
 | `connapse memory forget <fact-id>` | Delete a fact and every corrected version of it. Waits for the owner's approval. |
 
 ### Administration
@@ -227,6 +239,7 @@ Once it is approved, run the same command again and it deletes, once. The approv
 | Command | Description |
 |---|---|
 | `connapse approval status <request-id> [--wait <0-50>] [--json]` | Show whether a held delete was approved. Exits 0 when approved, 3 while pending, 1 when denied or expired. |
+| `connapse approval request --reason <text> [--container <name> --file <id-or-path>... --folder <path>...] [--empty-container <name>]... [--space <name>]... [--fact <id>]... [--json]` | Ask your sign-in's owner to approve up to 50 deletions of any kind in one request. If any item can't be deleted, nothing is asked and the error names it. The server deletes what the owner approves itself, so don't rerun it; follow it with `approval status`. Exits 3 while it waits. |
 
 `connapse api DELETE ...` calls the REST route directly and is never held.
 
