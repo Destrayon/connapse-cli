@@ -70,7 +70,7 @@ public sealed class ApiPassthrough(ApiClient api, bool stdoutIsTerminal = false)
             throw new CliValidationError($"'{path}' isn't a path on the signed-in server. Give one like /api/containers, not a URL.");
         // Git Bash rewrites an argument like /api/containers into C:/Program Files/Git/api/containers.
         if (GitBashPaths.LooksRewritten(p))
-            throw new CliValidationError($"'{path}' is a Windows path. Git Bash rewrites /api/... arguments; {GitBashPaths.Fix}.");
+            throw new CliValidationError($"'{path}' is a Windows path, not a path on the server. {GitBashPaths.Explain(p)}");
         return p.StartsWith('/') ? p : "/" + p;
     }
 

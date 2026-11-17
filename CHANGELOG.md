@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+
+- **Git Bash path refusal names your own path** (CC-17): when Git Bash rewrites a folder such as `/code`, `upload --destination`, `files list --path`, `search --path` and `connapse api` now say "Git Bash rewrote '/code' into 'C:/Program Files/Git/code'" instead of always using `/notes` as the example.
+
 ## 0.5.2
 
 Changes since v0.5.1 (2026-11-08).
