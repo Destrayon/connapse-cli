@@ -78,12 +78,16 @@ public static class UploadCommand
             var failed = 0;
             var uploadPath = $"/api/containers/{containerId}/files";
 
+            var root = File.Exists(sourcePath) ? null : sourcePath;
+
             foreach (var file in files)
             {
-                Console.Write($"  {Path.GetFileName(file)}... ");
+                Console.Write($"  {(root is null ? Path.GetFileName(file) : RelativeName(root, file))}... ");
 
                 try
                 {
+                    var folder = FolderFor(destination, root, file);
+
                     // Sent by hand, not through the generated client: the spec describes the upload as a model
                     // of byte arrays, which Kiota's multipart writer refuses (it takes only its MultipartBody),
                     // and which would hold each file in memory and drop its name.
@@ -94,7 +98,7 @@ public static class UploadCommand
                         new MediaTypeHeaderValue("application/octet-stream");
 
                     content.Add(streamContent, "files", Path.GetFileName(file));
-                    content.Add(new StringContent(destination), "path");
+                    content.Add(new StringContent(folder), "path");
                     content.Add(new StringContent(strategy), "strategy");
 
                     using var response = await apiClient.SendRawAsync(
@@ -130,4 +134,32 @@ public static class UploadCommand
 
         return cmd;
     }
+
+    /// <summary>
+    /// The container folder <paramref name="file"/> goes into: <paramref name="destination"/> plus the
+    /// file's subfolder under the uploaded folder <paramref name="root"/>, so the folder's layout is kept
+    /// and two files with the same name in different subfolders don't overwrite each other.
+    /// </summary>
+    internal static string FolderFor(string destination, string? root, string file)
+    {
+        if (root is null)
+            return destination;
+
+        var dir = Path.GetDirectoryName(Path.GetFullPath(file))!;
+        var relative = Path.GetRelativePath(Path.GetFullPath(root), dir);
+        if (relative == ".")
+            return destination;
+
+        // A backslash is a separator only on Windows. Elsewhere it can be part of a folder name, and
+        // the server would read it as a separator, merging 'a\b' with 'a/b'.
+        if (Path.DirectorySeparatorChar != '\\' && relative.Contains('\\'))
+            throw new CliValidationError(
+                $"Folder '{relative}' has a backslash in its name, which a container folder can't hold.");
+        relative = relative.Replace(Path.DirectorySeparatorChar, '/');
+
+        return destination.TrimEnd('/') + "/" + relative + "/";
+    }
+
+    private static string RelativeName(string root, string file) =>
+        Path.GetRelativePath(Path.GetFullPath(root), Path.GetFullPath(file)).Replace(Path.DirectorySeparatorChar, '/');
 }

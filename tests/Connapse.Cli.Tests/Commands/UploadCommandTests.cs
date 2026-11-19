@@ -88,6 +88,96 @@ public sealed class UploadCommandTests : IDisposable
         Assert.Contains("rate limiting", result.Error);
     }
 
+    [Theory]
+    [InlineData(null, "/")]
+    [InlineData("/notes", "/notes/")]
+    [InlineData("/notes/", "/notes/")]
+    public async Task Upload_NestedFolder_KeepsEverySubfolderPath(string? destination, string prefix)
+    {
+        void Write(string relative, string text)
+        {
+            var full = Path.Combine(_folder, relative);
+            Directory.CreateDirectory(Path.GetDirectoryName(full)!);
+            File.WriteAllText(full, text);
+        }
+        Write("top.md", "top");
+        Write(Path.Combine("a", "readme.md"), "a");
+        Write(Path.Combine("b", "readme.md"), "b");
+        Write(Path.Combine("b", "deep", "er", "readme.md"), "deep");
+
+        var sent = new List<(string Folder, string Name, string Text)>();
+        _host.Respond(request =>
+        {
+            var path = request.RequestUri!.AbsolutePath;
+            if (path == "/api/containers/by-name/docs")
+                return MockHttpMessageHandler.Json(HttpStatusCode.OK, $$"""{"id":"{{ContainerId}}","name":"docs"}""");
+            if (request.Method == HttpMethod.Post && path == $"/api/containers/{ContainerId}/files")
+            {
+                var parts = ((MultipartFormDataContent)request.Content!).ToList();
+                string Field(string name) => parts.Single(p => p.Headers.ContentDisposition!.Name == name)
+                    .ReadAsStringAsync().GetAwaiter().GetResult();
+                var file = parts.Single(p => p.Headers.ContentDisposition!.Name == "files");
+                sent.Add((Field("path"), file.Headers.ContentDisposition!.FileName!.Trim('"'),
+                    file.ReadAsStringAsync().GetAwaiter().GetResult()));
+                return MockHttpMessageHandler.Json(HttpStatusCode.OK, "{}");
+            }
+            return MockHttpMessageHandler.Json(HttpStatusCode.NotFound, """{"title":"Not found","status":404}""");
+        });
+
+        var args = destination is null
+            ? new[] { "upload", _folder, "--container", "docs" }
+            : new[] { "upload", _folder, "--container", "docs", "--destination", destination };
+        var result = await _host.RunAsync(args);
+
+        Assert.Equal(0, result.ExitCode);
+        Assert.Equal(
+            new[]
+            {
+                (destination ?? "/", "top.md", "top"),
+                (prefix + "a/", "readme.md", "a"),
+                (prefix + "b/", "readme.md", "b"),
+                (prefix + "b/deep/er/", "readme.md", "deep"),
+            }.OrderBy(s => s.Item1),
+            sent.OrderBy(s => s.Folder));
+        Assert.Contains("b/deep/er/readme.md", result.Output);
+    }
+
+    [Fact]
+    public async Task Upload_FolderWithABackslashInItsName_FailsThatFileInsteadOfMergingFolders()
+    {
+        // Only Unix lets a folder name hold a backslash; on Windows it is a separator.
+        if (OperatingSystem.IsWindows())
+            return;
+
+        Directory.CreateDirectory(Path.Combine(_folder, "a", "b"));
+        Directory.CreateDirectory(Path.Combine(_folder, "a\\b"));
+        File.WriteAllText(Path.Combine(_folder, "a", "b", "readme.md"), "slash");
+        File.WriteAllText(Path.Combine(_folder, "a\\b", "readme.md"), "backslash");
+
+        var folders = new List<string>();
+        _host.Respond(request =>
+        {
+            var path = request.RequestUri!.AbsolutePath;
+            if (path == "/api/containers/by-name/docs")
+                return MockHttpMessageHandler.Json(HttpStatusCode.OK, $$"""{"id":"{{ContainerId}}","name":"docs"}""");
+            if (request.Method == HttpMethod.Post && path == $"/api/containers/{ContainerId}/files")
+            {
+                folders.Add(((MultipartFormDataContent)request.Content!)
+                    .Single(p => p.Headers.ContentDisposition!.Name == "path")
+                    .ReadAsStringAsync().GetAwaiter().GetResult());
+                return MockHttpMessageHandler.Json(HttpStatusCode.OK, "{}");
+            }
+            return MockHttpMessageHandler.Json(HttpStatusCode.NotFound, """{"title":"Not found","status":404}""");
+        });
+
+        var result = await _host.RunAsync("upload", _folder, "--container", "docs");
+
+        Assert.Equal(new[] { "/a/b/" }, folders);
+        Assert.Contains("Summary: 1 successful, 1 failed", result.Output);
+        Assert.Contains("backslash", result.Output);
+        Assert.NotEqual(0, result.ExitCode);
+    }
+
     [Fact]
     public async Task Upload_FolderOf650Files_WaitsOnceAMinute()
     {
