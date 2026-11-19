@@ -78,9 +78,12 @@ public static class UploadCommand
             var failed = 0;
             var uploadPath = $"/api/containers/{containerId}/files";
 
+            var root = File.Exists(sourcePath) ? null : sourcePath;
+
             foreach (var file in files)
             {
-                Console.Write($"  {Path.GetFileName(file)}... ");
+                var folder = FolderFor(destination, root, file);
+                Console.Write($"  {(root is null ? Path.GetFileName(file) : RelativeName(root, file))}... ");
 
                 try
                 {
@@ -94,7 +97,7 @@ public static class UploadCommand
                         new MediaTypeHeaderValue("application/octet-stream");
 
                     content.Add(streamContent, "files", Path.GetFileName(file));
-                    content.Add(new StringContent(destination), "path");
+                    content.Add(new StringContent(folder), "path");
                     content.Add(new StringContent(strategy), "strategy");
 
                     using var response = await apiClient.SendRawAsync(
@@ -130,4 +133,25 @@ public static class UploadCommand
 
         return cmd;
     }
+
+    /// <summary>
+    /// The container folder <paramref name="file"/> goes into: <paramref name="destination"/> plus the
+    /// file's subfolder under the uploaded folder <paramref name="root"/>, so the folder's layout is kept
+    /// and two files with the same name in different subfolders don't overwrite each other.
+    /// </summary>
+    internal static string FolderFor(string destination, string? root, string file)
+    {
+        if (root is null)
+            return destination;
+
+        var dir = Path.GetDirectoryName(Path.GetFullPath(file))!;
+        var relative = Path.GetRelativePath(Path.GetFullPath(root), dir).Replace('\\', '/');
+        if (relative == ".")
+            return destination;
+
+        return destination.TrimEnd('/') + "/" + relative + "/";
+    }
+
+    private static string RelativeName(string root, string file) =>
+        Path.GetRelativePath(Path.GetFullPath(root), Path.GetFullPath(file)).Replace('\\', '/');
 }
