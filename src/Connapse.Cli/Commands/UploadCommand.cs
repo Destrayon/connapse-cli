@@ -82,11 +82,12 @@ public static class UploadCommand
 
             foreach (var file in files)
             {
-                var folder = FolderFor(destination, root, file);
                 Console.Write($"  {(root is null ? Path.GetFileName(file) : RelativeName(root, file))}... ");
 
                 try
                 {
+                    var folder = FolderFor(destination, root, file);
+
                     // Sent by hand, not through the generated client: the spec describes the upload as a model
                     // of byte arrays, which Kiota's multipart writer refuses (it takes only its MultipartBody),
                     // and which would hold each file in memory and drop its name.
@@ -145,13 +146,20 @@ public static class UploadCommand
             return destination;
 
         var dir = Path.GetDirectoryName(Path.GetFullPath(file))!;
-        var relative = Path.GetRelativePath(Path.GetFullPath(root), dir).Replace('\\', '/');
+        var relative = Path.GetRelativePath(Path.GetFullPath(root), dir);
         if (relative == ".")
             return destination;
+
+        // A backslash is a separator only on Windows. Elsewhere it can be part of a folder name, and
+        // the server would read it as a separator, merging 'a\b' with 'a/b'.
+        if (Path.DirectorySeparatorChar != '\\' && relative.Contains('\\'))
+            throw new CliValidationError(
+                $"Folder '{relative}' has a backslash in its name, which a container folder can't hold.");
+        relative = relative.Replace(Path.DirectorySeparatorChar, '/');
 
         return destination.TrimEnd('/') + "/" + relative + "/";
     }
 
     private static string RelativeName(string root, string file) =>
-        Path.GetRelativePath(Path.GetFullPath(root), Path.GetFullPath(file)).Replace('\\', '/');
+        Path.GetRelativePath(Path.GetFullPath(root), Path.GetFullPath(file)).Replace(Path.DirectorySeparatorChar, '/');
 }

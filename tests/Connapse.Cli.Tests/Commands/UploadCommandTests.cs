@@ -143,6 +143,42 @@ public sealed class UploadCommandTests : IDisposable
     }
 
     [Fact]
+    public async Task Upload_FolderWithABackslashInItsName_FailsThatFileInsteadOfMergingFolders()
+    {
+        // Only Unix lets a folder name hold a backslash; on Windows it is a separator.
+        if (OperatingSystem.IsWindows())
+            return;
+
+        Directory.CreateDirectory(Path.Combine(_folder, "a", "b"));
+        Directory.CreateDirectory(Path.Combine(_folder, "a\\b"));
+        File.WriteAllText(Path.Combine(_folder, "a", "b", "readme.md"), "slash");
+        File.WriteAllText(Path.Combine(_folder, "a\\b", "readme.md"), "backslash");
+
+        var folders = new List<string>();
+        _host.Respond(request =>
+        {
+            var path = request.RequestUri!.AbsolutePath;
+            if (path == "/api/containers/by-name/docs")
+                return MockHttpMessageHandler.Json(HttpStatusCode.OK, $$"""{"id":"{{ContainerId}}","name":"docs"}""");
+            if (request.Method == HttpMethod.Post && path == $"/api/containers/{ContainerId}/files")
+            {
+                folders.Add(((MultipartFormDataContent)request.Content!)
+                    .Single(p => p.Headers.ContentDisposition!.Name == "path")
+                    .ReadAsStringAsync().GetAwaiter().GetResult());
+                return MockHttpMessageHandler.Json(HttpStatusCode.OK, "{}");
+            }
+            return MockHttpMessageHandler.Json(HttpStatusCode.NotFound, """{"title":"Not found","status":404}""");
+        });
+
+        var result = await _host.RunAsync("upload", _folder, "--container", "docs");
+
+        Assert.Equal(new[] { "/a/b/" }, folders);
+        Assert.Contains("Summary: 1 successful, 1 failed", result.Output);
+        Assert.Contains("backslash", result.Output);
+        Assert.NotEqual(0, result.ExitCode);
+    }
+
+    [Fact]
     public async Task Upload_FolderOf650Files_WaitsOnceAMinute()
     {
         MakeFolder(650);
